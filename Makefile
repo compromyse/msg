@@ -1,17 +1,20 @@
-LUA_VERSION := 5.4.7
-LUA_BIN ?= $(CURDIR)/bin
+TARGET_EXEC := msg
 
-lua: bin
+BUILD_DIR := ./build
+SRC_DIR := ./src
 
-.ONESHELL:
-bin:
-	curl -L -R -O https://www.lua.org/ftp/lua-$(LUA_VERSION).tar.gz
-	tar zxf lua-$(LUA_VERSION).tar.gz
-	###
-	cd lua-$(LUA_VERSION)
-	make all test
-	###
-	mkdir -p $(LUA_BIN)
-	mv src/lua src/luac $(LUA_BIN)
-	###
-	rm -rf $(CURDIR)/lua-$(LUA_VERSION) $(CURDIR)/lua-$(LUA_VERSION).tar.gz
+SRCS := $(wildcard $(SRC_DIR)/*.c)
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+
+CFLAGS := -Wall -Wextra -Wpedantic -Werror
+
+$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
+
+$(BUILD_DIR)/%.c.o: %.c
+	mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+.PHONY: clean
+clean:
+	rm -r $(BUILD_DIR)
