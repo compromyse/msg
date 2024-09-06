@@ -1,20 +1,25 @@
-TARGET_EXEC := msg
+BUILD := build
+$(shell mkdir -p build)
 
-BUILD_DIR := ./build
-SRC_DIR := ./src
+SRC := $(wildcard src/*.c)
+OBJ := $(SRC:src/%.c=$(BUILD)/%.o)
+OUT := $(BUILD)/msg
 
-SRCS := $(wildcard $(SRC_DIR)/*.c)
-OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+CC := gcc
+CFLAGS := -Wall -Wextra -Wpedantic
 
-CFLAGS := -Wall -Wextra -Wpedantic -Werror
+$(OUT): $(OBJ)
+	@printf "\e[33mLinking\e[90m %s\e[0m\n" $@
+	$(CC) $(CFLAGS) $^ -o $@
+	@printf "\e[34mDone!\e[0m\n"
 
-$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CC) $(OBJS) -o $@ $(LDFLAGS)
-
-$(BUILD_DIR)/%.c.o: %.c
-	mkdir -p $(dir $@)
+$(BUILD)/%.o: src/%.c | $(BUILD)
+	@printf "\e[36mCompile\e[90m %s\e[0m\n" $@
 	$(CC) $(CFLAGS) -c $< -o $@
 
-.PHONY: clean
+release: CFLAGS += -Werror -O3
+release: clean $(OUT)
+
 clean:
-	rm -r $(BUILD_DIR)
+	@rm -f $(OUT) $(OBJ)
+	@printf "\e[34mAll clear!\e[0m\n"
