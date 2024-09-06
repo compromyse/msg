@@ -1,16 +1,29 @@
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "engine.h"
 
-int main(int argc, char **argv) {
-  (void) argc;
-  (void) argv;
+int
+main(int argc, char **argv)
+{
+	char *working_directory;
+	if (argc < 2) {
+		working_directory = getcwd(NULL, 0);
+	} else {
+		asprintf(&working_directory, "%s", argv[1]);
+	}
 
-  engine_init();
+	char *output_directory;
+	asprintf(&output_directory, "%s/.out", working_directory);
 
-  engine_get_all_base_files();
-  engine_parse_base_files();
+	engine_init(working_directory, output_directory);
 
-  engine_exit();
-  return EXIT_SUCCESS;
+	engine_recreate_output_directory();
+	engine_get_all_base_files();
+	engine_parse_base_files();
+
+	engine_exit();
+	return EXIT_SUCCESS;
 }

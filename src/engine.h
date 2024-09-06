@@ -1,10 +1,19 @@
 #ifndef __ENGINE_H
 #define __ENGINE_H
 
-void engine_init(void);
+typedef struct {
+	char *wd; /* Working Directory */
+	char *od; /* Output Directory */
+	struct dirent **base_files;
+	int n_base_files;
+} Engine;
+
+void engine_init(char *working_directory, char *output_directory);
 void engine_exit(void);
 
 void engine_get_all_base_files(void);
 void engine_parse_base_files(void);
+
+void engine_recreate_output_directory(void);
 
 #endif
