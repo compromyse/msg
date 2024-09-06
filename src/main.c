@@ -1,10 +1,16 @@
-#include <stdio.h>
+#include <stdlib.h>
 
-int main(int argc, char** argv) {
+#include "engine.h"
+
+int main(int argc, char **argv) {
   (void) argc;
   (void) argv;
 
-  printf("Hello!\n");
+  engine_init();
 
-  return 0;
+  engine_get_all_base_files();
+  engine_parse_base_files();
+
+  engine_exit();
+  return EXIT_SUCCESS;
 }
