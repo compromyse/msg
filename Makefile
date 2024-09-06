@@ -27,7 +27,7 @@ $(BUILD)/%.o: src/%.c | $(BUILD)
 release: CFLAGS += -Werror -O3 -s
 release: clean $(OUT)
 
-debug: CFLAGS += -O1 -g
+debug: CFLAGS += -O1 -g3 -glldb
 debug: $(OUT)
 
 format: $(wildcard src/*)

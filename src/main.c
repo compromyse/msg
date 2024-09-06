@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 #include "engine.h"
@@ -21,7 +20,6 @@ main(int argc, char **argv)
 	engine_init(working_directory, output_directory);
 
 	engine_recreate_output_directory();
-	engine_get_all_base_files();
 	engine_parse_base_files();
 
 	engine_exit();

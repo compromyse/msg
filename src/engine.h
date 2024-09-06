@@ -11,9 +11,7 @@ typedef struct {
 void engine_init(char *working_directory, char *output_directory);
 void engine_exit(void);
 
-void engine_get_all_base_files(void);
 void engine_parse_base_files(void);
-
 void engine_recreate_output_directory(void);
 
 #endif
