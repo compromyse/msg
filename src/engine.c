@@ -23,9 +23,18 @@ filter(const struct dirent *entry)
 	} else if (entry->d_type != DT_DIR)
 		return 0;
 
-	/* TODO: Recursively search subdirs, unless they're present in resources */
-	for (size_t i = 0; i < e->n_resources; i++) {
-	}
+	if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")
+		|| !strcmp(entry->d_name, RESOURCES_FILE)
+		|| !strcmp(entry->d_name, PARTIAL_DIRECTORY)
+		|| !strcmp(entry->d_name, ".out"))
+		return 0;
+
+	for (size_t i = 0; i < e->n_resources; i++)
+		if (!strcmp(e->resources[i], entry->d_name))
+			return 0;
+
+	/* TODO: Recursively search subdirs */
+	printf("%s\n", entry->d_name);
 
 	return 0;
 }
@@ -72,7 +81,9 @@ engine_parse_resources(void)
 	int i;
 	for (i = 0; token != NULL; i++) {
 		reallocarray(e->resources, i + 1, sizeof(char *));
-		e->resources[i] = token;
+		char *atoken = calloc(1, strlen(token) + 1);
+		strcpy(atoken, token);
+		e->resources[i] = atoken;
 		token = strtok(NULL, "\n");
 	}
 	free(output);
