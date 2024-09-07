@@ -3,10 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #include "engine.h"
+#include "template.h"
 
 Engine *e;
 
@@ -23,7 +22,7 @@ filter(const struct dirent *entry)
 void
 engine_init(char *working_directory, char *output_directory)
 {
-	e = malloc(sizeof(Engine));
+	e = calloc(1, sizeof(Engine));
 
 	e->wd = working_directory;
 	e->od = output_directory;
@@ -54,11 +53,8 @@ parse_base_file(const struct dirent *file)
 		exit(EXIT_FAILURE);
 	}
 
-	/* TODO: Template engine stuff. */
+	char *output = template_ingest_file(f);
 	fclose(f);
-
-	/* TODO: Replace with template engine output. */
-	char *output = "testing";
 
 	char *output_path;
 	asprintf(&output_path, "%s/%s", e->od, file->d_name);

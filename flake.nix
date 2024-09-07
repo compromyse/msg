@@ -11,6 +11,7 @@
         buildInputs = with pkgs; [
           clang-tools_18
           clang_18
+          lldb
           gnumake
 
           bear
