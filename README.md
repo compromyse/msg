@@ -8,7 +8,7 @@ There are a lot of static site generators out there already, but nothing particu
 View `example_site` for an example.
 
 #### Partials
-The include directive, `{{ include "hello.html" }}`, includes the operand "hello.html" from the partials folder. It essentially just copies and pastes `partials/hello.html` in it's place.
+The include directive, `{{ include "hello.html" }}`, includes the operand "hello.html" from the partials folder. It essentially just copies and pastes `partials/hello.html` in it's place. Partials can include other partials too.
 
 ```html
 <html>
