@@ -112,12 +112,7 @@ engine_fetch_partial_content(char *partial_name)
 		exit(EXIT_FAILURE);
 	}
 
-	fseek(f, 0, SEEK_END);
-	long fsize = ftell(f);
-	fseek(f, 0, SEEK_SET);
+	char *output = template_ingest_file(f);
 
-	char *buffer = calloc(1, fsize);
-	fread(buffer, fsize, 1, f);
-
-	return buffer;
+	return output;
 }

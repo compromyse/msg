@@ -24,7 +24,7 @@ $(BUILD)/%.o: src/%.c | $(BUILD)
 	@printf "\e[36mCompile\e[90m %s\e[0m\n" $@
 	$(CC) $(CFLAGS) -c $< -o $@
 
-release: CFLAGS += -Werror -O3 -s
+release: CFLAGS += -Werror -O3
 release: clean $(OUT)
 
 debug: CFLAGS += -O1 -g3 -glldb
