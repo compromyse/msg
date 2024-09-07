@@ -45,3 +45,5 @@ Run the debug target to generate an executable for development.
 ```sh
 make debug
 ```
+
+Run `make format` before pushing changes.
