@@ -16,9 +16,7 @@ static int
 filter(const struct dirent *entry)
 {
 	if (entry->d_type == DT_REG) {
-
-		char *dot = strrchr(entry->d_name, '.');
-		if (dot && !strcmp(dot, ".html"))
+		if (strcmp(entry->d_name, RESOURCES_FILE))
 			return 1;
 
 		return 0;
@@ -26,6 +24,9 @@ filter(const struct dirent *entry)
 		return 0;
 
 	/* TODO: Recursively search subdirs, unless they're present in resources */
+	for (size_t i = 0; i < e->n_resources; i++) {
+	}
+
 	return 0;
 }
 
@@ -151,7 +152,5 @@ engine_fetch_partial_content(char *partial_name)
 		exit(EXIT_FAILURE);
 	}
 
-	char *output = template_ingest_file(f);
-
-	return output;
+	return template_ingest_file(f);
 }

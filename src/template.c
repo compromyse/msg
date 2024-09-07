@@ -16,7 +16,7 @@ template_ingest_file(FILE *f)
 	long fsize = ftell(f);
 	fseek(f, 0, SEEK_SET);
 
-	char *buffer = calloc(1, fsize);
+	char *buffer = calloc(1, fsize + 1);
 	fread(buffer, fsize, 1, f);
 
 	TemplateMatch *match;
