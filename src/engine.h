@@ -14,4 +14,6 @@ void engine_exit(void);
 void engine_parse_base_files(void);
 void engine_recreate_output_directory(void);
 
+char *engine_fetch_partial_content(char *partial_name);
+
 #endif

@@ -41,8 +41,6 @@ engine_exit(void)
 static void
 parse_base_file(const struct dirent *file)
 {
-	printf("Parsing: %s\n", file->d_name);
-
 	char *full_path;
 	asprintf(&full_path, "%s/%s", e->wd, file->d_name);
 
@@ -97,4 +95,27 @@ engine_recreate_output_directory(void)
 	nftw(e->od, unlink_cb, 64,
 		 FTW_DEPTH | FTW_PHYS); /* Recursively delete old output directory */
 	mkdir(e->od, 0777);
+}
+
+char *
+engine_fetch_partial_content(char *partial_name)
+{
+	char *full_path;
+	asprintf(&full_path, "%s/partials/%s", e->wd, partial_name);
+
+	FILE *f = fopen(full_path, "r");
+	if (f == NULL) {
+		printf("Unable to open file: %s\n", full_path);
+		engine_exit();
+		exit(EXIT_FAILURE);
+	}
+
+	fseek(f, 0, SEEK_END);
+	long fsize = ftell(f);
+	fseek(f, 0, SEEK_SET);
+
+	char *buffer = calloc(1, fsize);
+	fread(buffer, fsize, 1, f);
+
+	return buffer;
 }

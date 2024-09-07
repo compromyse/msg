@@ -9,7 +9,7 @@ FORMAT := clang-format
 TIDY := clang-tidy
 
 CC := clang
-CFLAGS := -Wall -Wextra -Wpedantic
+CFLAGS := -Wall -Wextra -Wpedantic -std=c99
 CFLAGS += -Wno-unused-result
 CFLAGS += -D_GNU_SOURCE -D_FORTIFY_SOURCE=2
 
