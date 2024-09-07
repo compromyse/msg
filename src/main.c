@@ -4,6 +4,8 @@
 
 #include "engine.h"
 
+#define OUTPUT_DIRECTORY ".out"
+
 int
 main(int argc, char **argv)
 {
@@ -15,7 +17,7 @@ main(int argc, char **argv)
 	}
 
 	char *output_directory;
-	asprintf(&output_directory, "%s/.out", working_directory);
+	asprintf(&output_directory, "%s/" OUTPUT_DIRECTORY, working_directory);
 
 	engine_init(working_directory, output_directory);
 

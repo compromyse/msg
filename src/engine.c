@@ -7,6 +7,8 @@
 #include "engine.h"
 #include "template.h"
 
+#define PARTIAL_DIRECTORY "partials"
+
 Engine *e;
 
 static int
@@ -101,7 +103,7 @@ char *
 engine_fetch_partial_content(char *partial_name)
 {
 	char *full_path;
-	asprintf(&full_path, "%s/partials/%s", e->wd, partial_name);
+	asprintf(&full_path, "%s/" PARTIAL_DIRECTORY "/%s", e->wd, partial_name);
 
 	FILE *f = fopen(full_path, "r");
 	if (f == NULL) {
