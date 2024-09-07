@@ -19,22 +19,25 @@ template_ingest_file(FILE *f)
 	char *buffer = calloc(1, fsize);
 	fread(buffer, fsize, 1, f);
 
-	char *output;
+	TemplateMatch *match;
+	TemplateOperationResult *result;
 
-	TemplateMatches *matches = template_find_keys(buffer);
-	for (size_t i = 0; i < matches->n_matches; i++) {
-		TemplateMatch match = matches->matches[i];
-		TemplateOperationResult *result
-			= template_parse_key(strndup(buffer + match.offset, match.length));
-		output = template_produce_output(result, match, buffer);
-		/* TODO: Free TemplateMatches */
+	while (true) {
+		match = template_find_next_key(buffer);
+		if (match == NULL)
+			break;
+
+		result = template_parse_key(
+			strndup(buffer + match->offset, match->length));
+		buffer = template_produce_output(result, match, buffer);
+		/* TODO: Free TemplateMatch */
 	}
 
-	return output;
+	return buffer;
 }
 
-TemplateMatches *
-template_find_keys(char *content)
+TemplateMatch *
+template_find_next_key(char *content)
 {
 	char *buffer = content;
 
@@ -44,41 +47,24 @@ template_find_keys(char *content)
 	regmatch_t pmatch[1];
 	regoff_t offset, length;
 
-	TemplateMatch *matches = malloc(1);
-	int n_matches = 0;
-
 	int file_offset = 0;
 	int ret;
-	while (true) {
-		ret = regexec(&regex, buffer, ARRAY_SIZE(pmatch), pmatch, 0);
-		if (ret == REG_NOMATCH) {
-			break;
-		}
+	ret = regexec(&regex, buffer, ARRAY_SIZE(pmatch), pmatch, 0);
+	if (ret == REG_NOMATCH)
+		return NULL;
 
-		offset = pmatch[0].rm_so;
-		length = pmatch[0].rm_eo - pmatch[0].rm_so;
+	TemplateMatch *match = malloc(1);
+	offset = pmatch[0].rm_so;
+	length = pmatch[0].rm_eo - pmatch[0].rm_so;
 
-		n_matches++;
-		realloc(matches, n_matches * sizeof(TemplateMatch));
+	match->length = length;
+	match->offset = file_offset + offset;
 
-		matches[n_matches - 1].length = length;
-		matches[n_matches - 1].offset = file_offset + offset;
-
-		file_offset = offset + length;
-		buffer += file_offset;
-	}
+	file_offset = offset + length;
+	buffer += file_offset;
 	regfree(&regex);
 
-	if (n_matches == 0) {
-		free(matches);
-		return NULL;
-	}
-
-	TemplateMatches *out = calloc(1, sizeof(TemplateMatches));
-	out->n_matches = n_matches;
-	out->matches = matches;
-
-	return out;
+	return match;
 }
 
 TemplateOperationResult *
@@ -119,7 +105,7 @@ template_parse_key(char *content)
 }
 
 char *
-template_produce_output(TemplateOperationResult *result, TemplateMatch match,
+template_produce_output(TemplateOperationResult *result, TemplateMatch *match,
 						char *buffer)
 {
 	switch (result->op) {
@@ -131,13 +117,13 @@ template_produce_output(TemplateOperationResult *result, TemplateMatch match,
 			= engine_fetch_partial_content(include_operands->operand);
 		/* printf("%s\n", operand_content); */
 
-		char *output = calloc(strlen(buffer) - match.length
+		char *output = calloc(strlen(buffer) - match->length
 								  + strlen(operand_content) + 1,
 							  sizeof(char));
 
-		strncpy(output, buffer, match.offset);
+		strncpy(output, buffer, match->offset);
 		strcat(output, operand_content);
-		strcat(output, buffer + match.offset + match.length);
+		strcat(output, buffer + match->offset + match->length);
 
 		return output;
 	} break;
