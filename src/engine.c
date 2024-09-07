@@ -8,16 +8,24 @@
 #include "template.h"
 
 #define PARTIAL_DIRECTORY "partials"
+#define RESOURCES_FILE ".resources"
 
 Engine *e;
 
 static int
 filter(const struct dirent *entry)
 {
-	char *dot = strrchr(entry->d_name, '.');
-	if (dot && !strcmp(dot, ".html"))
-		return 1;
+	if (entry->d_type == DT_REG) {
 
+		char *dot = strrchr(entry->d_name, '.');
+		if (dot && !strcmp(dot, ".html"))
+			return 1;
+
+		return 0;
+	} else if (entry->d_type != DT_DIR)
+		return 0;
+
+	/* TODO: Recursively search subdirs, unless they're present in resources */
 	return 0;
 }
 
@@ -29,6 +37,8 @@ engine_init(char *working_directory, char *output_directory)
 	e->wd = working_directory;
 	e->od = output_directory;
 
+	engine_parse_resources();
+
 	e->n_base_files = scandir(e->wd, &e->base_files, filter, alphasort);
 }
 
@@ -38,6 +48,35 @@ engine_exit(void)
 	free(e->wd);
 	free(e->od);
 	free(e);
+}
+
+void
+engine_parse_resources(void)
+{
+	char *full_path;
+	asprintf(&full_path, "%s/" RESOURCES_FILE, e->wd);
+
+	FILE *f = fopen(full_path, "r");
+	if (f == NULL) {
+		printf("Unable to open file: %s\n", full_path);
+		engine_exit();
+		exit(EXIT_FAILURE);
+	}
+
+	/* TODO: Implement read file function */
+	char *output = template_ingest_file(f);
+	e->resources = malloc(1);
+
+	char *token = strtok(output, "\n");
+	int i;
+	for (i = 0; token != NULL; i++) {
+		reallocarray(e->resources, i + 1, sizeof(char *));
+		e->resources[i] = token;
+		token = strtok(NULL, "\n");
+	}
+	free(output);
+
+	e->n_resources = i;
 }
 
 static void

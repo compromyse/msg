@@ -53,7 +53,7 @@ template_find_next_key(char *content)
 	if (ret == REG_NOMATCH)
 		return NULL;
 
-	TemplateMatch *match = malloc(1);
+	TemplateMatch *match = calloc(1, sizeof(TemplateMatch));
 	offset = pmatch[0].rm_so;
 	length = pmatch[0].rm_eo - pmatch[0].rm_so;
 
@@ -70,7 +70,8 @@ template_find_next_key(char *content)
 TemplateOperationResult *
 template_parse_key(char *content)
 {
-	TemplateOperationResult *result = malloc(sizeof(TemplateOperationResult));
+	TemplateOperationResult *result
+		= calloc(1, sizeof(TemplateOperationResult));
 
 	char *operation;
 	sscanf(content, "{{ %ms", &operation);
@@ -94,7 +95,7 @@ template_parse_key(char *content)
 		if (end)
 			*end = '\0';
 		TemplateIncludeOperands *op_operands
-			= malloc(sizeof(TemplateIncludeOperands));
+			= calloc(1, sizeof(TemplateIncludeOperands));
 		op_operands->operand = operand;
 
 		result->op_result = op_operands;
