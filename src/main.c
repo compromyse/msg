@@ -11,7 +11,8 @@ main(int argc, char **argv)
 {
 	char *working_directory;
 	if (argc < 2) {
-		working_directory = getcwd(NULL, 0);
+		// working_directory = getcwd(NULL, 0);
+		asprintf(&working_directory, ".");
 	} else {
 		asprintf(&working_directory, "%s", argv[1]);
 	}
@@ -22,7 +23,7 @@ main(int argc, char **argv)
 	engine_init(working_directory, output_directory);
 
 	engine_recreate_output_directory();
-	engine_parse_base_files();
+	engine_parse_hypertext_content();
 
 	engine_exit();
 	return EXIT_SUCCESS;

@@ -8,36 +8,9 @@
 #include "template.h"
 
 #define PARTIAL_DIRECTORY "partials"
-#define RESOURCES_FILE ".resources"
+#define EXCLUDE_FILE ".exclude"
 
 Engine *e;
-
-static int
-filter(const struct dirent *entry)
-{
-	if (entry->d_type == DT_REG) {
-		if (strcmp(entry->d_name, RESOURCES_FILE))
-			return 1;
-
-		return 0;
-	} else if (entry->d_type != DT_DIR)
-		return 0;
-
-	if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")
-		|| !strcmp(entry->d_name, RESOURCES_FILE)
-		|| !strcmp(entry->d_name, PARTIAL_DIRECTORY)
-		|| !strcmp(entry->d_name, ".out"))
-		return 0;
-
-	for (size_t i = 0; i < e->n_resources; i++)
-		if (!strcmp(e->resources[i], entry->d_name))
-			return 0;
-
-	/* TODO: Recursively search subdirs */
-	printf("%s\n", entry->d_name);
-
-	return 0;
-}
 
 void
 engine_init(char *working_directory, char *output_directory)
@@ -47,9 +20,11 @@ engine_init(char *working_directory, char *output_directory)
 	e->wd = working_directory;
 	e->od = output_directory;
 
-	engine_parse_resources();
+	engine_parse_excludes();
+	engine_hydrate_files(e->wd);
 
-	e->n_base_files = scandir(e->wd, &e->base_files, filter, alphasort);
+	for (int i = 0; i < e->n_hypertext_content; i++)
+		puts(e->hypertext_content[i]);
 }
 
 void
@@ -61,10 +36,65 @@ engine_exit(void)
 }
 
 void
-engine_parse_resources(void)
+engine_hydrate_files(char *directory)
+{
+	DIR *d = opendir(directory);
+	if (d == NULL) {
+		printf("Unable to open directory: %s\n", directory);
+		engine_exit();
+		exit(EXIT_FAILURE);
+	}
+
+	e->hypertext_content = NULL;
+	e->non_hypertext_content = NULL;
+	e->n_hypertext_content = 0;
+	e->n_non_hypertext_content = 0;
+
+	struct dirent *entry;
+	while ((entry = readdir(d)) != NULL) {
+		if (!strcmp(entry->d_name, "."))
+			continue;
+		if (!strcmp(entry->d_name, ".."))
+			continue;
+		for (size_t i = 0; i < e->n_excludes; i++)
+			if (!strcmp(entry->d_name, e->excludes[i]))
+				continue;
+
+		char *path;
+		asprintf(&path, "%s/%s", directory, entry->d_name);
+
+		if (entry->d_type == DT_REG) {
+			char *dot = strrchr(entry->d_name, '.');
+			if (dot && !strcmp(dot, ".html")) {
+				char **temp = reallocarray(e->hypertext_content,
+										   e->n_hypertext_content + 1,
+										   sizeof(char **));
+				e->hypertext_content = temp;
+
+				e->hypertext_content[e->n_hypertext_content] = path;
+				e->n_hypertext_content++;
+			} else {
+				char **temp = reallocarray(e->non_hypertext_content,
+										   e->n_non_hypertext_content + 1,
+										   sizeof(char **));
+				e->non_hypertext_content = temp;
+
+				e->non_hypertext_content[e->n_non_hypertext_content] = path;
+				e->n_non_hypertext_content++;
+			}
+		} else if (entry->d_type == DT_DIR) {
+			char *subdir_path;
+			asprintf(&subdir_path, "%s/%s", directory, entry->d_name);
+			engine_hydrate_files(subdir_path);
+		}
+	}
+}
+
+void
+engine_parse_excludes(void)
 {
 	char *full_path;
-	asprintf(&full_path, "%s/" RESOURCES_FILE, e->wd);
+	asprintf(&full_path, "%s/" EXCLUDE_FILE, e->wd);
 
 	FILE *f = fopen(full_path, "r");
 	if (f == NULL) {
@@ -75,31 +105,30 @@ engine_parse_resources(void)
 
 	/* TODO: Implement read file function */
 	char *output = template_ingest_file(f);
-	e->resources = malloc(1);
+	e->excludes = NULL;
 
 	char *token = strtok(output, "\n");
 	int i;
 	for (i = 0; token != NULL; i++) {
-		reallocarray(e->resources, i + 1, sizeof(char *));
+		char **temp = reallocarray(e->excludes, i + 1, sizeof(char *));
+		e->excludes = temp;
+
 		char *atoken = calloc(1, strlen(token) + 1);
 		strcpy(atoken, token);
-		e->resources[i] = atoken;
+		e->excludes[i] = atoken;
 		token = strtok(NULL, "\n");
 	}
 	free(output);
 
-	e->n_resources = i;
+	e->n_excludes = i;
 }
 
 static void
-parse_base_file(const struct dirent *file)
+parse_base_file(char *file_path)
 {
-	char *full_path;
-	asprintf(&full_path, "%s/%s", e->wd, file->d_name);
-
-	FILE *f = fopen(full_path, "r");
+	FILE *f = fopen(file_path, "r");
 	if (f == NULL) {
-		printf("Unable to open file: %s\n", full_path);
+		printf("Unable to open file: %s\n", file_path);
 		engine_exit();
 		exit(EXIT_FAILURE);
 	}
@@ -108,7 +137,7 @@ parse_base_file(const struct dirent *file)
 	fclose(f);
 
 	char *output_path;
-	asprintf(&output_path, "%s/%s", e->od, file->d_name);
+	asprintf(&output_path, "%s/%s", e->od, file_path);
 
 	FILE *out = fopen(output_path, "w");
 	if (out == NULL) {
@@ -122,10 +151,10 @@ parse_base_file(const struct dirent *file)
 }
 
 void
-engine_parse_base_files(void)
+engine_parse_hypertext_content(void)
 {
-	for (int i = 0; i < e->n_base_files; i++)
-		parse_base_file(e->base_files[i]);
+	for (int i = 0; i < e->n_hypertext_content; i++)
+		parse_base_file(e->hypertext_content[i]);
 }
 
 static int
