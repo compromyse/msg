@@ -1,8 +1,6 @@
 #ifndef _TEMPLATE_H
 #define _TEMPLATE_H
 
-#include "stdio.h"
-
 #define MAXIMUM_OPERATION_NAME_SIZE 16
 
 typedef enum { INCLUDE } OPERATION;
@@ -21,7 +19,7 @@ typedef struct {
 	void *op_result;
 } TemplateOperationResult;
 
-char *template_ingest_file(FILE *f);
+char *template_ingest(char *buffer);
 
 TemplateMatch *template_find_next_key(char *content);
 TemplateOperationResult *template_parse_key(char *content);

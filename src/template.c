@@ -10,15 +10,8 @@
 #define ARRAY_SIZE(array) (sizeof((array)) / sizeof((array)[0]))
 
 char *
-template_ingest_file(FILE *f)
+template_ingest(char *buffer)
 {
-	fseek(f, 0, SEEK_END);
-	long fsize = ftell(f);
-	fseek(f, 0, SEEK_SET);
-
-	char *buffer = calloc(1, fsize + 1);
-	fread(buffer, fsize, 1, f);
-
 	TemplateMatch *match;
 	TemplateOperationResult *result;
 

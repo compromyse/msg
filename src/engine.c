@@ -6,6 +6,7 @@
 
 #include "engine.h"
 #include "template.h"
+#include "util.h"
 
 #define PARTIAL_DIRECTORY "partials"
 #define RESOURCES_FILE ".resources"
@@ -66,15 +67,12 @@ engine_parse_resources(void)
 	char *full_path;
 	asprintf(&full_path, "%s/" RESOURCES_FILE, e->wd);
 
-	FILE *f = fopen(full_path, "r");
-	if (f == NULL) {
-		printf("Unable to open file: %s\n", full_path);
+	char *output = read_file(full_path);
+	if (output == NULL) {
 		engine_exit();
 		exit(EXIT_FAILURE);
 	}
 
-	/* TODO: Implement read file function */
-	char *output = template_ingest_file(f);
 	e->resources = malloc(1);
 
 	char *token = strtok(output, "\n");
@@ -97,15 +95,13 @@ parse_base_file(const struct dirent *file)
 	char *full_path;
 	asprintf(&full_path, "%s/%s", e->wd, file->d_name);
 
-	FILE *f = fopen(full_path, "r");
-	if (f == NULL) {
-		printf("Unable to open file: %s\n", full_path);
+	char *buffer = read_file(full_path);
+	if (buffer == NULL) {
 		engine_exit();
 		exit(EXIT_FAILURE);
 	}
 
-	char *output = template_ingest_file(f);
-	fclose(f);
+	char *output = template_ingest(buffer);
 
 	char *output_path;
 	asprintf(&output_path, "%s/%s", e->od, file->d_name);
@@ -156,12 +152,12 @@ engine_fetch_partial_content(char *partial_name)
 	char *full_path;
 	asprintf(&full_path, "%s/" PARTIAL_DIRECTORY "/%s", e->wd, partial_name);
 
-	FILE *f = fopen(full_path, "r");
-	if (f == NULL) {
+	char *buffer = read_file(full_path);
+	if (buffer == NULL) {
 		printf("Unable to open file: %s\n", full_path);
 		engine_exit();
 		exit(EXIT_FAILURE);
 	}
 
-	return template_ingest_file(f);
+	return template_ingest(buffer);
 }
