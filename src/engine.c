@@ -54,6 +54,13 @@ engine_init(char *working_directory, char *output_directory)
 }
 
 void
+engine_run(void)
+{
+	engine_recreate_output_directory();
+	engine_parse_base_files();
+}
+
+void
 engine_exit(void)
 {
 	free(e->wd);

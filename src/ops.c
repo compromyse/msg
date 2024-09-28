@@ -39,5 +39,7 @@ ops_handle_include(OpsOperation *operation, TemplateMatch *match, char *buffer)
 	strcat(output, operand_content);
 	strcat(output, buffer + match->offset + match->length);
 
+	free(include_operands->operand);
+
 	return output;
 }

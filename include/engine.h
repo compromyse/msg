@@ -13,6 +13,7 @@ typedef struct {
 } Engine;
 
 void engine_init(char *working_directory, char *output_directory);
+void engine_run(void);
 void engine_exit(void);
 
 void engine_parse_resources(void);

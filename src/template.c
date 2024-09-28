@@ -26,6 +26,7 @@ template_ingest(char *buffer)
 		buffer = template_produce_output(operation, match, buffer);
 
 		free(match);
+		free(operation->op_result);
 		free(operation);
 	}
 
@@ -90,11 +91,11 @@ template_parse_key(char *content)
 }
 
 char *
-template_produce_output(OpsOperation *result, TemplateMatch *match,
+template_produce_output(OpsOperation *operation, TemplateMatch *match,
 						char *buffer)
 {
-	switch (result->op) {
+	switch (operation->op) {
 	case INCLUDE:
-		return ops_handle_include(result, match, buffer);
+		return ops_handle_include(operation, match, buffer);
 	}
 }

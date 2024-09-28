@@ -19,10 +19,8 @@ main(int argc, char **argv)
 	asprintf(&output_directory, "%s/" OUTPUT_DIRECTORY, working_directory);
 
 	engine_init(working_directory, output_directory);
-
-	engine_recreate_output_directory();
-	engine_parse_base_files();
-
+	engine_run();
 	engine_exit();
+
 	return EXIT_SUCCESS;
 }
