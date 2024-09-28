@@ -38,12 +38,17 @@ Replace `[directory_name]` with your site's root directory. By default, this is 
 ```
 <br>
 
-> P.S. If you'd like to use GCC instead of Clang for compilation, just replace `CC := clang` with `CC := gcc` in the Makefile.
+> P.S. If you'd like to use GCC instead of Clang for compilation, just run `make CC=gcc` instead.
 
 ## Development
 Run the debug target to generate an executable for development.
 ```sh
 make debug
+```
+
+You can also install [Bear](https://github.com/rizsotto/Bear) and run the following to generate compile_commands.json.
+```sh
+bear -- make
 ```
 
 Run `make format` before pushing changes.
