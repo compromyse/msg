@@ -16,7 +16,7 @@ typedef struct {
 
 OpsIncludeOperands *ops_fetch_include_operands(char *content);
 
-char *ops_handle_include(OpsOperation *result, TemplateMatch *match,
+char *ops_handle_include(OpsOperation *operation, TemplateMatch *match,
 						 char *buffer);
 
 #endif
