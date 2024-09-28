@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "engine.h"
-
-#define OUTPUT_DIRECTORY ".out"
+#include "../config.h"
+#include <engine.h>
 
 int
 main(int argc, char **argv)

@@ -2,10 +2,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "engine.h"
-#include "string.h"
-#include "template.h"
+#include <engine.h>
+#include <ops.h>
+#include <template.h>
 
 #define ARRAY_SIZE(array) (sizeof((array)) / sizeof((array)[0]))
 
@@ -13,17 +14,19 @@ char *
 template_ingest(char *buffer)
 {
 	TemplateMatch *match;
-	TemplateOperationResult *result;
+	OpsOperation *operation;
 
 	while (true) {
 		match = template_find_next_key(buffer);
 		if (match == NULL)
 			break;
 
-		result = template_parse_key(
+		operation = template_parse_key(
 			strndup(buffer + match->offset, match->length));
-		buffer = template_produce_output(result, match, buffer);
-		/* TODO: Free TemplateMatch */
+		buffer = template_produce_output(operation, match, buffer);
+
+		free(match);
+		free(operation);
 	}
 
 	return buffer;
@@ -60,66 +63,38 @@ template_find_next_key(char *content)
 	return match;
 }
 
-TemplateOperationResult *
+OpsOperation *
 template_parse_key(char *content)
 {
-	TemplateOperationResult *result
-		= calloc(1, sizeof(TemplateOperationResult));
+	OpsOperation *operation = calloc(1, sizeof(OpsOperation));
 
-	char *operation;
-	sscanf(content, "{{ %ms", &operation);
+	char *op;
+	sscanf(content, "{{ %ms", &op);
 
-	if (strcmp(operation, "include") == 0)
-		result->op = INCLUDE;
+	if (strcmp(op, "include") == 0)
+		operation->op = INCLUDE;
 	else {
 		printf("Unknown operation: %s in \"%s\"", operation, content);
 		/* TODO: Clean exit. */
 		exit(1);
 	}
-	free(operation);
+	free(op);
 
-	switch (result->op) {
+	switch (operation->op) {
 	case INCLUDE: {
-		char *operand;
-		sscanf(content, "{{ include \"%ms }}", &operand);
-
-		/* TODO: Cleaner way of extracting the operand */
-		char *end = strchr(operand, '"');
-		if (end)
-			*end = '\0';
-		TemplateIncludeOperands *op_operands
-			= calloc(1, sizeof(TemplateIncludeOperands));
-		op_operands->operand = operand;
-
-		result->op_result = op_operands;
+		operation->op_result = ops_fetch_include_operands(content);
 	} break;
 	}
 
-	return result;
+	return operation;
 }
 
 char *
-template_produce_output(TemplateOperationResult *result, TemplateMatch *match,
+template_produce_output(OpsOperation *result, TemplateMatch *match,
 						char *buffer)
 {
 	switch (result->op) {
-	case INCLUDE: {
-		TemplateIncludeOperands *include_operands
-			= (TemplateIncludeOperands *) result->op_result;
-
-		char *operand_content
-			= engine_fetch_partial_content(include_operands->operand);
-		/* printf("%s\n", operand_content); */
-
-		char *output = calloc(strlen(buffer) - match->length
-								  + strlen(operand_content) + 1,
-							  sizeof(char));
-
-		strncpy(output, buffer, match->offset);
-		strcat(output, operand_content);
-		strcat(output, buffer + match->offset + match->length);
-
-		return output;
-	} break;
+	case INCLUDE:
+		return ops_handle_include(result, match, buffer);
 	}
 }

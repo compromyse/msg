@@ -2,13 +2,14 @@
 #define __ENGINE_H
 
 #include "stdio.h"
+
 typedef struct {
 	char *wd; /* Working Directory */
 	char *od; /* Output Directory */
 	char **resources;
 	size_t n_resources;
 	struct dirent **base_files;
-	int n_base_files;
+	size_t n_base_files;
 } Engine;
 
 void engine_init(char *working_directory, char *output_directory);

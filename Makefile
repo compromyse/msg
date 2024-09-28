@@ -2,6 +2,7 @@ BUILD := build
 $(shell mkdir -p build)
 
 SRC := $(wildcard src/*.c)
+INCLUDE := include/
 OBJ := $(SRC:src/%.c=$(BUILD)/%.o)
 OUT := $(BUILD)/msg
 
@@ -12,6 +13,7 @@ CC := clang
 CFLAGS := -Wall -Wextra -Wpedantic -std=c99
 CFLAGS += -Wno-unused-result
 CFLAGS += -D_GNU_SOURCE -D_FORTIFY_SOURCE=2
+CFLAGS += -I $(INCLUDE)
 
 all: release
 
@@ -27,7 +29,7 @@ $(BUILD)/%.o: src/%.c | $(BUILD)
 release: CFLAGS += -Werror -O3
 release: clean $(OUT)
 
-debug: CFLAGS += -O1 -g3 -glldb
+debug: CFLAGS += -O0 -g3 -glldb
 debug: $(OUT)
 
 format: $(wildcard src/*)

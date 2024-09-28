@@ -4,12 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "engine.h"
-#include "template.h"
-#include "util.h"
-
-#define PARTIAL_DIRECTORY "partials"
-#define RESOURCES_FILE ".resources"
+#include "../config.h"
+#include <engine.h>
+#include <template.h>
+#include <util.h>
 
 Engine *e;
 
@@ -24,11 +22,13 @@ filter(const struct dirent *entry)
 	} else if (entry->d_type != DT_DIR)
 		return 0;
 
-	if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")
-		|| !strcmp(entry->d_name, RESOURCES_FILE)
-		|| !strcmp(entry->d_name, PARTIAL_DIRECTORY)
-		|| !strcmp(entry->d_name, ".out"))
-		return 0;
+	char *disallowed_names[]
+		= { ".", "..", RESOURCES_FILE, PARTIAL_DIRECTORY, OUTPUT_DIRECTORY,
+			NULL };
+
+	for (int i = 0; disallowed_names[i] != NULL; i++)
+		if (!strcmp(entry->d_name, disallowed_names[i]))
+			return 0;
 
 	for (size_t i = 0; i < e->n_resources; i++)
 		if (!strcmp(e->resources[i], entry->d_name))
@@ -58,6 +58,14 @@ engine_exit(void)
 {
 	free(e->wd);
 	free(e->od);
+
+	for (size_t i = 0; i < e->n_resources; i++)
+		free(e->resources[i]);
+	for (size_t i = 0; i < e->n_base_files; i++)
+		free(e->base_files[i]);
+
+	free(e->resources);
+	free(e->base_files);
 	free(e);
 }
 
@@ -102,6 +110,7 @@ parse_base_file(const struct dirent *file)
 	}
 
 	char *output = template_ingest(buffer);
+	free(buffer);
 
 	char *output_path;
 	asprintf(&output_path, "%s/%s", e->od, file->d_name);
@@ -113,14 +122,14 @@ parse_base_file(const struct dirent *file)
 		exit(EXIT_FAILURE);
 	}
 
-	fprintf(out, output);
+	fprintf(out, "%s", output);
 	fclose(out);
 }
 
 void
 engine_parse_base_files(void)
 {
-	for (int i = 0; i < e->n_base_files; i++)
+	for (size_t i = 0; i < e->n_base_files; i++)
 		parse_base_file(e->base_files[i]);
 }
 
@@ -159,5 +168,8 @@ engine_fetch_partial_content(char *partial_name)
 		exit(EXIT_FAILURE);
 	}
 
-	return template_ingest(buffer);
+	char *output = template_ingest(buffer);
+	free(buffer);
+
+	return output;
 }
