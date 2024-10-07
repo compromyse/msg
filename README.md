@@ -36,7 +36,6 @@ Replace `[directory_name]` with your site's root directory. By default, this is 
 ```sh
 ./build/msg [directory_name]
 ```
-<br>
 
 > P.S. If you'd like to use GCC instead of Clang for compilation, just run `make CC=gcc` instead.
 
