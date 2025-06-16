@@ -1,0 +1,8 @@
+BasedOnStyle: GNU
+IndentWidth: 2
+TabWidth: 2
+BreakBeforeBraces: Linux
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: true
+BinPackArguments: false
+BinPackParameters: false
