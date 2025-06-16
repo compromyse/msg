@@ -23,6 +23,9 @@ typedef struct {
   void *operands;
 } directive_t;
 
+char *base_pre;
+char *base_post;
+
 key_match_t *
 find_next_key(char *buffer)
 {
@@ -192,8 +195,25 @@ main(int argc, char **argv)
   (void) argc;
   (void) argv;
 
+  FILE *base = fopen(DIRECTORY "/" BASE_TEMPLATE, "r");
+
+  unsigned int size = fsize(base);
+  char *contents = fcontent(base, size);
+
+  key_match_t *match = find_next_key(contents);
+  asprintf(&base_pre, "%.*s", match->offset, contents);
+  asprintf(&base_post,
+           "%.*s",
+           size - match->offset - match->length,
+           contents + match->offset + match->length);
+
+  free(contents);
+  fclose(base);
+
   mkdir(OUTPUT, 0700);
   nftw(DIRECTORY, fn, 64, FTW_PHYS | FTW_ACTIONRETVAL);
 
+  free(base_pre);
+  free(base_post);
   return EXIT_SUCCESS;
 }
