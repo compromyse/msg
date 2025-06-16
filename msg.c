@@ -11,22 +11,21 @@
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
+typedef enum { CONTENT, INCLUDE } directive_e;
+
 typedef struct {
   unsigned int offset;
   unsigned int length;
 } key_match_t;
 
-char *fcontent(FILE *f, unsigned int size);
-key_match_t *find_next_key(char *content);
-unsigned int fsize(FILE *f);
-void handle_file(const char *path);
-void ingest(char *buffer);
+typedef struct {
+  directive_e type;
+  void *operands;
+} directive_t;
 
 key_match_t *
-find_next_key(char *content)
+find_next_key(char *buffer)
 {
-  char *buffer = content;
-
   regex_t regex;
   regcomp(&regex, "{{[^}]*}}", 0);
 
@@ -53,6 +52,42 @@ find_next_key(char *content)
   return match;
 }
 
+directive_t *
+find_directive(char *content, key_match_t *match)
+{
+  directive_t *directive = (directive_t *) calloc(1, sizeof(directive_t));
+
+  char *buffer = content + match->offset;
+  unsigned int n = 0;
+
+  for (size_t i = 0; i < match->length; i++)
+    switch (buffer[i]) {
+    case '{':
+    case ' ':
+    case '\t':
+    case '\n':
+      n++;
+      break;
+
+    default:
+      goto found_start;
+    }
+
+  return NULL;
+
+found_start:
+  if (strncmp(buffer + n, "include", strlen("include")) == 0) {
+    directive->type = INCLUDE;
+    directive->operands = NULL;
+  }
+  if (strncmp(buffer + n, "content", strlen("content")) == 0) {
+    directive->type = CONTENT;
+    directive->operands = NULL;
+  }
+
+  return directive;
+}
+
 void
 ingest(char *buffer)
 {
@@ -63,12 +98,12 @@ ingest(char *buffer)
     if (match == NULL)
       break;
 
-    buffer += match->offset;
-    printf("%.*s", match->length, buffer);
+    directive_t *directive = find_directive(buffer, match);
 
+    buffer += match->offset + match->length;
+
+    free(directive);
     free(match);
-
-    exit(0);
   }
 }
 
@@ -102,8 +137,8 @@ handle_file(const char *path)
 {
   char *inpath;
   char *outpath;
-  asprintf(&inpath, "%s/%s", directory, path);
-  asprintf(&outpath, "%s/%s", output_directory, path);
+  asprintf(&inpath, "%s/%s", DIRECTORY, path);
+  asprintf(&outpath, "%s/%s", OUTPUT, path);
 
   FILE *in = fopen(inpath, "r");
   FILE *out = fopen(outpath, "w");
@@ -126,13 +161,12 @@ fn(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
   (void) sb;
 
   const char *basename = fpath + ftwbuf->base;
-  const char *path = fpath + strlen(directory) + 1;
+  const char *path = fpath + strlen(DIRECTORY) + 1;
   char *output_path = NULL;
-  asprintf(&output_path, "%s/%s", output_directory, path);
+  asprintf(&output_path, "%s/%s", OUTPUT, path);
 
   if (typeflag == FTW_D) {
-    if (!strcmp(basename, partials_directory)
-        || !strcmp(basename, assets_directory))
+    if (strcmp(basename, PARTIALS) == 0 || strcmp(basename, ASSETS) == 0)
       return FTW_SKIP_SUBTREE;
 
     mkdir(output_path, 0700);
@@ -140,6 +174,13 @@ fn(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
     return FTW_CONTINUE;
   }
 
+  if (typeflag != FTW_F)
+    return FTW_CONTINUE;
+
+  if (ftwbuf->level == 1 && strcmp(basename, BASE_TEMPLATE) == 0)
+    return FTW_CONTINUE;
+
+  printf("Handling: %s\n", path);
   handle_file(path);
 
   return FTW_CONTINUE;
@@ -151,8 +192,8 @@ main(int argc, char **argv)
   (void) argc;
   (void) argv;
 
-  mkdir(output_directory, 0700);
-  nftw(directory, fn, 64, FTW_PHYS | FTW_ACTIONRETVAL);
+  mkdir(OUTPUT, 0700);
+  nftw(DIRECTORY, fn, 64, FTW_PHYS | FTW_ACTIONRETVAL);
 
   return EXIT_SUCCESS;
 }

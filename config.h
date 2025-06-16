@@ -1,4 +1,5 @@
-static const char *directory = "example";
-static const char *partials_directory = "partials";
-static const char *assets_directory = "assets";
-static const char *output_directory = "dist";
+#define DIRECTORY "example"
+#define PARTIALS "partials"
+#define ASSETS "assets"
+#define OUTPUT "dist"
+#define BASE_TEMPLATE "base.html"
