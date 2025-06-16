@@ -214,7 +214,6 @@ fn(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
   if (ftwbuf->level == 1 && strcmp(basename, BASE_TEMPLATE) == 0)
     return FTW_CONTINUE;
 
-  printf("Handling: %s\n", path);
   handle_file(path);
 
   return FTW_CONTINUE;
