@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 
+#include <ctype.h>
 #include <ftw.h>
 #include <regex.h>
 #include <stdbool.h>
@@ -81,29 +82,45 @@ find_directive(char *content, key_match_t *match)
 found_start:
   if (strncmp(buffer + n, "include", strlen("include")) == 0) {
     directive->type = INCLUDE;
-    directive->operands = NULL;
-  }
-  if (strncmp(buffer + n, "content", strlen("content")) == 0) {
-    directive->type = CONTENT;
-    directive->operands = NULL;
+
+    char *operand = NULL;
+    for (size_t i = n + strlen("include");
+         i < match->length - strlen("include");
+         i++)
+      if (isalnum(buffer[i])) {
+        sscanf(buffer + i, "%ms\"", &operand);
+        operand[strlen(operand) - 1] = '\0';
+        break;
+      }
+
+    asprintf((char **) &directive->operands, "%s", operand);
   }
 
   return directive;
 }
 
 void
-ingest(char *buffer)
+ingest(char **buffer)
 {
   key_match_t *match;
 
   while (true) {
-    match = find_next_key(buffer);
+    match = find_next_key(*buffer);
     if (match == NULL)
       break;
 
-    directive_t *directive = find_directive(buffer, match);
+    directive_t *directive = find_directive(*buffer, match);
 
-    buffer += match->offset + match->length;
+    if (directive->type == INCLUDE) {
+      char *operand = (char *) directive->operands;
+
+      asprintf(buffer,
+               "%.*s%s%s\n",
+               match->offset,
+               *buffer,
+               operand,
+               *buffer + match->offset + match->length);
+    }
 
     free(directive);
     free(match);
@@ -149,7 +166,7 @@ handle_file(const char *path)
   unsigned int size = fsize(in);
   char *buffer = fcontent(in, size);
 
-  ingest(buffer);
+  ingest(&buffer);
 
   fprintf(out, "%s%s%s", base_pre, buffer, base_post);
 
