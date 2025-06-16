@@ -24,6 +24,13 @@ typedef struct {
   void *operands;
 } directive_t;
 
+key_match_t *find_next_key(char *buffer);
+directive_t *find_directive(char *content, key_match_t *match);
+void ingest(char **buffer);
+unsigned int fsize(FILE *f);
+char *fcontent(FILE *f, unsigned int size);
+void handle_file(const char *path);
+
 char *base_pre;
 char *base_post;
 
@@ -113,12 +120,18 @@ ingest(char **buffer)
 
     if (directive->type == INCLUDE) {
       char *operand = (char *) directive->operands;
+      char *partial_path;
+      asprintf(&partial_path, "%s/%s/%s", DIRECTORY, PARTIALS, operand);
+
+      FILE *f = fopen(partial_path, "r");
+      unsigned int size = fsize(f);
+      char *partial_content = fcontent(f, size);
 
       asprintf(buffer,
                "%.*s%s%s\n",
                match->offset,
                *buffer,
-               operand,
+               partial_content,
                *buffer + match->offset + match->length);
     }
 
@@ -136,7 +149,7 @@ fsize(FILE *f)
   unsigned int s = ftell(f);
   fseek(f, current, SEEK_SET);
 
-  return s;
+  return s + 1;
 }
 
 char *
