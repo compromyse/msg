@@ -16,6 +16,12 @@ typedef struct {
   unsigned int length;
 } key_match_t;
 
+char *fcontent(FILE *f, unsigned int size);
+key_match_t *find_next_key(char *content);
+unsigned int fsize(FILE *f);
+void handle_file(const char *path);
+void ingest(char *buffer);
+
 key_match_t *
 find_next_key(char *content)
 {
@@ -115,10 +121,7 @@ handle_file(const char *path)
 }
 
 int
-handle(const char *fpath,
-       const struct stat *sb,
-       int typeflag,
-       struct FTW *ftwbuf)
+fn(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
   (void) sb;
 
@@ -149,7 +152,7 @@ main(int argc, char **argv)
   (void) argv;
 
   mkdir(output_directory, 0700);
-  nftw(directory, handle, 64, FTW_PHYS | FTW_ACTIONRETVAL);
+  nftw(directory, fn, 64, FTW_PHYS | FTW_ACTIONRETVAL);
 
   return EXIT_SUCCESS;
 }
