@@ -1,11 +1,70 @@
 #define _GNU_SOURCE
 
 #include <ftw.h>
+#include <regex.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "config.h"
+
+#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
+
+typedef struct {
+  unsigned int offset;
+  unsigned int length;
+} key_match_t;
+
+key_match_t *
+find_next_key(char *content)
+{
+  char *buffer = content;
+
+  regex_t regex;
+  regcomp(&regex, "{{[^}]*}}", 0);
+
+  regmatch_t pmatch[1];
+  regoff_t offset, length;
+
+  int file_offset = 0;
+  int ret;
+  ret = regexec(&regex, buffer, ARRAY_SIZE(pmatch), pmatch, 0);
+  if (ret == REG_NOMATCH)
+    return NULL;
+
+  key_match_t *match = calloc(1, sizeof(key_match_t));
+  offset = pmatch[0].rm_so;
+  length = pmatch[0].rm_eo - pmatch[0].rm_so;
+
+  match->length = length;
+  match->offset = file_offset + offset;
+
+  file_offset = offset + length;
+  buffer += file_offset;
+  regfree(&regex);
+
+  return match;
+}
+
+void
+ingest(char *buffer)
+{
+  key_match_t *match;
+
+  while (true) {
+    match = find_next_key(buffer);
+    if (match == NULL)
+      break;
+
+    buffer += match->offset;
+    printf("%.*s", match->length, buffer);
+
+    free(match);
+
+    exit(0);
+  }
+}
 
 unsigned int
 fsize(FILE *f)
@@ -19,8 +78,21 @@ fsize(FILE *f)
   return s;
 }
 
+char *
+fcontent(FILE *f, unsigned int size)
+{
+  char *buffer = (char *) calloc(size, sizeof(char));
+
+  fseek(f, 0, SEEK_SET);
+  int bytesread = fread(buffer, sizeof(char), size, f);
+  if (bytesread < 0)
+    return NULL;
+
+  return buffer;
+}
+
 void
-copy_file(const char *path)
+handle_file(const char *path)
 {
   char *inpath;
   char *outpath;
@@ -31,14 +103,11 @@ copy_file(const char *path)
   FILE *out = fopen(outpath, "w");
 
   unsigned int size = fsize(in);
-  fseek(in, 0, SEEK_SET);
+  char *buffer = fcontent(in, size);
 
-  char *buffer = (char *) calloc(size, sizeof(char));
-  int bytesread = fread(buffer, sizeof(char), size, in);
-  if (bytesread < 0)
-    return;
+  ingest(buffer);
 
-  fwrite(buffer, size, 1, out);
+  fwrite(buffer, size, sizeof(char), out);
   fclose(in);
   fclose(out);
 
@@ -68,7 +137,7 @@ handle(const char *fpath,
     return FTW_CONTINUE;
   }
 
-  copy_file(path);
+  handle_file(path);
 
   return FTW_CONTINUE;
 }
@@ -80,7 +149,6 @@ main(int argc, char **argv)
   (void) argv;
 
   mkdir(output_directory, 0700);
-
   nftw(directory, handle, 64, FTW_PHYS | FTW_ACTIONRETVAL);
 
   return EXIT_SUCCESS;
