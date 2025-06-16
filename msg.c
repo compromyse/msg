@@ -151,7 +151,10 @@ handle_file(const char *path)
 
   ingest(buffer);
 
+  fwrite(base_pre, strlen(base_pre), sizeof(char), out);
   fwrite(buffer, size, sizeof(char), out);
+  fwrite(base_post, strlen(base_post), sizeof(char), out);
+
   fclose(in);
   fclose(out);
 
