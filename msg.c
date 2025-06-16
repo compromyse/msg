@@ -25,12 +25,12 @@ typedef struct {
   void *operands;
 } directive_t;
 
-key_match_t *find_next_key(char *buffer);
-directive_t *find_directive(char *content, key_match_t *match);
-void ingest(char **buffer);
-unsigned int fsize(FILE *f);
 char *fcontent(FILE *f, unsigned int size);
+directive_t *find_directive(char *content, key_match_t *match);
+key_match_t *find_next_key(char *buffer);
+unsigned int fsize(FILE *f);
 void handle_file(const char *path);
+void ingest(char **buffer);
 
 char *base_pre;
 char *base_post;
