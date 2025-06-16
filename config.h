@@ -1,4 +1,4 @@
-#define DIRECTORY "example"
+#define DIRECTORY "compromyse.xyz"
 #define PARTIALS "partials"
 #define ASSETS "assets"
 #define OUTPUT "dist"
