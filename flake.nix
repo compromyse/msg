@@ -13,6 +13,8 @@
           clang
           lldb
           gnumake
+
+          discount
         ];
       };
     };

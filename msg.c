@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <ftw.h>
+#include <mkdio.h>
 #include <regex.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -101,6 +102,7 @@ found_start:
       }
 
     asprintf((char **) &directive->operands, "%s", operand);
+    free(operand);
   }
 
   return directive;
@@ -170,8 +172,15 @@ handle_file(const char *path)
 {
   char *inpath;
   char *outpath;
+
   asprintf(&inpath, "%s/%s", DIRECTORY, path);
-  asprintf(&outpath, "%s/%s", OUTPUT, path);
+
+  char *dot = strrchr(inpath, '.');
+  if (dot && strcmp(dot, ".md") == 0) {
+    asprintf(&outpath, "%s/%.*s.html", OUTPUT, (int) strlen(path) - 3, path);
+  } else {
+    asprintf(&outpath, "%s/%s", OUTPUT, path);
+  }
 
   FILE *in = fopen(inpath, "r");
   FILE *out = fopen(outpath, "w");
@@ -179,9 +188,15 @@ handle_file(const char *path)
   unsigned int size = fsize(in);
   char *buffer = fcontent(in, size);
 
-  ingest(&buffer);
-
-  fprintf(out, "%s%s%s", base_pre, buffer, base_post);
+  if (dot && strcmp(dot, ".md") == 0) {
+    MMIOT *doc = mkd_string(buffer, size, 0);
+    fprintf(out, "%s", base_pre);
+    markdown(doc, out, 0);
+    fprintf(out, "%s", base_post);
+  } else {
+    ingest(&buffer);
+    fprintf(out, "%s%s%s", base_pre, buffer, base_post);
+  }
 
   fclose(in);
   fclose(out);
@@ -214,6 +229,7 @@ fn(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
   if (ftwbuf->level == 1 && strcmp(basename, BASE_TEMPLATE) == 0)
     return FTW_CONTINUE;
 
+  printf("handling: %s\n", path);
   handle_file(path);
 
   return FTW_CONTINUE;

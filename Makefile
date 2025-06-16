@@ -1,6 +1,7 @@
 CC := clang
 CFLAGS := -std=c99
 CFLAGS += -Wall -Wextra -Wpedantic
+CFLAGS += -lmarkdown
 
 all: CFLAGS += -O3
 all: clean msg
