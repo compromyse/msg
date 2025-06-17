@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 
 #include <ctype.h>
+#include <ftw.h>
 #include <libgen.h>
 #include <mkdio.h>
 #include <stdbool.h>
@@ -238,6 +239,38 @@ handle_file(const char *path)
 }
 
 int
+copy_recursively(const char *fpath,
+                 const struct stat *sb,
+                 int typeflag,
+                 struct FTW *ftwbuf)
+{
+  (void) sb;
+  (void) ftwbuf;
+
+  const char *path = fpath + strlen(DIRECTORY) + 1;
+  char *output_path = NULL;
+  asprintf(&output_path, "%s/%s", OUTPUT, path);
+
+  if (typeflag == FTW_D) {
+    mkdir(output_path, 0700);
+    return FTW_CONTINUE;
+  }
+
+  if (typeflag != FTW_F)
+    return FTW_CONTINUE;
+
+  FILE *in = fopen(fpath, "r");
+  FILE *out = fopen(output_path, "w");
+
+  size_t size = fsize(in);
+  char *content = fcontent(in, size);
+
+  fprintf(out, "%s", content);
+
+  return FTW_CONTINUE;
+}
+
+int
 main(int argc, char **argv)
 {
   (void) argc;
@@ -259,6 +292,8 @@ main(int argc, char **argv)
   fclose(base);
 
   mkdir(OUTPUT, 0700);
+  nftw(
+      DIRECTORY "/" ASSETS, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
 
   char **x;
   char *filepath;
