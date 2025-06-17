@@ -6,7 +6,7 @@ CFLAGS += -lmarkdown
 all: CFLAGS += -O3
 all: clean msg
 
-debug: CFLAGS += -Og -g3 -glldb
+debug: CFLAGS += -O0 -g3 -glldb
 debug: clean msg
 
 msg: msg.c

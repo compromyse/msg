@@ -3,7 +3,6 @@
 #include <ctype.h>
 #include <libgen.h>
 #include <mkdio.h>
-#include <regex.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,28 +38,26 @@ char *base_post;
 key_match_t *
 find_next_key(char *buffer)
 {
-  regex_t regex;
-  regcomp(&regex, "{{[^}]*}}", 0);
-
-  regmatch_t pmatch[1];
-  regoff_t offset, length;
-
-  int file_offset = 0;
-  int ret;
-  ret = regexec(&regex, buffer, ARRAY_SIZE(pmatch), pmatch, 0);
-  if (ret == REG_NOMATCH)
-    return NULL;
-
   key_match_t *match = calloc(1, sizeof(key_match_t));
-  offset = pmatch[0].rm_so;
-  length = pmatch[0].rm_eo - pmatch[0].rm_so;
 
-  match->length = length;
-  match->offset = file_offset + offset;
+  for (size_t i = 0; i < strlen(buffer) - 1; i++) {
+    if (buffer[i] == '{' && buffer[i + 1] == '{')
+      match->offset = i;
 
-  file_offset = offset + length;
-  buffer += file_offset;
-  regfree(&regex);
+    if (i == strlen(buffer) - 1)
+      return NULL;
+  }
+
+  char *subbuffer = buffer + match->offset;
+  for (size_t i = 0; i < strlen(buffer) - 1; i++) {
+    if (subbuffer[i] == '}' && subbuffer[i + 1] == '}')
+      match->length = i + 2;
+
+    if (i == strlen(buffer) - 1) {
+      printf("Unterminated Key\n");
+      return NULL;
+    }
+  }
 
   return match;
 }
@@ -120,6 +117,8 @@ ingest(char **buffer)
       break;
 
     directive_t *directive = find_directive(*buffer, match);
+    if (directive == NULL)
+      break;
 
     if (directive->type == INCLUDE) {
       char *operand = (char *) directive->operands;
@@ -224,7 +223,8 @@ handle_file(const char *path)
     markdown(doc, out, 0);
     fprintf(out, "%s", base_post);
   } else {
-    ingest(&buffer);
+    if (strlen(buffer) != 0)
+      ingest(&buffer);
     fprintf(out, "%s%s%s", base_pre, buffer, base_post);
   }
 
