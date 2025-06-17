@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
-inotifywait -q -m -r -e modify $1 | while read DIRECTORY EVENT FILE; do
-  rm -rf dist && ./msg
+./msg
+
+inotifywait -q -m -r -e modify $(cat config.h | grep DIRECTORY | cut -d '"' -f 2) | while read; do
+  rm -rf dist
+  ./msg
+  echo $?
 done

@@ -313,5 +313,6 @@ main(int argc, char **argv)
 
   free(base_pre);
   free(base_post);
+
   return EXIT_SUCCESS;
 }
