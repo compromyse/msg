@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 
 #include <ctype.h>
+#include <fcntl.h>
 #include <ftw.h>
 #include <libgen.h>
 #include <mkdio.h>
@@ -8,7 +9,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/sendfile.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "config.h"
 
@@ -260,12 +263,16 @@ copy_recursively(const char *fpath,
     return FTW_CONTINUE;
 
   FILE *in = fopen(fpath, "r");
-  FILE *out = fopen(output_path, "w");
-
   size_t size = fsize(in);
-  char *content = fcontent(in, size);
+  fclose(in);
 
-  fprintf(out, "%s", content);
+  int in_fd = open(fpath, O_RDONLY);
+  int out_fd = open(output_path, O_WRONLY | O_CREAT, 0700);
+
+  sendfile(out_fd, in_fd, 0, size);
+
+  close(in_fd);
+  close(out_fd);
 
   return FTW_CONTINUE;
 }
