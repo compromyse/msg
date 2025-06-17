@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <ftw.h>
+#include <libgen.h>
 #include <mkdio.h>
 #include <regex.h>
 #include <stdbool.h>
@@ -182,8 +183,33 @@ handle_file(const char *path)
     asprintf(&outpath, "%s/%s", OUTPUT, path);
   }
 
+  char *directory = dirname(strdup(outpath));
+  char *next = calloc(strlen(directory) + 1, sizeof(char));
+  strcpy(next, "");
+
+  char *token;
+  for (token = strtok(directory, "/"); token != NULL;
+       token = strtok(NULL, "/")) {
+    if (strcmp(next, "") != 0) {
+      strcat(next, "/");
+    }
+
+    strcat(next, token);
+    mkdir(next, 0700);
+  }
+
   FILE *in = fopen(inpath, "r");
   FILE *out = fopen(outpath, "w");
+
+  if (in == NULL) {
+    printf("Failed to open %s\n", inpath);
+    return;
+  }
+
+  if (out == NULL) {
+    printf("Failed to open %s\n", outpath);
+    return;
+  }
 
   unsigned int size = fsize(in);
   char *buffer = fcontent(in, size);
@@ -201,38 +227,10 @@ handle_file(const char *path)
   fclose(in);
   fclose(out);
 
+  free(inpath);
+  free(outpath);
+
   free(buffer);
-}
-
-int
-fn(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
-{
-  (void) sb;
-
-  const char *basename = fpath + ftwbuf->base;
-  const char *path = fpath + strlen(DIRECTORY) + 1;
-  char *output_path = NULL;
-  asprintf(&output_path, "%s/%s", OUTPUT, path);
-
-  if (typeflag == FTW_D) {
-    if (strcmp(basename, PARTIALS) == 0 || strcmp(basename, ASSETS) == 0)
-      return FTW_SKIP_SUBTREE;
-
-    mkdir(output_path, 0700);
-
-    return FTW_CONTINUE;
-  }
-
-  if (typeflag != FTW_F)
-    return FTW_CONTINUE;
-
-  if (ftwbuf->level == 1 && strcmp(basename, BASE_TEMPLATE) == 0)
-    return FTW_CONTINUE;
-
-  printf("handling: %s\n", path);
-  handle_file(path);
-
-  return FTW_CONTINUE;
 }
 
 int
@@ -257,7 +255,15 @@ main(int argc, char **argv)
   fclose(base);
 
   mkdir(OUTPUT, 0700);
-  nftw(DIRECTORY, fn, 64, FTW_PHYS | FTW_ACTIONRETVAL);
+
+  char **x;
+  char *filepath;
+
+  for (x = (char **) html_resources; *x != NULL; x++) {
+    asprintf(&filepath, "%s.html", *x);
+    handle_file(filepath);
+    free(filepath);
+  }
 
   free(base_pre);
   free(base_post);
