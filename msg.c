@@ -183,7 +183,8 @@ handle_file(const char *path)
     asprintf(&outpath, "%s/%s", OUTPUT, path);
   }
 
-  char *directory = dirname(strdup(outpath));
+  char *temp_outpath = strdup(outpath);
+  char *directory = dirname(temp_outpath);
   char *next = calloc(strlen(directory) + 1, sizeof(char));
   strcpy(next, "");
 
@@ -197,6 +198,9 @@ handle_file(const char *path)
     strcat(next, token);
     mkdir(next, 0700);
   }
+
+  free(next);
+  free(temp_outpath);
 
   FILE *in = fopen(inpath, "r");
   FILE *out = fopen(outpath, "w");
