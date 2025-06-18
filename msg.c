@@ -133,12 +133,18 @@ ingest(char **buffer)
       unsigned int size = fsize(f);
       char *partial_content = fcontent(f, size);
 
+      char *temp_buffer = malloc(strlen(*buffer) + 1 * sizeof(char));
+      strcpy(temp_buffer, *buffer);
+
+      free(*buffer);
       asprintf(buffer,
                "%.*s%s%s\n",
                match->offset,
-               *buffer,
+               temp_buffer,
                partial_content,
-               *buffer + match->offset + match->length);
+               temp_buffer + match->offset + match->length);
+
+      free(temp_buffer);
     }
 
     free(directive);
