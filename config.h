@@ -6,5 +6,5 @@
 #define OUTPUT "dist"
 #define BASE_TEMPLATE "base.html"
 
-static const char *html_resources[] = { "index", "posts/a", NULL };
+static const char *html_resources[] = { "index", "projects", "posts/a", NULL };
 static const char *md_resources[] = { "posts/b", NULL };

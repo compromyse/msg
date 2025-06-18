@@ -1,8 +1,64 @@
 {{ include "navbar.html" }}
 
-<div class="p-12">
-  <p class="text-4xl">
-    Hi there! I'm RAGHU.
-  </p>
-  <p>Programmer and Hacker.</p>
+<div class="p-16">
+  <div class="flex flex-wrap gap-8">
+    <img src="/assets/me.webp" class="max-h-56"></img>
+    <div class="flex flex-col justify-center">
+      <h1 class="text-5xl">
+        Hi there! I'm RAGHU.
+      </h1>
+      <p class="text-xl">Programmer and Hacker.</p>
+
+      <div class="flex gap-2">
+        <a href="https://github.com/compromyse" class="hover:underline hover:text-pink-900 hover:bg-pink-200 p-1" target="_blank">GITHUB</a>
+        <a href="https://www.linkedin.com/in/compromyse" class="hover:underline hover:text-pink-900 hover:bg-pink-200 p-1" target="_blank">LINKEDIN</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="pt-12">
+
+    <!-- START PROJECTS -->
+    <div class="max-w-120">
+      <h2 class="text-2xl">[ PROJECTS ]</h2>
+
+      <div class="inline-grid grid-cols-[max-content_1fr] gap-y-5 pt-4">
+        <a href="/projects#bubbl" class="contents group">
+          <div class="text-lg group-hover:underline group-hover:text-pink-900 group-hover:bg-pink-200 p-1">BUBBL</div>
+          <div class="text-md pl-3 border-l-3 border-dashed border-pink-300 group-hover:text-pink-900 group-hover:bg-pink-200 group-hover:underline group-hover:border-pink-900 flex items-center">An operating system for x86.</div>
+        </a>
+
+        <a href="/projects#bubbl" class="contents group">
+          <div class="text-lg group-hover:underline group-hover:text-pink-900 group-hover:bg-pink-200 wrap-anywhere text-wrap max-w-28">ZUK MSM8996</div>
+          <div class="text-md pl-3 border-l-3 border-dashed border-pink-300 group-hover:text-pink-900 group-hover:bg-pink-200 group-hover:underline flex items-center">A port of Android 13 &amp; 14 to the Zuk Z2 PLUS.</div>
+        </a>
+
+        <a href="/projects#bubbl" class="contents group">
+          <div class="text-lg group-hover:underline group-hover:text-pink-900 group-hover:bg-pink-200">CHIP8Emu</div>
+          <div class="text-md pl-3 border-l-3 border-dashed border-pink-300 group-hover:text-pink-900 group-hover:bg-pink-200 group-hover:underline flex items-center">A VM/interpreter for CHIP-8.</div>
+        </a>
+
+        <a href="/projects#bubbl" class="contents group">
+          <div class="text-lg group-hover:underline group-hover:text-pink-900 group-hover:bg-pink-200">MSG</div>
+          <div class="text-md pl-3 border-l-3 border-dashed border-pink-300 group-hover:text-pink-900 group-hover:bg-pink-200 group-hover:underline flex items-center">A Minimal Static Site Generator.</div>
+        </a>
+
+        <a href="/projects#bubbl" class="contents group">
+          <div class="text-lg group-hover:underline group-hover:text-pink-900 group-hover:bg-pink-200">Autograd</div>
+          <div class="text-md pl-3 border-l-3 border-dashed border-pink-300 group-hover:text-pink-900 group-hover:bg-pink-200 group-hover:underline flex items-center">An implementation of autograd / backpropagation.</div>
+        </a>
+      </div>
+    </div>
+    <!-- END PROJECTS -->
+
+  </div>
+
 </div>
+
+<footer class="w-full p-4">
+  <div class="text-center">
+    <p>The Quieter You Become, The More You Are Able To Hear.</p>
+  </div>
+</footer>
+
+{{ include "tailwind_class_groups.html" }}
