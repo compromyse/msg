@@ -133,8 +133,8 @@ ingest(char **buffer)
       unsigned int size = fsize(f);
       char *partial_content = fcontent(f, size);
 
-      char *temp_buffer = malloc(strlen(*buffer) + 1 * sizeof(char));
-      strcpy(temp_buffer, *buffer);
+      char *temp_buffer;
+      asprintf(&temp_buffer, "%s", *buffer);
 
       free(*buffer);
       asprintf(buffer,
