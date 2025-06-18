@@ -53,7 +53,7 @@ find_next_key(char *buffer)
   }
 
   char *subbuffer = buffer + match->offset;
-  for (size_t i = 0; i < strlen(buffer) - 1; i++) {
+  for (size_t i = 0; i < strlen(subbuffer) - 1; i++) {
     if (subbuffer[i] == '}' && subbuffer[i + 1] == '}')
       match->length = i + 2;
 
