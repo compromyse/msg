@@ -2,8 +2,12 @@ cmake_minimum_required(VERSION 3.21)
 project(msg C)
 
 set(SRC
+  src/copy.c
+  src/engine.c
   src/filehandler.c
+  src/lexer.c
   src/main.c
+  src/template.c
 )
 
 add_executable(msg ${SRC})
@@ -23,6 +27,7 @@ set(C_COMPILE_OPTIONS
   -std=c99
 
   -Wno-unused-result
+  -Wno-unused-variable
 )
 
 target_compile_options(msg PRIVATE

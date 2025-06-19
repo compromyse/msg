@@ -3,6 +3,10 @@
 
 #include <stdio.h>
 
+typedef struct {
+
+} filehandler_t;
+
 char *fcontent(FILE *f, unsigned int size);
 unsigned int fsize(FILE *f);
 

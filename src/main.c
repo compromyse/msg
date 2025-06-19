@@ -1,158 +1,24 @@
 #define _GNU_SOURCE
 
-#include <ctype.h>
-#include <fcntl.h>
+#include <copy.h>
+#include <engine.h>
 #include <filehandler.h>
 #include <ftw.h>
+#include <lexer.h>
 #include <libgen.h>
 #include <mkdio.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/sendfile.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#include <template.h>
 
 #include "../config.h"
 
-#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
-
-typedef enum { INCLUDE } directive_e;
-
-typedef struct {
-  unsigned int offset;
-  unsigned int length;
-} key_match_t;
-
-typedef struct {
-  directive_e type;
-  void *operands;
-} directive_t;
-
-directive_t *find_directive(char *content, key_match_t *match);
-key_match_t *find_next_key(char *buffer);
 void handle_file(const char *path);
-void ingest(char **buffer);
 
 char *base_pre;
 char *base_post;
-
-key_match_t *
-find_next_key(char *buffer)
-{
-  key_match_t *match = calloc(1, sizeof(key_match_t));
-
-  for (size_t i = 0; i < strlen(buffer) - 1; i++) {
-    if (buffer[i] == '{' && buffer[i + 1] == '{')
-      match->offset = i;
-
-    if (i == strlen(buffer) - 1) {
-      free(match);
-      return NULL;
-    }
-  }
-
-  char *subbuffer = buffer + match->offset;
-  for (size_t i = 0; i < strlen(subbuffer) - 1; i++) {
-    if (subbuffer[i] == '}' && subbuffer[i + 1] == '}')
-      match->length = i + 2;
-
-    if (i == strlen(buffer) - 1) {
-      printf("Unterminated Key\n");
-      free(match);
-      return NULL;
-    }
-  }
-
-  return match;
-}
-
-directive_t *
-find_directive(char *content, key_match_t *match)
-{
-  directive_t *directive = (directive_t *) calloc(1, sizeof(directive_t));
-
-  char *buffer = content + match->offset;
-  unsigned int n = 0;
-
-  for (size_t i = 0; i < match->length; i++)
-    switch (buffer[i]) {
-    case '{':
-    case ' ':
-    case '\t':
-    case '\n':
-      n++;
-      break;
-
-    default:
-      goto found_start;
-    }
-
-  return NULL;
-
-found_start:
-  if (strncmp(buffer + n, "include", strlen("include")) == 0) {
-    directive->type = INCLUDE;
-
-    char *operand = NULL;
-    for (size_t i = n + strlen("include");
-         i < match->length - strlen("include");
-         i++)
-      if (isalnum(buffer[i])) {
-        sscanf(buffer + i, "%ms\"", &operand);
-        operand[strlen(operand) - 1] = '\0';
-        break;
-      }
-
-    asprintf((char **) &directive->operands, "%s", operand);
-    free(operand);
-  }
-
-  return directive;
-}
-
-void
-ingest(char **buffer)
-{
-  key_match_t *match;
-
-  while (true) {
-    match = find_next_key(*buffer);
-    if (match == NULL)
-      break;
-
-    directive_t *directive = find_directive(*buffer, match);
-    if (directive == NULL)
-      break;
-
-    if (directive->type == INCLUDE) {
-      char *operand = (char *) directive->operands;
-      char *partial_path;
-      asprintf(&partial_path, "%s/%s/%s", DIRECTORY, PARTIALS, operand);
-
-      FILE *f = fopen(partial_path, "r");
-      unsigned int size = fsize(f);
-      char *partial_content = fcontent(f, size);
-
-      char *temp_buffer;
-      asprintf(&temp_buffer, "%s", *buffer);
-
-      free(*buffer);
-      asprintf(buffer,
-               "%.*s%s%s\n",
-               match->offset,
-               temp_buffer,
-               partial_content,
-               temp_buffer + match->offset + match->length);
-
-      free(temp_buffer);
-    }
-
-    free(directive);
-    free(match);
-  }
-}
 
 void
 handle_file(const char *path)
@@ -225,42 +91,6 @@ handle_file(const char *path)
 }
 
 int
-copy_recursively(const char *fpath,
-                 const struct stat *sb,
-                 int typeflag,
-                 struct FTW *ftwbuf)
-{
-  (void) sb;
-  (void) ftwbuf;
-
-  const char *path = fpath + strlen(DIRECTORY) + 1;
-  char *output_path = NULL;
-  asprintf(&output_path, "%s/%s", OUTPUT, path);
-
-  if (typeflag == FTW_D) {
-    mkdir(output_path, 0700);
-    return FTW_CONTINUE;
-  }
-
-  if (typeflag != FTW_F)
-    return FTW_CONTINUE;
-
-  FILE *in = fopen(fpath, "r");
-  size_t size = fsize(in);
-  fclose(in);
-
-  int in_fd = open(fpath, O_RDONLY);
-  int out_fd = open(output_path, O_WRONLY | O_CREAT, 0700);
-
-  sendfile(out_fd, in_fd, 0, size);
-
-  close(in_fd);
-  close(out_fd);
-
-  return FTW_CONTINUE;
-}
-
-int
 main(int argc, char **argv)
 {
   (void) argc;
@@ -272,20 +102,7 @@ main(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  FILE *base = fopen(DIRECTORY "/" BASE_TEMPLATE, "r");
-
-  unsigned int size = fsize(base);
-  char *contents = fcontent(base, size);
-
-  key_match_t *match = find_next_key(contents);
-  asprintf(&base_pre, "%.*s", match->offset, contents);
-  asprintf(&base_post,
-           "%.*s",
-           size - match->offset - match->length,
-           contents + match->offset + match->length);
-
-  free(contents);
-  fclose(base);
+  template_initialize(&base_pre, &base_post);
 
   mkdir(OUTPUT, 0700);
   nftw(
