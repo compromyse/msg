@@ -2,6 +2,7 @@
 
 #include <copy.h>
 #include <engine.h>
+#include <errno.h>
 #include <filehandler.h>
 #include <ftw.h>
 #include <lexer.h>
@@ -14,8 +15,6 @@
 #include <template.h>
 
 #include "../config.h"
-
-void handle_file(const char *path);
 
 char *base_pre;
 char *base_post;
@@ -104,7 +103,12 @@ main(int argc, char **argv)
 
   template_initialize(&base_pre, &base_post);
 
-  mkdir(OUTPUT, 0700);
+  int err = mkdir(OUTPUT, 0700);
+  if (err != 0 && errno != EEXIST) {
+    perror("mkdir");
+    return EXIT_FAILURE;
+  }
+
   nftw(
       DIRECTORY "/" ASSETS, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
 

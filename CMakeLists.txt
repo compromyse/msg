@@ -16,7 +16,7 @@ target_link_libraries(msg markdown)
 
 set(C_COMPILE_OPTIONS
   # -O3
-  -Og
+  -O0
 
   -Wall
   -Wextra
