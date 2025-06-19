@@ -12,7 +12,7 @@
           clang-tools
           clang
           lldb
-          gnumake
+          cmake
 
           discount
         ];

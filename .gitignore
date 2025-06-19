@@ -1,3 +1,5 @@
 .direnv/
-msg
+.cache/
+build/
 dist/
+compile_commands.json

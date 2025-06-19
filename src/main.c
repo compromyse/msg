@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <fcntl.h>
+#include <filehandler.h>
 #include <ftw.h>
 #include <libgen.h>
 #include <mkdio.h>
@@ -13,11 +14,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "config.h"
+#include "../config.h"
 
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
-typedef enum { CONTENT, INCLUDE } directive_e;
+typedef enum { INCLUDE } directive_e;
 
 typedef struct {
   unsigned int offset;
@@ -29,10 +30,8 @@ typedef struct {
   void *operands;
 } directive_t;
 
-char *fcontent(FILE *f, unsigned int size);
 directive_t *find_directive(char *content, key_match_t *match);
 key_match_t *find_next_key(char *buffer);
-unsigned int fsize(FILE *f);
 void handle_file(const char *path);
 void ingest(char **buffer);
 
@@ -48,8 +47,10 @@ find_next_key(char *buffer)
     if (buffer[i] == '{' && buffer[i + 1] == '{')
       match->offset = i;
 
-    if (i == strlen(buffer) - 1)
+    if (i == strlen(buffer) - 1) {
+      free(match);
       return NULL;
+    }
   }
 
   char *subbuffer = buffer + match->offset;
@@ -59,6 +60,7 @@ find_next_key(char *buffer)
 
     if (i == strlen(buffer) - 1) {
       printf("Unterminated Key\n");
+      free(match);
       return NULL;
     }
   }
@@ -150,31 +152,6 @@ ingest(char **buffer)
     free(directive);
     free(match);
   }
-}
-
-unsigned int
-fsize(FILE *f)
-{
-  unsigned int current = ftell(f);
-
-  fseek(f, 0, SEEK_END);
-  unsigned int s = ftell(f);
-  fseek(f, current, SEEK_SET);
-
-  return s + 1;
-}
-
-char *
-fcontent(FILE *f, unsigned int size)
-{
-  char *buffer = (char *) calloc(size, sizeof(char));
-
-  fseek(f, 0, SEEK_SET);
-  int bytesread = fread(buffer, sizeof(char), size, f);
-  if (bytesread < 0)
-    return NULL;
-
-  return buffer;
 }
 
 void
@@ -288,6 +265,12 @@ main(int argc, char **argv)
 {
   (void) argc;
   (void) argv;
+
+  struct stat sb;
+  if (stat(DIRECTORY, &sb) != 0 || !S_ISDIR(sb.st_mode)) {
+    printf("%s does not exist.\n", DIRECTORY);
+    return EXIT_FAILURE;
+  }
 
   FILE *base = fopen(DIRECTORY "/" BASE_TEMPLATE, "r");
 
