@@ -238,13 +238,13 @@ handle_file(const char *path)
     fprintf(out, "%s%s%s", base_pre, buffer, base_post);
   }
 
+  free(buffer);
+
   fclose(in);
   fclose(out);
 
   free(inpath);
   free(outpath);
-
-  free(buffer);
 }
 
 int
@@ -313,6 +313,12 @@ main(int argc, char **argv)
 
   for (x = (char **) html_resources; *x != NULL; x++) {
     asprintf(&filepath, "%s.html", *x);
+    handle_file(filepath);
+    free(filepath);
+  }
+
+  for (x = (char **) md_resources; *x != NULL; x++) {
+    asprintf(&filepath, "%s.md", *x);
     handle_file(filepath);
     free(filepath);
   }
