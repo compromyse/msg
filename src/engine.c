@@ -23,12 +23,18 @@ ingest(char **buffer)
     if (directive == NULL)
       break;
 
-    if (directive->type == INCLUDE) {
+    switch (directive->type) {
+    case INCLUDE: {
       char *operand = (char *) directive->operands;
       char *partial_path;
       asprintf(&partial_path, "%s/%s/%s", DIRECTORY, PARTIALS, operand);
 
       FILE *f = fopen(partial_path, "r");
+      if (f == NULL) {
+        printf("Could not open: %s\n", partial_path);
+        return;
+      }
+
       unsigned int size = fsize(f);
       char *partial_content = fcontent(f, size);
 
@@ -44,6 +50,16 @@ ingest(char **buffer)
                temp_buffer + match->offset + match->length);
 
       free(temp_buffer);
+      break;
+    }
+    case CONTENTFOR: {
+      contentfor_operands_t *operand
+          = (contentfor_operands_t *) directive->operands;
+      printf("CONTENTFOR: %s\n", operand->key);
+
+      return;
+      break;
+    }
     }
 
     free(directive);

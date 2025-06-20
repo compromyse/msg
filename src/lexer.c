@@ -64,9 +64,7 @@ found_start:
     directive->type = INCLUDE;
 
     char *operand = NULL;
-    for (size_t i = n + strlen("include");
-         i < match->length - strlen("include");
-         i++)
+    for (size_t i = n + strlen("include"); i < match->length; i++)
       if (isalnum(buffer[i])) {
         sscanf(buffer + i, "%ms\"", &operand);
         operand[strlen(operand) - 1] = '\0';
@@ -75,6 +73,18 @@ found_start:
 
     asprintf((char **) &directive->operands, "%s", operand);
     free(operand);
+  } else if (strncmp(buffer + n, "contentfor", strlen("contentfor")) == 0) {
+    directive->type = CONTENTFOR;
+    contentfor_operands_t *operands = malloc(sizeof(contentfor_operands_t));
+
+    for (size_t i = n + strlen("contentfor"); i < match->length; i++)
+      if (isalnum(buffer[i])) {
+        sscanf(buffer + i, "%ms\"", &operands->key);
+        operands->key[strlen(operands->key) - 1] = '\0';
+        break;
+      }
+
+    directive->operands = operands;
   }
 
   return directive;

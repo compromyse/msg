@@ -22,7 +22,8 @@ set(C_COMPILE_OPTIONS
   -Wextra
   # -Werror
 
-  -g
+  -g3
+  -glldb
 
   -std=c99
 
