@@ -68,7 +68,7 @@ found_start:
     directive->type = INCLUDE;
 
     char *operand = NULL;
-    for (size_t i = n + strlen("include"); i < match->length; i++)
+    for (size_t i = n + strlen("include"); i < match->length - n; i++)
       if (isalnum(buffer[i])) {
         sscanf(buffer + i, "%ms\"", &operand);
         operand[strlen(operand) - 1] = '\0';
