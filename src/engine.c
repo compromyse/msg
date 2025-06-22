@@ -66,7 +66,10 @@ ingest(char **buffer)
     }
     }
 
-    free(directive);
-    free(match);
+    if (directive != NULL)
+      free(directive);
+
+    if (match != NULL)
+      free(match);
   }
 }
