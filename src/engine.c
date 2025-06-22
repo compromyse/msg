@@ -60,10 +60,15 @@ ingest(char **buffer)
       contentfor_operands_t *operand
           = (contentfor_operands_t *) directive->operands;
       printf("CONTENTFOR: %s\n", operand->key);
+      printf("CONTENT: %s\n", operand->content);
 
       return;
       break;
     }
+
+    /* NOTE: This will never occur */
+    case ENDCONTENT:
+      break;
     }
 
     if (directive != NULL)

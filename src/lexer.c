@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <lexer.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -76,6 +77,9 @@ found_start:
       }
 
     directive->operands = operand;
+  } else if (strncmp(buffer + n, "endcontent", strlen("endcontent")) == 0) {
+    directive->type = ENDCONTENT;
+    directive->operands = NULL;
   } else if (strncmp(buffer + n, "contentfor", strlen("contentfor")) == 0) {
     directive->type = CONTENTFOR;
     contentfor_operands_t *operands = malloc(sizeof(contentfor_operands_t));
@@ -86,6 +90,44 @@ found_start:
         operands->key[strlen(operands->key) - 1] = '\0';
         break;
       }
+
+    buffer = content + match->length + match->offset;
+
+    size_t content_length = 0;
+
+    key_match_t *new_match;
+    directive_t *new_directive;
+
+    while (true) {
+      new_match = find_next_key(buffer);
+      if (new_match == NULL) {
+        printf("Cannot find endcontent\n");
+        free(new_directive);
+        free(new_match);
+        free(directive);
+        return NULL;
+      }
+
+      new_directive = find_directive(buffer, new_match);
+      if (new_directive == NULL) {
+        printf("Cannot find directive: %.*s\n",
+               new_match->length,
+               buffer + new_match->offset);
+        free(new_directive);
+        free(new_match);
+        free(directive);
+        return NULL;
+      }
+
+      if (new_directive->type == ENDCONTENT) {
+        break;
+      }
+    }
+
+    asprintf(&operands->content, "%.*s", new_match->offset, buffer);
+
+    free(new_directive);
+    free(new_match);
 
     directive->operands = operands;
   } else {
