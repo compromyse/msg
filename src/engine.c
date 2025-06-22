@@ -20,8 +20,12 @@ ingest(char **buffer)
       break;
 
     directive_t *directive = find_directive(*buffer, match);
-    if (directive == NULL)
+    if (directive == NULL) {
+      printf(
+          "Unknown directive: %.*s\n", match->length, *buffer + match->offset);
+
       break;
+    }
 
     switch (directive->type) {
     case INCLUDE: {
