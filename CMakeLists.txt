@@ -6,6 +6,7 @@ set(SRC
   src/engine.c
   src/filehandler.c
   src/lexer.c
+  src/list.c
   src/main.c
   src/template.c
 )

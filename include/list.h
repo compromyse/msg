@@ -4,8 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define START_SIZE 100
-#define INCREMENT_BY 25
+#define START_SIZE 10
+#define INCREMENT_BY 5
 
 typedef struct {
   size_t element_size;

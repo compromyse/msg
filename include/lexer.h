@@ -16,7 +16,8 @@ typedef struct {
 typedef struct {
   char *key;
   char *content;
-} contentfor_operands_t;
+  unsigned int length;
+} contentfor_operand_t;
 
 directive_t *find_directive(char *content, key_match_t *match);
 key_match_t *find_next_key(char *buffer);

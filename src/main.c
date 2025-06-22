@@ -117,6 +117,7 @@ main(int argc, char **argv)
 
   for (x = (char **) html_resources; *x != NULL; x++) {
     asprintf(&filepath, "%s.html", *x);
+    printf("HANDLING: %s\n", filepath);
     handle_file(filepath);
     free(filepath);
   }

@@ -82,7 +82,7 @@ found_start:
     directive->operands = NULL;
   } else if (strncmp(buffer + n, "contentfor", strlen("contentfor")) == 0) {
     directive->type = CONTENTFOR;
-    contentfor_operands_t *operands = malloc(sizeof(contentfor_operands_t));
+    contentfor_operand_t *operands = malloc(sizeof(contentfor_operand_t));
 
     for (size_t i = n + strlen("contentfor"); i < match->length; i++)
       if (isalnum(buffer[i])) {
@@ -125,6 +125,8 @@ found_start:
     }
 
     asprintf(&operands->content, "%.*s", new_match->offset, buffer);
+    operands->length = match->offset + match->length + new_match->offset
+                       + new_match->length;
 
     free(new_directive);
     free(new_match);

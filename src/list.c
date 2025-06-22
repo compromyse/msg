@@ -15,7 +15,7 @@ list_create(size_t element_size)
   list->element_size = element_size;
   list->size = 0;
   list->max = START_SIZE;
-  list->elements = (uint8_t *) calloc(list->max, element_size);
+  list->elements = (uint8_t *) calloc(list->max, list->element_size);
 
   return list;
 }
