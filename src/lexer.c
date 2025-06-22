@@ -12,8 +12,10 @@ find_next_key(char *buffer)
   key_match_t *match = calloc(1, sizeof(key_match_t));
 
   for (size_t i = 0; i < strlen(buffer) - 1; i++) {
-    if (buffer[i] == '{' && buffer[i + 1] == '{')
+    if (buffer[i] == '{' && buffer[i + 1] == '{') {
       match->offset = i;
+      break;
+    }
 
     if (i == strlen(buffer) - 1) {
       free(match);
@@ -23,8 +25,10 @@ find_next_key(char *buffer)
 
   char *subbuffer = buffer + match->offset;
   for (size_t i = 0; i < strlen(subbuffer) - 1; i++) {
-    if (subbuffer[i] == '}' && subbuffer[i + 1] == '}')
+    if (subbuffer[i] == '}' && subbuffer[i + 1] == '}') {
       match->length = i + 2;
+      break;
+    }
 
     if (i == strlen(buffer) - 1) {
       printf("Unterminated Key\n");
