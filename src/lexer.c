@@ -75,8 +75,7 @@ found_start:
         break;
       }
 
-    asprintf((char **) &directive->operands, "%s", operand);
-    free(operand);
+    directive->operands = operand;
   } else if (strncmp(buffer + n, "contentfor", strlen("contentfor")) == 0) {
     directive->type = CONTENTFOR;
     contentfor_operands_t *operands = malloc(sizeof(contentfor_operands_t));
