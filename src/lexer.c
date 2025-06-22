@@ -88,6 +88,9 @@ found_start:
       }
 
     directive->operands = operands;
+  } else {
+    free(directive);
+    return NULL;
   }
 
   return directive;
