@@ -25,6 +25,14 @@ ingest(char **buffer)
     if (match == NULL)
       break;
 
+#ifdef DEBUG
+    printf("Match: %.*s LENGTH(%d) OFFSET(%d)\n",
+           match->length,
+           *buffer + match->offset,
+           match->length,
+           match->offset);
+#endif
+
     directive_t *directive = find_directive(*buffer, match);
     if (directive == NULL) {
       printf(
