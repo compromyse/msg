@@ -16,8 +16,7 @@
 
 #include "../config.h"
 
-char *base_pre;
-char *base_post;
+template_t *base_template;
 
 void
 handle_file(const char *path)
@@ -71,13 +70,13 @@ handle_file(const char *path)
 
   if (dot && strcmp(dot, ".md") == 0) {
     MMIOT *doc = mkd_string(buffer, size, 0);
-    fprintf(out, "%s", base_pre);
+    fprintf(out, "%s", base_template->pre);
     markdown(doc, out, 0);
-    fprintf(out, "%s", base_post);
+    fprintf(out, "%s", base_template->post);
   } else {
     if (strlen(buffer) != 0)
       ingest(&buffer);
-    fprintf(out, "%s%s%s", base_pre, buffer, base_post);
+    fprintf(out, "%s%s%s", base_template->pre, buffer, base_template->post);
   }
 
   free(buffer);
@@ -101,7 +100,7 @@ main(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  template_initialize(&base_pre, &base_post);
+  base_template = template_create();
 
   int err = mkdir(OUTPUT, 0700);
   if (err != 0 && errno != EEXIST) {
@@ -128,8 +127,8 @@ main(int argc, char **argv)
     free(filepath);
   }
 
-  free(base_pre);
-  free(base_post);
+  free(base_template->pre);
+  free(base_template->post);
 
   return EXIT_SUCCESS;
 }
