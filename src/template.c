@@ -20,6 +20,7 @@ template_create(void)
   fclose(base);
 
   key_match_t *match = find_next_key(contents);
+
   asprintf(&template->pre, "%.*s", match->offset, contents);
   asprintf(&template->post,
            "%.*s",

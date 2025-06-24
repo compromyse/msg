@@ -80,6 +80,9 @@ found_start:
   } else if (strncmp(buffer + n, "endcontent", strlen("endcontent")) == 0) {
     directive->type = ENDCONTENT;
     directive->operands = NULL;
+  } else if (strncmp(buffer + n, "body", strlen("body")) == 0) {
+    directive->type = BODY;
+    directive->operands = NULL;
   } else if (strncmp(buffer + n, "contentfor", strlen("contentfor")) == 0) {
     directive->type = CONTENTFOR;
     contentfor_operand_t *operands = malloc(sizeof(contentfor_operand_t));

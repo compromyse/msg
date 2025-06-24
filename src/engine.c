@@ -10,6 +10,64 @@
 
 #include "../config.h"
 
+static void
+handle_include(char **buffer, key_match_t *match, directive_t *directive)
+{
+  char *operand = directive->operands;
+  char *partial_path;
+  asprintf(&partial_path, "%s/%s/%s", DIRECTORY, PARTIALS, operand);
+
+  FILE *f = fopen(partial_path, "r");
+  if (f == NULL) {
+    printf("Could not open: %s\n", partial_path);
+    return;
+  }
+
+  unsigned int size = fsize(f);
+  char *partial_content = fcontent(f, size);
+
+  char *temp_buffer;
+  asprintf(&temp_buffer, "%s", *buffer);
+
+  free(*buffer);
+  asprintf(buffer,
+           "%.*s%s%s\n",
+           match->offset,
+           temp_buffer,
+           partial_content,
+           temp_buffer + match->offset + match->length);
+
+  free(temp_buffer);
+}
+
+static void
+handle_contentfor(char **buffer,
+                  key_match_t *match,
+                  directive_t *directive,
+                  list_t *content_headers)
+{
+  contentfor_operand_t *operand = directive->operands;
+  list_add(content_headers, operand);
+
+#ifdef DEBUG
+  printf("CONTENTFOR: %s\n", operand->key);
+  printf("CONTENT: %s\n", operand->content);
+#endif
+
+  char *temp_buffer;
+  asprintf(&temp_buffer, "%s", *buffer);
+
+  free(*buffer);
+  asprintf(buffer,
+           "%.*s%s",
+           match->offset,
+           temp_buffer,
+           temp_buffer + operand->length);
+
+  free(temp_buffer);
+  free(operand);
+}
+
 void
 ingest(char **buffer)
 {
@@ -43,59 +101,16 @@ ingest(char **buffer)
 
     switch (directive->type) {
     case INCLUDE: {
-      char *operand = directive->operands;
-      char *partial_path;
-      asprintf(&partial_path, "%s/%s/%s", DIRECTORY, PARTIALS, operand);
-
-      FILE *f = fopen(partial_path, "r");
-      if (f == NULL) {
-        printf("Could not open: %s\n", partial_path);
-        return;
-      }
-
-      unsigned int size = fsize(f);
-      char *partial_content = fcontent(f, size);
-
-      char *temp_buffer;
-      asprintf(&temp_buffer, "%s", *buffer);
-
-      free(*buffer);
-      asprintf(buffer,
-               "%.*s%s%s\n",
-               match->offset,
-               temp_buffer,
-               partial_content,
-               temp_buffer + match->offset + match->length);
-
-      free(temp_buffer);
+      handle_include(buffer, match, directive);
       break;
     }
     case CONTENTFOR: {
-      contentfor_operand_t *operand = directive->operands;
-      list_add(content_headers, operand);
-
-      /* printf("CONTENTFOR: %s\n", operand->key); */
-      /* printf("CONTENT: %s\n", operand->content); */
-
-      /* printf("CONTENT: %.*s\n", operand->length, *buffer + match->offset);
-       */
-
-      char *temp_buffer;
-      asprintf(&temp_buffer, "%s", *buffer);
-
-      free(*buffer);
-      asprintf(buffer,
-               "%.*s%s",
-               match->offset,
-               temp_buffer,
-               temp_buffer + operand->length);
-
-      free(temp_buffer);
-      /* free(operand); */
+      handle_contentfor(buffer, match, directive, content_headers);
       break;
     }
 
     /* NOTE: This will never occur */
+    case BODY:
     case ENDCONTENT:
       break;
     }
