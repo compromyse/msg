@@ -10,7 +10,7 @@
 
 #include "../config.h"
 
-static void
+void
 handle_include(char **buffer, key_match_t *match, directive_t *directive)
 {
   char *operand = directive->operands;
@@ -40,7 +40,7 @@ handle_include(char **buffer, key_match_t *match, directive_t *directive)
   free(temp_buffer);
 }
 
-static void
+void
 handle_contentfor(char **buffer,
                   key_match_t *match,
                   directive_t *directive,
@@ -100,16 +100,14 @@ ingest(char **buffer)
     }
 
     switch (directive->type) {
-    case INCLUDE: {
+    case INCLUDE:
       handle_include(buffer, match, directive);
       break;
-    }
-    case CONTENTFOR: {
+    case CONTENTFOR:
       handle_contentfor(buffer, match, directive, content_headers);
       break;
-    }
 
-    /* NOTE: This will never occur */
+    /* TODO: Handle this gracefully */
     case BODY:
     case ENDCONTENT:
       break;
