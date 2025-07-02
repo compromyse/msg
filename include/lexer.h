@@ -1,7 +1,7 @@
 #ifndef __LEXER_H
 #define __LEXER_H
 
-typedef enum { INCLUDE, CONTENTFOR, ENDCONTENT, BODY } directive_e;
+typedef enum { INCLUDE, CONTENT, CONTENTFOR, ENDCONTENT, BODY } directive_e;
 
 typedef struct {
   unsigned int offset;

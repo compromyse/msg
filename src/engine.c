@@ -109,6 +109,7 @@ ingest(char **buffer)
 
     /* TODO: Handle this gracefully */
     case BODY:
+    case CONTENT:
     case ENDCONTENT:
       break;
     }
