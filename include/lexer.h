@@ -19,6 +19,7 @@ typedef struct {
   unsigned int length;
 } contentfor_operand_t;
 
+list_t *parse_file(char *content);
 directive_t *find_directive(char *content, key_match_t *match);
 key_match_t *find_next_key(char *buffer);
 

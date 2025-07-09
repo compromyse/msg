@@ -2,10 +2,56 @@
 
 #include <ctype.h>
 #include <lexer.h>
+#include <list.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+static list_t *
+find_all_keys(char *buffer)
+{
+  list_t *keys = list_create(sizeof(key_match_t));
+  key_match_t *match;
+  size_t match_offset = 0;
+  size_t current_offset = 0;
+
+  while (true) {
+    match = find_next_key(buffer);
+    if (match == NULL)
+      break;
+
+    match_offset = match->offset;
+
+    buffer += match->offset + match->length;
+    match->offset += current_offset;
+    current_offset += match->length + match_offset;
+
+    list_add(keys, match);
+  }
+
+  return keys;
+}
+
+list_t *
+parse_file(char *content)
+{
+  list_t *keys = find_all_keys(content);
+
+  for (size_t i = 0; i < keys->size; i++) {
+    key_match_t *match = list_get(keys, i);
+#ifdef DEBUG
+    printf("%lu: (%u) %.*s\n",
+           i,
+           match->length,
+           match->length,
+           content + match->offset);
+#endif
+  }
+
+  list_delete(keys);
+  return NULL;
+}
 
 key_match_t *
 find_next_key(char *buffer)
