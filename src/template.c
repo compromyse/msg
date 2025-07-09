@@ -45,6 +45,7 @@ template_create(void)
     case INCLUDE:
     case CONTENTFOR:
     case ENDCONTENT:
+    case _RAW:
       break;
     }
 

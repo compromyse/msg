@@ -1,7 +1,16 @@
 #ifndef __LEXER_H
 #define __LEXER_H
 
-typedef enum { INCLUDE, CONTENT, CONTENTFOR, ENDCONTENT, BODY } directive_e;
+#include <list.h>
+
+typedef enum {
+  _RAW,
+  INCLUDE,
+  CONTENT,
+  CONTENTFOR,
+  ENDCONTENT,
+  BODY
+} directive_e;
 
 typedef struct {
   unsigned int offset;
@@ -19,7 +28,7 @@ typedef struct {
   unsigned int length;
 } contentfor_operand_t;
 
-list_t *parse_file(char *content);
+list_t *lex_file(char *buffer);
 directive_t *find_directive(char *content, key_match_t *match);
 key_match_t *find_next_key(char *buffer);
 

@@ -8,49 +8,57 @@
 #include <stdlib.h>
 #include <string.h>
 
-static list_t *
-find_all_keys(char *buffer)
+list_t *
+lex_file(char *buffer)
 {
-  list_t *keys = list_create(sizeof(key_match_t));
-  key_match_t *match;
-  size_t match_offset = 0;
+  list_t *directives = list_create(sizeof(directive_t));
   size_t current_offset = 0;
 
   while (true) {
-    match = find_next_key(buffer);
-    if (match == NULL)
+    key_match_t *key = find_next_key(buffer);
+    if (key == NULL)
       break;
 
-    match_offset = match->offset;
+    directive_t *directive = find_directive(buffer, key);
+    /* TODO: Handle unknown directive */
+    if (directive == NULL)
+      break;
 
-    buffer += match->offset + match->length;
-    match->offset += current_offset;
-    current_offset += match->length + match_offset;
+    current_offset += key->length + key->offset;
 
-    list_add(keys, match);
+    if (current_offset != 0) {
+      char *raw_content;
+      asprintf(&raw_content, "%.*s", (int) key->offset, buffer);
+
+      directive_t *raw_directive = malloc(sizeof(directive_t));
+      raw_directive->type = _RAW;
+      raw_directive->operands = raw_content;
+      list_add(directives, raw_directive);
+    }
+
+    buffer += key->offset + key->length;
+
+    list_add(directives, directive);
   }
 
-  return keys;
-}
+  if (strlen(buffer) > 0) {
+    char *raw_content;
+    asprintf(&raw_content, "%s", buffer);
 
-list_t *
-parse_file(char *content)
-{
-  list_t *keys = find_all_keys(content);
-
-  for (size_t i = 0; i < keys->size; i++) {
-    key_match_t *match = list_get(keys, i);
-#ifdef DEBUG
-    printf("%lu: (%u) %.*s\n",
-           i,
-           match->length,
-           match->length,
-           content + match->offset);
-#endif
+    directive_t *raw_directive = malloc(sizeof(directive_t));
+    raw_directive->type = _RAW;
+    raw_directive->operands = raw_content;
+    list_add(directives, raw_directive);
   }
 
-  list_delete(keys);
-  return NULL;
+  for (size_t i = 0; i < directives->size; i++) {
+    directive_t *match = list_get(directives, i);
+    if (match->type == _RAW) {
+      printf("%lu: %s\n", i, (char *) match->operands);
+    }
+  }
+
+  return directives;
 }
 
 key_match_t *
