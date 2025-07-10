@@ -111,6 +111,7 @@ ingest(char **buffer)
     case BODY:
     case CONTENT:
     case ENDCONTENT:
+    case _RAW:
       break;
     }
 
