@@ -9,7 +9,7 @@
 #include <string.h>
 
 list_t *
-lex_file(char *buffer)
+lex(char *buffer)
 {
   list_t *directives = list_create(sizeof(directive_t));
   size_t current_offset = 0;
