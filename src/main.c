@@ -53,15 +53,15 @@ handle_file(const char *path)
   free(temp_outpath);
 
   FILE *in = fopen(inpath, "r");
-  FILE *out = fopen(outpath, "w");
-
   if (in == NULL) {
     printf("Failed to open %s\n", inpath);
     return;
   }
 
+  FILE *out = fopen(outpath, "w");
   if (out == NULL) {
     printf("Failed to open %s\n", outpath);
+    fclose(in);
     return;
   }
 
