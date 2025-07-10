@@ -1,9 +1,11 @@
+#include <string.h>
 #define _GNU_SOURCE
 
 #include <filehandler.h>
 #include <lexer.h>
 #include <stdlib.h>
 #include <template.h>
+#include <util.h>
 
 #include "../config.h"
 
@@ -21,4 +23,28 @@ template_create(void)
   template->components = lex(buffer);
 
   return template;
+}
+
+char *
+template_ingest(template_t *template, char *body)
+{
+  (void) body;
+  char *output = malloc(1);
+  strcpy(output, "");
+
+  for (size_t i = 0; i < template->components->size; i++) {
+    directive_t *match = list_get(template->components, i);
+
+    switch (match->type) {
+    case _RAW:
+      xstrcat(output, match->operands);
+      break;
+
+    /* TODO: Handle this gracefully */
+    default:
+      break;
+    }
+  }
+
+  return output;
 }

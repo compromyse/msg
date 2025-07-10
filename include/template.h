@@ -8,5 +8,6 @@ typedef struct {
 } template_t;
 
 template_t *template_create(void);
+char *template_ingest(template_t *template, char *body);
 
 #endif
