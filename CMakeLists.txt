@@ -9,6 +9,7 @@ set(SRC
   src/list.c
   src/main.c
   src/template.c
+  src/util.c
 )
 
 add_executable(msg ${SRC})
