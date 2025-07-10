@@ -4,9 +4,11 @@
 #include <ftw.h>
 #include <sys/stat.h>
 
+typedef struct FTW FTW;
+
 int copy_recursively(const char *fpath,
                      const struct stat *sb,
                      int typeflag,
-                     struct FTW *ftwbuf);
+                     FTW *ftwbuf);
 
 #endif
