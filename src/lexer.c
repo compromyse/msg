@@ -51,13 +51,6 @@ lex(char *buffer)
     list_add(directives, raw_directive);
   }
 
-  for (size_t i = 0; i < directives->size; i++) {
-    directive_t *match = list_get(directives, i);
-    if (match->type == _RAW) {
-      printf("%lu: %s\n", i, (char *) match->operands);
-    }
-  }
-
   return directives;
 }
 
