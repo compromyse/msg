@@ -54,8 +54,12 @@ template_write(template_t *template,
       break;
 
     case CONTENT: {
-      char *content = find_contentfor_value(content_headers, match->operands);
-      fprintf(f, "%s", content);
+      /* TODO: handle this gracefully */
+      if (!is_markdown) {
+        char *content
+            = find_contentfor_value(content_headers, match->operands);
+        fprintf(f, "%s", content);
+      }
       break;
     }
 
