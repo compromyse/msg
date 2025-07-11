@@ -35,7 +35,7 @@ template_delete(template_t *template)
 }
 
 void
-template_ingest(template_t *template, list_t *content_headers, FILE *f)
+template_write(template_t *template, list_t *content_headers, FILE *f)
 {
   char *output = malloc(1);
   strcpy(output, "");

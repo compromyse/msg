@@ -11,6 +11,6 @@ typedef struct {
 template_t *template_create(void);
 void template_delete(template_t *template);
 
-void template_ingest(template_t *template, list_t *content_headers, FILE *f);
+void template_write(template_t *template, list_t *content_headers, FILE *f);
 
 #endif
