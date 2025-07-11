@@ -122,11 +122,5 @@ ingest(char **buffer)
       free(match);
   }
 
-  for (size_t i = 0; i < content_headers->size; i++) {
-    contentfor_operand_t *op = list_get(content_headers, i);
-    free(op->content);
-    free(op->key);
-  }
-
   return content_headers;
 }
