@@ -77,6 +77,8 @@ handle_file(const char *path)
     if (strlen(buffer) != 0)
       ingest(&buffer);
     fprintf(out, "%s%s%s", base_template->pre, buffer, base_template->post);
+    list_t *content_headers = ingest(&buffer);
+    list_delete(content_headers);
   }
 
   free(buffer);

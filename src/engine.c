@@ -68,14 +68,14 @@ handle_contentfor(char **buffer,
   free(operand);
 }
 
-void
+list_t *
 ingest(char **buffer)
 {
   key_match_t *match;
   list_t *content_headers = list_create(sizeof(contentfor_operand_t));
   if (content_headers == NULL) {
     printf("Could not create content_headers\n");
-    return;
+    return NULL;
   }
 
   while (true) {
@@ -128,5 +128,5 @@ ingest(char **buffer)
     free(op->key);
   }
 
-  list_delete(content_headers);
+  return content_headers;
 }

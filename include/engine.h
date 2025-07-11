@@ -4,7 +4,7 @@
 #include <lexer.h>
 #include <list.h>
 
-void ingest(char **buffer);
+list_t *ingest(char **buffer);
 void handle_include(char **buffer, key_match_t *match, directive_t *directive);
 void handle_contentfor(char **buffer,
                        key_match_t *match,
