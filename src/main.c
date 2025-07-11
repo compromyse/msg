@@ -72,7 +72,6 @@ handle_file(const char *path)
   if (dot && strcmp(dot, ".md") == 0) {
     MMIOT *doc = mkd_string(buffer, size, 0);
     template_write(base_template, NULL, out, doc, false);
-    /* free(doc); */
   } else if (strlen(buffer) != 0) {
     list_t *content_headers = ingest(&buffer);
     template_write(base_template, content_headers, out, buffer, false);
@@ -119,16 +118,15 @@ main(int argc, char **argv)
     printf("HANDLING: %s\n", filepath);
     handle_file(filepath);
     free(filepath);
+
+    return EXIT_SUCCESS;
   }
 
-  for (x = (char **) md_resources; *x != NULL; x++) {
-    asprintf(&filepath, "%s.md", *x);
-    handle_file(filepath);
-    free(filepath);
-  }
-
-  free(base_template->pre);
-  free(base_template->post);
+  /* for (x = (char **) md_resources; *x != NULL; x++) { */
+  /*   asprintf(&filepath, "%s.md", *x); */
+  /*   handle_file(filepath); */
+  /*   free(filepath); */
+  /* } */
 
   return EXIT_SUCCESS;
 }
