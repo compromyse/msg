@@ -31,5 +31,6 @@ typedef struct {
 list_t *lex(char *buffer);
 directive_t *find_directive(char *content, key_match_t *match);
 key_match_t *find_next_key(char *buffer);
+char *find_contentfor_value(list_t *content_headers, char *key);
 
 #endif

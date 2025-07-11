@@ -208,3 +208,16 @@ found_start:
 
   return directive;
 }
+
+char *
+find_contentfor_value(list_t *content_headers, char *key)
+{
+  for (size_t i = 0; i < content_headers->size; i++) {
+    contentfor_operand_t *operand = list_get(content_headers, i);
+
+    if (strcmp(key, operand->key) == 0)
+      return operand->content;
+  }
+
+  return NULL;
+}
