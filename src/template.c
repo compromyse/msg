@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <template.h>
-#include <util.h>
 
 #include "../config.h"
 
