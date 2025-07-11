@@ -3,6 +3,7 @@
 
 #include <filehandler.h>
 #include <lexer.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <template.h>
 #include <util.h>
@@ -33,10 +34,9 @@ template_delete(template_t *template)
   free(template);
 }
 
-char *
-template_ingest(template_t *template, list_t *content_headers, char *body)
+void
+template_ingest(template_t *template, list_t *content_headers, FILE *f)
 {
-  (void) body;
   char *output = malloc(1);
   strcpy(output, "");
 
@@ -45,14 +45,18 @@ template_ingest(template_t *template, list_t *content_headers, char *body)
 
     switch (match->type) {
     case _RAW:
-      xstrcat(output, match->operands);
+      fprintf(f, "%s", (char *) match->operands);
       break;
+
+    case CONTENT: {
+      char *content = find_contentfor_value(content_headers, match->operands);
+      fprintf(f, "%s", content);
+      break;
+    }
 
     /* TODO: Handle this gracefully */
     default:
       break;
     }
   }
-
-  return output;
 }

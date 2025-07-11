@@ -2,6 +2,7 @@
 #define __TEMPLATE_H
 
 #include <list.h>
+#include <stdio.h>
 
 typedef struct {
   list_t *components;
@@ -10,7 +11,6 @@ typedef struct {
 template_t *template_create(void);
 void template_delete(template_t *template);
 
-char *
-template_ingest(template_t *template, list_t *content_headers, char *body);
+void template_ingest(template_t *template, list_t *content_headers, FILE *f);
 
 #endif
