@@ -1,10 +1,11 @@
-#include <string.h>
 #define _GNU_SOURCE
 
 #include <filehandler.h>
 #include <lexer.h>
+#include <mkdio.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <template.h>
 #include <util.h>
 
@@ -35,7 +36,11 @@ template_delete(template_t *template)
 }
 
 void
-template_write(template_t *template, list_t *content_headers, FILE *f)
+template_write(template_t *template,
+               list_t *content_headers,
+               FILE *f,
+               void *doc,
+               bool is_markdown)
 {
   char *output = malloc(1);
   strcpy(output, "");
@@ -51,6 +56,16 @@ template_write(template_t *template, list_t *content_headers, FILE *f)
     case CONTENT: {
       char *content = find_contentfor_value(content_headers, match->operands);
       fprintf(f, "%s", content);
+      break;
+    }
+
+    case BODY: {
+      if (is_markdown) {
+        markdown(doc, f, 0);
+      } else {
+        fprintf(f, "%s", (char *) doc);
+      }
+
       break;
     }
 

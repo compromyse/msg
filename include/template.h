@@ -2,6 +2,7 @@
 #define __TEMPLATE_H
 
 #include <list.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 typedef struct {
@@ -10,6 +11,10 @@ typedef struct {
 
 template_t *template_create(void);
 void template_delete(template_t *template);
-void template_write(template_t *template, list_t *content_headers, FILE *f);
+void template_write(template_t *template,
+                    list_t *content_headers,
+                    FILE *f,
+                    void *doc,
+                    bool is_markdown);
 
 #endif
