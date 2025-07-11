@@ -7,6 +7,7 @@
 #include <ftw.h>
 #include <lexer.h>
 #include <libgen.h>
+#include <list.h>
 #include <mkdio.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,14 +71,11 @@ handle_file(const char *path)
 
   if (dot && strcmp(dot, ".md") == 0) {
     MMIOT *doc = mkd_string(buffer, size, 0);
-    fprintf(out, "%s", base_template->pre);
-    markdown(doc, out, 0);
-    fprintf(out, "%s", base_template->post);
-  } else {
-    if (strlen(buffer) != 0)
-      ingest(&buffer);
-    fprintf(out, "%s%s%s", base_template->pre, buffer, base_template->post);
+    template_write(base_template, NULL, out, doc, false);
+    /* free(doc); */
+  } else if (strlen(buffer) != 0) {
     list_t *content_headers = ingest(&buffer);
+    template_write(base_template, content_headers, out, buffer, false);
     list_delete(content_headers);
   }
 
