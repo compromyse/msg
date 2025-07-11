@@ -22,11 +22,19 @@ template_create(void)
 
   template->components = lex(buffer);
 
+  free(buffer);
   return template;
 }
 
+void
+template_delete(template_t *template)
+{
+  list_delete(template->components);
+  free(template);
+}
+
 char *
-template_ingest(template_t *template, char *body)
+template_ingest(template_t *template, list_t *content_headers, char *body)
 {
   (void) body;
   char *output = malloc(1);

@@ -8,6 +8,9 @@ typedef struct {
 } template_t;
 
 template_t *template_create(void);
-char *template_ingest(template_t *template, char *body);
+void template_delete(template_t *template);
+
+char *
+template_ingest(template_t *template, list_t *content_headers, char *body);
 
 #endif
