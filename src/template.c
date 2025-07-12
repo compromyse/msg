@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 
+#include <engine.h>
 #include <filehandler.h>
 #include <lexer.h>
 #include <mkdio.h>
@@ -21,6 +22,7 @@ template_create(void)
   char *buffer = fcontent(base, size);
   fclose(base);
 
+  ingest(&buffer);
   template->components = lex(buffer);
 
   free(buffer);
