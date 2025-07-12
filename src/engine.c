@@ -108,7 +108,6 @@ ingest(char **buffer)
       handle_contentfor(buffer, match, directive, content_headers);
       break;
 
-    /* TODO: Handle this gracefully */
     case BODY:
     case CONTENT:
     case ENDCONTENT:
