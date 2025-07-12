@@ -78,8 +78,9 @@ ingest(char **buffer)
     return NULL;
   }
 
+  size_t skip = 0;
   while (true) {
-    match = find_next_key(*buffer);
+    match = find_next_key(*buffer, skip);
     if (match == NULL)
       break;
 
@@ -112,6 +113,7 @@ ingest(char **buffer)
     case CONTENT:
     case ENDCONTENT:
     case _RAW:
+      skip++;
       break;
     }
 

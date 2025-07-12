@@ -30,7 +30,7 @@ typedef struct {
 
 list_t *lex(char *buffer);
 directive_t *find_directive(char *content, key_match_t *match);
-key_match_t *find_next_key(char *buffer);
+key_match_t *find_next_key(char *buffer, size_t skip);
 char *find_contentfor_value(list_t *content_headers, char *key);
 
 #endif

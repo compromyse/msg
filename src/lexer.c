@@ -15,7 +15,7 @@ lex(char *buffer)
   size_t current_offset = 0;
 
   while (true) {
-    key_match_t *key = find_next_key(buffer);
+    key_match_t *key = find_next_key(buffer, 0);
     if (key == NULL)
       break;
 
@@ -55,14 +55,19 @@ lex(char *buffer)
 }
 
 key_match_t *
-find_next_key(char *buffer)
+find_next_key(char *buffer, size_t skip)
 {
   key_match_t *match = calloc(1, sizeof(key_match_t));
+  size_t count = 0;
 
   for (size_t i = 0; i < strlen(buffer); i++) {
     if (buffer[i] == '{' && buffer[i + 1] == '{') {
-      match->offset = i;
-      break;
+      count++;
+
+      if (count > skip) {
+        match->offset = i;
+        break;
+      }
     }
 
     if (i == strlen(buffer) - 1) {
@@ -149,7 +154,7 @@ found_start:
     directive_t *new_directive;
 
     while (true) {
-      new_match = find_next_key(buffer);
+      new_match = find_next_key(buffer, 0);
       if (new_match == NULL) {
         printf("Cannot find endcontent\n");
         free(new_directive);
