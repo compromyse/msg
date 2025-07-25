@@ -93,13 +93,112 @@ find_next_key(char *buffer, size_t skip)
   return match;
 }
 
+void
+lexer_handle_include(directive_t *directive,
+                     key_match_t *match,
+                     char *buffer,
+                     size_t n)
+{
+  directive->type = INCLUDE;
+
+  char *operand = NULL;
+  for (size_t i = n + strlen("include"); i < match->length - n; i++)
+    if (isalnum(buffer[i])) {
+      sscanf(buffer + i, "%ms\"", &operand);
+      operand[strlen(operand) - 1] = '\0';
+      break;
+    }
+
+  directive->operands = operand;
+}
+
+void
+lexer_handle_contentfor(directive_t *directive,
+                        key_match_t *match,
+                        char *buffer,
+                        char *content,
+                        size_t n)
+{
+  directive->type = CONTENTFOR;
+  contentfor_operand_t *operands = malloc(sizeof(contentfor_operand_t));
+
+  for (size_t i = n + strlen("contentfor"); i < match->length; i++)
+    if (isalnum(buffer[i])) {
+      sscanf(buffer + i, "%ms\"", &operands->key);
+      operands->key[strlen(operands->key) - 1] = '\0';
+      break;
+    }
+
+  buffer = content + match->length + match->offset;
+
+  size_t content_length = 0;
+
+  key_match_t *new_match;
+  directive_t *new_directive;
+
+  while (true) {
+    new_match = find_next_key(buffer, 0);
+    if (new_match == NULL) {
+      printf("Cannot find endcontent\n");
+      free(new_directive);
+      free(new_match);
+      free(directive);
+      /* TODO: Handle early returns */
+      return;
+    }
+
+    new_directive = find_directive(buffer, new_match);
+    if (new_directive == NULL) {
+      printf("Cannot find directive: %.*s\n",
+             new_match->length,
+             buffer + new_match->offset);
+      free(new_directive);
+      free(new_match);
+      free(directive);
+      return;
+    }
+
+    if (new_directive->type == ENDCONTENT) {
+      break;
+    }
+  }
+
+  asprintf(&operands->content, "%.*s", new_match->offset, buffer);
+  operands->length
+      = match->offset + match->length + new_match->offset + new_match->length;
+
+  free(new_directive);
+  free(new_match);
+
+  directive->operands = operands;
+}
+
+void
+lexer_handle_content(directive_t *directive,
+                     key_match_t *match,
+                     char *buffer,
+                     size_t n)
+{
+  directive->type = CONTENT;
+
+  char *operand = NULL;
+  for (size_t i = n + strlen("content"); i < match->length - n; i++)
+    if (isalnum(buffer[i])) {
+      sscanf(buffer + i, "%ms\"", &operand);
+      operand[strlen(operand) - 1] = '\0';
+      break;
+    }
+
+  directive->operands = operand;
+}
+
 directive_t *
 find_directive(char *content, key_match_t *match)
 {
-  directive_t *directive = (directive_t *) calloc(1, sizeof(directive_t));
+  directive_t *directive;
 
   char *buffer = content + match->offset;
-  unsigned int n = 0;
+  size_t n = 0;
 
   for (size_t i = 0; i < match->length; i++)
     switch (buffer[i]) {
@@ -117,88 +216,20 @@ find_directive(char *content, key_match_t *match)
   return NULL;
 
 found_start:
-  if (strncmp(buffer + n, "include", strlen("include")) == 0) {
-    directive->type = INCLUDE;
+  directive = (directive_t *) calloc(1, sizeof(directive_t));
 
-    char *operand = NULL;
-    for (size_t i = n + strlen("include"); i < match->length - n; i++)
-      if (isalnum(buffer[i])) {
-        sscanf(buffer + i, "%ms\"", &operand);
-        operand[strlen(operand) - 1] = '\0';
-        break;
-      }
-
-    directive->operands = operand;
-  } else if (strncmp(buffer + n, "endcontent", strlen("endcontent")) == 0) {
+  if (DIRECTIVE_IS("include")) {
+    lexer_handle_include(directive, match, buffer, n);
+  } else if (DIRECTIVE_IS("endcontent")) {
     directive->type = ENDCONTENT;
     directive->operands = NULL;
-  } else if (strncmp(buffer + n, "body", strlen("body")) == 0) {
+  } else if (DIRECTIVE_IS("body")) {
     directive->type = BODY;
     directive->operands = NULL;
-  } else if (strncmp(buffer + n, "contentfor", strlen("contentfor")) == 0) {
-    directive->type = CONTENTFOR;
-    contentfor_operand_t *operands = malloc(sizeof(contentfor_operand_t));
-
-    for (size_t i = n + strlen("contentfor"); i < match->length; i++)
-      if (isalnum(buffer[i])) {
-        sscanf(buffer + i, "%ms\"", &operands->key);
-        operands->key[strlen(operands->key) - 1] = '\0';
-        break;
-      }
-
-    buffer = content + match->length + match->offset;
-
-    size_t content_length = 0;
-
-    key_match_t *new_match;
-    directive_t *new_directive;
-
-    while (true) {
-      new_match = find_next_key(buffer, 0);
-      if (new_match == NULL) {
-        printf("Cannot find endcontent\n");
-        free(new_directive);
-        free(new_match);
-        free(directive);
-        return NULL;
-      }
-
-      new_directive = find_directive(buffer, new_match);
-      if (new_directive == NULL) {
-        printf("Cannot find directive: %.*s\n",
-               new_match->length,
-               buffer + new_match->offset);
-        free(new_directive);
-        free(new_match);
-        free(directive);
-        return NULL;
-      }
-
-      if (new_directive->type == ENDCONTENT) {
-        break;
-      }
-    }
-
-    asprintf(&operands->content, "%.*s", new_match->offset, buffer);
-    operands->length = match->offset + match->length + new_match->offset
-                       + new_match->length;
-
-    free(new_directive);
-    free(new_match);
-
-    directive->operands = operands;
-  } else if (strncmp(buffer + n, "content ", strlen("content")) == 0) {
-    directive->type = CONTENT;
-
-    char *operand = NULL;
-    for (size_t i = n + strlen("content"); i < match->length - n; i++)
-      if (isalnum(buffer[i])) {
-        sscanf(buffer + i, "%ms\"", &operand);
-        operand[strlen(operand) - 1] = '\0';
-        break;
-      }
-
-    directive->operands = operand;
+  } else if (DIRECTIVE_IS("contentfor")) {
+    lexer_handle_contentfor(directive, match, buffer, content, n);
+  } else if (DIRECTIVE_IS("content")) {
+    lexer_handle_content(directive, match, buffer, n);
   } else {
     free(directive);
     return NULL;

@@ -3,6 +3,8 @@
 
 #include <list.h>
 
+#define DIRECTIVE_IS(key) strncmp(buffer + n, key, strlen(key)) == 0
+
 typedef enum {
   _RAW,
   INCLUDE,
@@ -32,5 +34,19 @@ list_t *lex(char *buffer);
 directive_t *find_directive(char *content, key_match_t *match);
 key_match_t *find_next_key(char *buffer, size_t skip);
 char *find_contentfor_value(list_t *content_headers, char *key);
+
+void lexer_handle_include(directive_t *directive,
+                          key_match_t *match,
+                          char *buffer,
+                          size_t n);
+void lexer_handle_contentfor(directive_t *directive,
+                             key_match_t *match,
+                             char *buffer,
+                             char *content,
+                             size_t n);
+void lexer_handle_content(directive_t *directive,
+                          key_match_t *match,
+                          char *buffer,
+                          size_t n);
 
 #endif
