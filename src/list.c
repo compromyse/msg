@@ -55,3 +55,18 @@ list_delete(list_t *list)
   free(list->elements);
   free(list);
 }
+
+void *
+list_find_corresponding_value_from_ptr_wrapper(list_t *keys,
+                                               list_t *values,
+                                               char *key)
+{
+  for (size_t i = 0; i < keys->size; i++) {
+    ptr_wrapper_t *wrapper = list_get(keys, i);
+    if (strcmp(wrapper->ptr, key) == 0) {
+      return list_get(values, i);
+    }
+  }
+
+  return NULL;
+}

@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 
+#include <copy.h>
 #include <engine.h>
 #include <filehandler.h>
 #include <lexer.h>

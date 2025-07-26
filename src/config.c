@@ -10,9 +10,11 @@
 config_t *
 config_parse(char *content)
 {
-  list_t *keys = list_create(sizeof(char *));
-  list_t *values = list_create(sizeof(char *));
+  list_t *keys = list_create(sizeof(ptr_wrapper_t));
+  list_t *values = list_create(sizeof(ptr_wrapper_t));
   list_t *array_values = list_create(sizeof(list_t));
+
+  ptr_wrapper_t *wrapper;
 
   char *buffer = strdup(content);
   /* For free() */
@@ -23,26 +25,39 @@ config_parse(char *content)
   while (buffer != NULL) {
     buffer = ltrim(buffer);
 
-    list_add(keys, key);
+    wrapper = malloc(sizeof(ptr_wrapper_t));
+    wrapper->ptr = strdup(key);
+    list_add(keys, wrapper);
 
     if (*buffer == '{') {
       buffer++;
-      list_t *l = list_create(sizeof(char *));
+      list_t *l = list_create(sizeof(ptr_wrapper_t));
       char *raw_array = strsep(&buffer, "}");
 
       char *value = strsep(&raw_array, DELIM_ARRAY);
       while (value != NULL) {
-        list_add(l, trim(value));
+        wrapper = malloc(sizeof(ptr_wrapper_t));
+        wrapper->ptr = strdup(trim(value));
+        list_add(l, wrapper);
+
         value = strsep(&raw_array, DELIM_ARRAY);
       }
 
       list_add(array_values, l);
-      list_add(values, "\0");
+
+      wrapper = malloc(sizeof(ptr_wrapper_t));
+      wrapper->ptr = NULL;
+      list_add(values, wrapper);
     } else {
       char *value = trim(strsep(&buffer, "\n"));
 
-      list_add(array_values, &((list_t) { 0 }));
-      list_add(values, value);
+      wrapper = malloc(sizeof(ptr_wrapper_t));
+      wrapper->ptr = NULL;
+      list_add(array_values, wrapper);
+
+      wrapper = malloc(sizeof(ptr_wrapper_t));
+      wrapper->ptr = strdup(value);
+      list_add(values, wrapper);
     }
 
     key = trim(strsep(&buffer, DELIM));

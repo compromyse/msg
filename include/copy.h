@@ -4,6 +4,9 @@
 #include <ftw.h>
 #include <sys/stat.h>
 
+#define OUTPUT "dist"
+#define DIRECTORY "compromyse.xyz"
+
 typedef struct FTW FTW;
 
 int copy_recursively(const char *fpath,

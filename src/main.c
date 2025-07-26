@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 
+#include <config.h>
 #include <copy.h>
 #include <engine.h>
 #include <errno.h>
@@ -16,6 +17,8 @@
 #include <template.h>
 
 #include "../config.h"
+
+#define ASSETS "assets"
 
 template_t *base_template;
 
@@ -93,6 +96,14 @@ main(int argc, char **argv)
   (void) argc;
   (void) argv;
 
+  FILE *f = fopen("config.cfg", "r");
+  size_t s = fsize(f);
+  char *content = fcontent(f, s);
+  fclose(f);
+
+  config_t *config = config_parse(content);
+  free(content);
+
   struct stat sb;
   if (stat(DIRECTORY, &sb) != 0 || !S_ISDIR(sb.st_mode)) {
     printf("%s does not exist.\n", DIRECTORY);
@@ -110,22 +121,22 @@ main(int argc, char **argv)
   nftw(
       DIRECTORY "/" ASSETS, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
 
-  char **x;
-  char *filepath;
+  list_t *resources = list_find_corresponding_value_from_ptr_wrapper(
+      config->keys, config->array_values, "resources");
 
-  for (x = (char **) html_resources; *x != NULL; x++) {
-    asprintf(&filepath, "%s.html", *x);
-    printf("HANDLING: %s\n", filepath);
-    handle_file(filepath);
-    free(filepath);
+  if (resources == NULL) {
+    printf("Could not find resources in config.cfg\n");
+    return EXIT_FAILURE;
   }
 
-  for (x = (char **) md_resources; *x != NULL; x++) {
-    asprintf(&filepath, "%s.md", *x);
-    printf("HANDLING: %s\n", filepath);
-    handle_file(filepath);
-    free(filepath);
+  for (size_t i = 0; i < resources->size; i++) {
+    ptr_wrapper_t *value = list_get(resources, i);
+    char *path = value->ptr;
+    printf("HANDLING: %s\n", path);
+    handle_file(path);
   }
+
+  free(config);
 
   return EXIT_SUCCESS;
 }
