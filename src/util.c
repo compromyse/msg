@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 #include <util.h>
 
@@ -24,4 +25,12 @@ char *
 trim(char *s)
 {
   return rtrim(ltrim(s));
+}
+
+ptr_wrapper_t *
+wrap_ptr(void *ptr)
+{
+  ptr_wrapper_t *wrapper = malloc(sizeof(ptr_wrapper_t));
+  wrapper->ptr = ptr;
+  return wrapper;
 }

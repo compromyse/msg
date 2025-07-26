@@ -8,5 +8,6 @@ typedef struct {
 char *ltrim(char *s);
 char *rtrim(char *s);
 char *trim(char *s);
+ptr_wrapper_t *wrap_ptr(void *ptr);
 
 #endif

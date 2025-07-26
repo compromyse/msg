@@ -14,8 +14,6 @@ config_parse(char *content)
   list_t *values = list_create(sizeof(ptr_wrapper_t));
   list_t *array_values = list_create(sizeof(list_t));
 
-  ptr_wrapper_t *wrapper;
-
   char *buffer = strdup(content);
   /* For free() */
   char *x = buffer;
@@ -24,10 +22,7 @@ config_parse(char *content)
 
   while (buffer != NULL) {
     buffer = ltrim(buffer);
-
-    wrapper = malloc(sizeof(ptr_wrapper_t));
-    wrapper->ptr = strdup(key);
-    list_add(keys, wrapper);
+    list_add(keys, wrap_ptr(strdup(key)));
 
     if (*buffer == '{') {
       buffer++;
@@ -36,28 +31,17 @@ config_parse(char *content)
 
       char *value = strsep(&raw_array, DELIM_ARRAY);
       while (value != NULL) {
-        wrapper = malloc(sizeof(ptr_wrapper_t));
-        wrapper->ptr = strdup(trim(value));
-        list_add(l, wrapper);
-
+        list_add(l, wrap_ptr(strdup(trim(value))));
         value = strsep(&raw_array, DELIM_ARRAY);
       }
 
       list_add(array_values, l);
-
-      wrapper = malloc(sizeof(ptr_wrapper_t));
-      wrapper->ptr = NULL;
-      list_add(values, wrapper);
+      list_add(values, wrap_ptr(NULL));
     } else {
       char *value = trim(strsep(&buffer, "\n"));
 
-      wrapper = malloc(sizeof(ptr_wrapper_t));
-      wrapper->ptr = NULL;
-      list_add(array_values, wrapper);
-
-      wrapper = malloc(sizeof(ptr_wrapper_t));
-      wrapper->ptr = strdup(value);
-      list_add(values, wrapper);
+      list_add(array_values, wrap_ptr(NULL));
+      list_add(values, wrap_ptr(strdup(value)));
     }
 
     key = trim(strsep(&buffer, DELIM));
