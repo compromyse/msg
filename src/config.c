@@ -37,11 +37,16 @@ config_parse(char *content)
 
       list_add(array_values, l);
       list_add(values, wrap_ptr(NULL));
+
+      free(l);
     } else {
+      list_t *l = list_create(sizeof(ptr_wrapper_t));
       char *value = trim(strsep(&buffer, "\n"));
 
-      list_add(array_values, wrap_ptr(NULL));
+      list_add(array_values, l);
       list_add(values, wrap_ptr(strdup(value)));
+
+      free(l);
     }
 
     key = trim(strsep(&buffer, DELIM));
