@@ -7,7 +7,7 @@
 #include <string.h>
 #include <util.h>
 
-void
+config_t *
 config_parse(char *content)
 {
   list_t *keys = list_create(sizeof(char *));
@@ -48,24 +48,11 @@ config_parse(char *content)
     key = trim(strsep(&buffer, DELIM));
   }
 
-  for (size_t i = 0; i < keys->size; i++) {
-    char *key = list_get(keys, i);
-    char *value = list_get(values, i);
-
-    if (strcmp(value, "\0") == 0) {
-      printf("%s ARRAY with VALUES ", key);
-      list_t *xvalues = list_get(array_values, i);
-
-      for (size_t y = 0; y < xvalues->size; y++) {
-        char *value = list_get(xvalues, y);
-        printf("%s ", value);
-      }
-
-      printf("\n");
-    } else {
-      printf("%s: %s\n", key, value);
-    }
-  }
-
   free(x);
+
+  config_t *config = malloc(sizeof(config_t));
+  config->keys = keys;
+  config->values = values;
+  config->array_values = array_values;
+  return config;
 }
