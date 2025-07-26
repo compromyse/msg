@@ -23,7 +23,7 @@ config_parse(char *content)
   while (buffer != NULL) {
     buffer = ltrim(buffer);
 
-    list_add(keys, strdup(key));
+    list_add(keys, key);
 
     if (*buffer == '{') {
       buffer++;
