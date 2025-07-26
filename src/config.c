@@ -28,7 +28,7 @@ config_parse(char *content)
       buffer++;
       list_add(values, "\0");
 
-      char *raw_array = remove_spaces(trim(strsep(&buffer, "}")));
+      char *raw_array = remove_spaces(strsep(&buffer, "}"));
     } else {
       char *value = trim(strsep(&buffer, "\n"));
     }
