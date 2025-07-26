@@ -4,6 +4,6 @@
 char *ltrim(char *s);
 char *rtrim(char *s);
 char *trim(char *s);
-void remove_spaces(char *str);
+char *remove_spaces(char *str);
 
 #endif
