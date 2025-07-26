@@ -31,6 +31,7 @@ config_parse(char *content)
       char *raw_array = remove_spaces(strsep(&buffer, "}"));
     } else {
       char *value = trim(strsep(&buffer, "\n"));
+      list_add(values, value);
     }
 
     printf("KEY %s\n", key);
