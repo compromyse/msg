@@ -9,8 +9,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "../config.h"
-
 int
 copy_recursively(const char *fpath,
                  const struct stat *sb,

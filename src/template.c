@@ -10,8 +10,6 @@
 #include <string.h>
 #include <template.h>
 
-#include "../config.h"
-
 template_t *
 template_create(void)
 {

@@ -9,8 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../config.h"
-
 void
 handle_include(char **buffer, key_match_t *match, directive_t *directive)
 {

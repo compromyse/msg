@@ -15,8 +15,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <template.h>
-
-#include "../config.h"
+#include <util.h>
 
 #define ASSETS "assets"
 
