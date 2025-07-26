@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 project(msg C)
 
 set(SRC
+  src/config.c
   src/copy.c
   src/engine.c
   src/filehandler.c
@@ -9,6 +10,7 @@ set(SRC
   src/list.c
   src/main.c
   src/template.c
+  src/util.c
 )
 
 add_executable(msg ${SRC})
