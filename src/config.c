@@ -20,19 +20,20 @@ config_parse(char *content)
   char *key = trim(strsep(&buffer, DELIM));
 
   while (buffer != NULL) {
-    char *value = NULL;
     buffer = ltrim(buffer);
+
+    list_add(keys, strdup(key));
 
     if (*buffer == '{') {
       buffer++;
-      value = trim(strsep(&buffer, "}"));
-      remove_spaces(value);
+      list_add(values, "\0");
+
+      char *raw_array = remove_spaces(trim(strsep(&buffer, "}")));
     } else {
-      value = trim(strsep(&buffer, "\n"));
+      char *value = trim(strsep(&buffer, "\n"));
     }
 
     printf("KEY %s\n", key);
-    printf("VALUE %s\n", value);
 
     key = trim(strsep(&buffer, DELIM));
   }

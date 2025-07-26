@@ -26,7 +26,7 @@ trim(char *s)
   return rtrim(ltrim(s));
 }
 
-void
+char *
 remove_spaces(char *str)
 {
   int count = 0;
@@ -35,4 +35,6 @@ remove_spaces(char *str)
     if (!isspace(str[i]))
       str[count++] = str[i];
   str[count] = '\0';
+
+  return str;
 }
