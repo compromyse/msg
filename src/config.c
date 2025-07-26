@@ -14,27 +14,28 @@ config_parse(char *content)
   list_t *values = list_create(sizeof(char *));
 
   char *buffer = strdup(content);
+  /* For free() */
+  char *x = buffer;
 
-  char *line_internal = strtok(buffer, "\n");
-  while (line_internal != NULL) {
-    char *line = strdup(line_internal);
+  char *key = trim(strsep(&buffer, DELIM));
 
-    char *value = line;
-    char *key = strsep(&value, "=");
-    value = trim(value);
-    key = trim(key);
+  while (buffer != NULL) {
+    char *value = NULL;
+    buffer = ltrim(buffer);
 
-    list_add(keys, strdup(key));
-    list_add(values, strdup(value));
+    if (*buffer == '{') {
+      buffer++;
+      value = trim(strsep(&buffer, "}"));
+      remove_spaces(value);
+    } else {
+      value = trim(strsep(&buffer, "\n"));
+    }
 
-    free(line);
-    line_internal = strtok(NULL, "\n");
+    printf("KEY %s\n", key);
+    printf("VALUE %s\n", value);
+
+    key = trim(strsep(&buffer, DELIM));
   }
 
-  for (size_t i = 0; i < keys->size; i++) {
-    printf(
-        "%s: %s\n", (char *) list_get(keys, i), (char *) list_get(values, i));
-  }
-
-  free(buffer);
+  /* free(x); */
 }
