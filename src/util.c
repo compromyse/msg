@@ -3,15 +3,36 @@
 #include <util.h>
 
 char *
+ltrim(char *s)
+{
+  while (isspace(*s))
+    s++;
+  return s;
+}
+
+char *
+rtrim(char *s)
+{
+  char *back = s + strlen(s);
+  while (isspace(*--back))
+    ;
+  *(back + 1) = '\0';
+  return s;
+}
+
+char *
 trim(char *s)
 {
-  int i;
+  return rtrim(ltrim(s));
+}
 
-  while (isspace(*s))
-    s++; // skip left side white spaces
-  for (i = strlen(s) - 1; (isspace(s[i])); i--)
-    ; // skip right side white spaces
-  s[i + 1] = '\0';
+void
+remove_spaces(char *str)
+{
+  int count = 0;
 
-  return s;
+  for (int i = 0; str[i]; i++)
+    if (!isspace(str[i]))
+      str[count++] = str[i];
+  str[count] = '\0';
 }
