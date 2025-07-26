@@ -28,11 +28,11 @@ config_parse(char *content)
     if (*buffer == '{') {
       buffer++;
       list_t *l = list_create(sizeof(char *));
-      char *raw_array = remove_spaces(strsep(&buffer, "}"));
+      char *raw_array = strsep(&buffer, "}");
 
       char *value = strsep(&raw_array, DELIM_ARRAY);
       while (value != NULL) {
-        list_add(l, strdup(value));
+        list_add(l, trim(value));
         value = strsep(&raw_array, DELIM_ARRAY);
       }
 
