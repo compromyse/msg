@@ -112,13 +112,7 @@ main(int argc, char **argv)
   nftw(
       DIRECTORY "/" ASSETS, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
 
-  FILE *f = fopen("config.cfg", "r");
-  size_t s = fsize(f);
-  char *content = fcontent(f, s);
-  fclose(f);
-
-  config_t *config = config_parse(content);
-  free(content);
+  config_t *config = config_fetch_and_parse("config.cfg");
 
   list_t *resources = list_find_corresponding_value_from_ptr_wrapper(
       config->keys, config->array_values, "resources");
