@@ -221,6 +221,9 @@ found_start:
   } else if (DIRECTIVE_IS("endcontent")) {
     directive->type = ENDCONTENT;
     directive->operands = NULL;
+  } else if (DIRECTIVE_IS("endfor")) {
+    directive->type = ENDFOR;
+    directive->operands = NULL;
   } else if (DIRECTIVE_IS("body")) {
     directive->type = BODY;
     directive->operands = NULL;
