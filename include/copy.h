@@ -5,7 +5,6 @@
 #include <sys/stat.h>
 
 #define OUTPUT "dist"
-#define DIRECTORY "compromyse.xyz"
 
 typedef struct FTW FTW;
 

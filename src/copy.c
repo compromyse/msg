@@ -4,10 +4,13 @@
 #include <fcntl.h>
 #include <filehandler.h>
 #include <ftw.h>
+#include <main.h>
 #include <string.h>
 #include <sys/sendfile.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+extern msg_t *msg;
 
 int
 copy_recursively(const char *fpath,
@@ -18,7 +21,7 @@ copy_recursively(const char *fpath,
   (void) sb;
   (void) ftwbuf;
 
-  const char *path = fpath + strlen(DIRECTORY) + 1;
+  const char *path = fpath + strlen(msg->base_directory) + 1;
   char *output_path = NULL;
   asprintf(&output_path, "%s/%s", OUTPUT, path);
 

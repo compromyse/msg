@@ -4,18 +4,24 @@
 #include <engine.h>
 #include <filehandler.h>
 #include <lexer.h>
+#include <main.h>
 #include <mkdio.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <template.h>
 
+extern msg_t *msg;
+
 template_t *
 template_create(void)
 {
   template_t *template = malloc(sizeof(template_t));
 
-  FILE *base = fopen(DIRECTORY "/" BASE_TEMPLATE, "r");
+  char *path;
+  asprintf(&path, "%s/%s", msg->base_directory, BASE_TEMPLATE);
+  FILE *base = fopen(path, "r");
+  free(path);
 
   unsigned int size = fsize(base);
   char *buffer = fcontent(base, size);

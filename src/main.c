@@ -9,6 +9,7 @@
 #include <lexer.h>
 #include <libgen.h>
 #include <list.h>
+#include <main.h>
 #include <mkdio.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,6 +21,7 @@
 #define ASSETS "assets"
 
 template_t *base_template;
+msg_t *msg;
 
 void
 handle_file(const char *path)
@@ -27,7 +29,7 @@ handle_file(const char *path)
   char *inpath;
   char *outpath;
 
-  asprintf(&inpath, "%s/%s", DIRECTORY, path);
+  asprintf(&inpath, "%s/%s", msg->base_directory, path);
 
   char *dot = strrchr(inpath, '.');
   if (dot && strcmp(dot, ".md") == 0) {
@@ -92,12 +94,16 @@ handle_file(const char *path)
 int
 main(int argc, char **argv)
 {
-  (void) argc;
-  (void) argv;
+  if (argc < 2) {
+    printf("Usage: %s [directory]\n", argv[0]);
+    return EXIT_FAILURE;
+  }
+  msg = malloc(sizeof(msg_t));
+  msg->base_directory = argv[1];
 
   struct stat sb;
-  if (stat(DIRECTORY, &sb) != 0 || !S_ISDIR(sb.st_mode)) {
-    printf("%s does not exist.\n", DIRECTORY);
+  if (stat(msg->base_directory, &sb) != 0 || !S_ISDIR(sb.st_mode)) {
+    printf("%s does not exist.\n", msg->base_directory);
     return EXIT_FAILURE;
   }
 
@@ -109,11 +115,12 @@ main(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  nftw(
-      DIRECTORY "/" ASSETS, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
+  char *assets_directory;
+  asprintf(&assets_directory, "%s/%s", msg->base_directory, ASSETS);
+  nftw(assets_directory, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
+  free(assets_directory);
 
   config_t *config = config_fetch_and_parse("config.cfg");
-
   list_t *resources = list_find_corresponding_value_from_ptr_wrapper(
       config->keys, config->array_values, "resources");
 
@@ -131,5 +138,6 @@ main(int argc, char **argv)
 
   config_delete(config);
 
+  free(msg);
   return EXIT_SUCCESS;
 }

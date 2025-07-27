@@ -5,17 +5,20 @@
 #include <filehandler.h>
 #include <lexer.h>
 #include <list.h>
+#include <main.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+extern msg_t *msg;
 
 void
 handle_include(char **buffer, key_match_t *match, directive_t *directive)
 {
   char *operand = directive->operands;
   char *partial_path;
-  asprintf(&partial_path, "%s/%s/%s", DIRECTORY, PARTIALS, operand);
+  asprintf(&partial_path, "%s/%s/%s", msg->base_directory, PARTIALS, operand);
 
   FILE *f = fopen(partial_path, "r");
   if (f == NULL) {
