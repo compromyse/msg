@@ -12,6 +12,6 @@ void handle_contentfor(char **buffer,
                        key_match_t *match,
                        directive_t *directive,
                        list_t *content_headers);
-void handle_for(char **buffer, key_match_t *match, directive_t *directive);
+void handle_eachdo(char **buffer, key_match_t *match, directive_t *directive);
 
 #endif

@@ -74,7 +74,7 @@ handle_contentfor(char **buffer,
 }
 
 void
-handle_for(char **buffer, key_match_t *match, directive_t *directive)
+handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 {
   eachdo_operands_t *operands = directive->operands;
 
@@ -169,7 +169,7 @@ ingest(char **buffer)
       handle_contentfor(buffer, match, directive, content_headers);
       break;
     case EACHDO:
-      handle_for(buffer, match, directive);
+      handle_eachdo(buffer, match, directive);
       break;
 
     case ENDEACHDO:
