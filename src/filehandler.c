@@ -1,6 +1,12 @@
+#define _GNU_SOURCE
+
+#include <dirent.h>
 #include <filehandler.h>
+#include <list.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <util.h>
 
 char *
 fcontent(FILE *f, unsigned int size)
@@ -25,4 +31,24 @@ fsize(FILE *f)
   fseek(f, current, SEEK_SET);
 
   return s + 1;
+}
+
+list_t *
+enumfilesindir(char *path)
+{
+  DIR *d;
+  struct dirent *dir;
+
+  d = opendir(path);
+  if (!d)
+    return NULL;
+
+  list_t *l = list_create(sizeof(ptr_wrapper_t *));
+
+  while ((dir = readdir(d)) != NULL)
+    if (dir->d_type == DT_REG)
+      list_add(l, wrap_ptr(strdup(dir->d_name)));
+
+  closedir(d);
+  return l;
 }
