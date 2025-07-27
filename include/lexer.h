@@ -11,7 +11,9 @@ typedef enum {
   CONTENT,
   CONTENTFOR,
   ENDCONTENT,
-  BODY
+  BODY,
+  FOR,
+  ENDFOR
 } directive_e;
 
 typedef struct {
