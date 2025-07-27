@@ -13,6 +13,7 @@ typedef struct {
 } config_t;
 
 config_t *config_parse(char *content);
+void config_delete(config_t *config);
 config_t *config_fetch_and_parse(char *path);
 
 #endif

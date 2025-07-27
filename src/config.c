@@ -62,6 +62,31 @@ config_parse(char *content)
   return config;
 }
 
+void
+config_delete(config_t *config)
+{
+  for (size_t i = 0; i < config->keys->size; i++) {
+    ptr_wrapper_t *wrapper;
+
+    wrapper = list_get(config->values, i);
+    if (wrapper->ptr != NULL)
+      free(wrapper->ptr);
+
+    list_t *l = list_get(config->array_values, i);
+    for (size_t y = 0; y < l->size; y++) {
+      wrapper = list_get(l, y);
+
+      if (wrapper->ptr != NULL)
+        free(wrapper->ptr);
+    }
+  }
+
+  list_delete(config->keys);
+  list_delete(config->values);
+  list_delete(config->array_values);
+  free(config);
+}
+
 config_t *
 config_fetch_and_parse(char *path)
 {
