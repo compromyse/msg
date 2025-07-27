@@ -188,9 +188,10 @@ lexer_handle_eachdo(directive_t *directive,
 
   buffer += match->length;
   key_match_t *new_match;
+  size_t skip = 0;
 
   while (true) {
-    new_match = find_next_key(buffer, 0);
+    new_match = find_next_key(buffer, skip);
     if (new_match == NULL) {
       printf("Cannot find endeachdo\n");
       free(new_match);
@@ -217,6 +218,8 @@ lexer_handle_eachdo(directive_t *directive,
 
     free(new_directive);
     free(new_match);
+
+    skip++;
   }
 
   operands->content = strndup(buffer, new_match->offset);
