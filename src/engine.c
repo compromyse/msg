@@ -1,3 +1,4 @@
+#include "util.h"
 #define _GNU_SOURCE
 
 #include <copy.h>
@@ -80,6 +81,22 @@ handle_for(char **buffer, key_match_t *match, directive_t *directive)
   printf("KEY: %s\n", operands->key);
   printf("CONTENT: %s\n", operands->content);
 #endif
+
+  char *path;
+  asprintf(&path, "%s/%s", msg->base_directory, operands->key);
+  list_t *files = enumfilesindir(path);
+  free(path);
+
+  if (files == NULL) {
+    printf("Could not find key %s\n", operands->key);
+    free(operands);
+    return;
+  }
+
+  for (size_t i = 0; i < files->size; i++) {
+    ptr_wrapper_t *wrapper = list_get(files, i);
+    printf("%s\n", (char *) wrapper->ptr);
+  }
 
   exit(1);
   free(operands);
