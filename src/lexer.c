@@ -9,10 +9,12 @@
 #include <string.h>
 #include <util.h>
 
-list_t *
+lex_t *
 lex(char *buffer)
 {
+  lex_t *out = malloc(sizeof(lex_t));
   list_t *directives = list_create(sizeof(directive_t));
+  list_t *matches = list_create(sizeof(key_match_t));
   size_t current_offset = 0;
 
   while (true) {
@@ -50,7 +52,9 @@ lex(char *buffer)
     list_add(directives, raw_directive);
   }
 
-  return directives;
+  out->directives = directives;
+  out->matches = matches;
+  return out;
 }
 
 key_match_t *
