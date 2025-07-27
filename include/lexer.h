@@ -13,7 +13,8 @@ typedef enum {
   ENDCONTENT,
   BODY,
   EACHDO,
-  ENDEACHDO
+  ENDEACHDO,
+  PUT
 } directive_e;
 
 typedef struct {
@@ -65,5 +66,9 @@ void lexer_handle_eachdo(directive_t *directive,
                          key_match_t *match,
                          char *buffer,
                          size_t n);
+void lexer_handle_put(directive_t *directive,
+                      key_match_t *match,
+                      char *buffer,
+                      size_t n);
 
 #endif
