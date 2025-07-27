@@ -179,15 +179,8 @@ lexer_handle_eachdo(directive_t *directive,
   directive->type = EACHDO;
   eachdo_operands_t *operands = malloc(sizeof(eachdo_operands_t));
 
-  char *tempbuffer = strdup(buffer);
-  /* For free() */
-  void *orig = tempbuffer;
-
-  tempbuffer += n;
-  tempbuffer += strlen("eachdo");
-  operands->key = strdup(trim(strtok(tempbuffer, ":")));
-
-  free(orig);
+  operands->key = trim(strndup(buffer + n + strlen("eachdo"),
+                               match->length - n - strlen("eachdo") - 2));
 
   buffer += match->length;
   key_match_t *new_match;
