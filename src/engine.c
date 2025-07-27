@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void
 handle_include(char **buffer, key_match_t *match, directive_t *directive)
@@ -25,8 +26,7 @@ handle_include(char **buffer, key_match_t *match, directive_t *directive)
   unsigned int size = fsize(f);
   char *partial_content = fcontent(f, size);
 
-  char *temp_buffer;
-  asprintf(&temp_buffer, "%s", *buffer);
+  char *temp_buffer = strdup(*buffer);
 
   free(*buffer);
   asprintf(buffer,
@@ -53,8 +53,7 @@ handle_contentfor(char **buffer,
   printf("CONTENT: %s\n", operand->content);
 #endif
 
-  char *temp_buffer;
-  asprintf(&temp_buffer, "%s", *buffer);
+  char *temp_buffer = strdup(*buffer);
 
   free(*buffer);
   asprintf(buffer,

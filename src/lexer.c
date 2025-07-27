@@ -27,8 +27,7 @@ lex(char *buffer)
     current_offset += key->length + key->offset;
 
     if (current_offset != 0) {
-      char *raw_content;
-      asprintf(&raw_content, "%.*s", (int) key->offset, buffer);
+      char *raw_content = strndup(buffer, key->offset);
 
       directive_t *raw_directive = malloc(sizeof(directive_t));
       raw_directive->type = _RAW;
@@ -42,8 +41,7 @@ lex(char *buffer)
   }
 
   if (strlen(buffer) > 0) {
-    char *raw_content;
-    asprintf(&raw_content, "%s", buffer);
+    char *raw_content = strdup(buffer);
 
     directive_t *raw_directive = malloc(sizeof(directive_t));
     raw_directive->type = _RAW;
@@ -163,7 +161,7 @@ lexer_handle_contentfor(directive_t *directive,
     }
   }
 
-  asprintf(&operands->content, "%.*s", new_match->offset, buffer);
+  operands->content = strndup(buffer, new_match->offset);
   operands->length
       = match->offset + match->length + new_match->offset + new_match->length;
 
