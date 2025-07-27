@@ -18,8 +18,6 @@
 #include <template.h>
 #include <util.h>
 
-#define ASSETS "assets"
-
 template_t *base_template;
 msg_t *msg;
 
@@ -120,7 +118,7 @@ main(int argc, char **argv)
   nftw(assets_directory, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
   free(assets_directory);
 
-  config_t *config = config_fetch_and_parse("config.cfg");
+  config_t *config = config_fetch_and_parse(CONFIG_FILE);
   list_t *resources = list_find_corresponding_value_from_ptr_wrapper(
       config->keys, config->array_values, "resources");
 
