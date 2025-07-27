@@ -26,6 +26,7 @@ typedef struct {
   void *operands;
 } directive_t;
 
+/* TODO: strlen(content) instead of length? */
 typedef struct {
   char *key;
   char *content;
@@ -56,5 +57,9 @@ void lexer_handle_content(directive_t *directive,
                           key_match_t *match,
                           char *buffer,
                           size_t n);
+void lexer_handle_for(directive_t *directive,
+                      key_match_t *match,
+                      char *buffer,
+                      size_t n);
 
 #endif

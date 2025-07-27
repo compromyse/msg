@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <util.h>
 
 list_t *
 lex(char *buffer)
@@ -129,8 +130,6 @@ lexer_handle_contentfor(directive_t *directive,
 
   buffer = content + match->length + match->offset;
 
-  size_t content_length = 0;
-
   key_match_t *new_match;
   directive_t *new_directive;
 
@@ -167,6 +166,71 @@ lexer_handle_contentfor(directive_t *directive,
 
   free(new_directive);
   free(new_match);
+
+  directive->operands = operands;
+}
+
+void
+lexer_handle_for(directive_t *directive,
+                 key_match_t *match,
+                 char *buffer,
+                 size_t n)
+{
+  directive->type = FOR;
+  for_operand_t *operands = malloc(sizeof(for_operand_t));
+
+  char *tempbuffer = strdup(buffer);
+  /* For free() */
+  void *orig = tempbuffer;
+
+  tempbuffer += n;
+  tempbuffer += strlen("for");
+  operands->key = strdup(trim(strtok(tempbuffer, ":")));
+  operands->source = strdup(trim(strtok(NULL, "}")));
+
+  free(orig);
+
+  buffer += match->length;
+
+  key_match_t *new_match;
+  directive_t *new_directive;
+
+  while (true) {
+    new_match = find_next_key(buffer, 0);
+    if (new_match == NULL) {
+      printf("Cannot find endfor\n");
+      free(new_directive);
+      free(new_match);
+      free(directive);
+      /* TODO: Handle early returns */
+      return;
+    }
+
+    new_directive = find_directive(buffer, new_match);
+    if (new_directive == NULL) {
+      printf("Cannot find directive: %.*s\n",
+             new_match->length,
+             buffer + new_match->offset);
+      free(new_directive);
+      free(new_match);
+      free(directive);
+      return;
+    }
+
+    if (new_directive->type == ENDFOR) {
+      break;
+    }
+  }
+
+  operands->content = strndup(buffer, new_match->offset);
+
+  free(new_directive);
+  free(new_match);
+
+  printf("KEY: %s\n", operands->key);
+  printf("SOURCE: %s\n", operands->source);
+  printf("CONTENT: %s\n", operands->content);
+  exit(1);
 
   directive->operands = operands;
 }
@@ -231,6 +295,8 @@ found_start:
     lexer_handle_contentfor(directive, match, buffer, content, n);
   } else if (DIRECTIVE_IS("content")) {
     lexer_handle_content(directive, match, buffer, n);
+  } else if (DIRECTIVE_IS("for")) {
+    lexer_handle_for(directive, match, buffer, n);
   } else {
     free(directive);
     return NULL;
