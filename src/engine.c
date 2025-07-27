@@ -84,6 +84,7 @@ handle_for(char **buffer, key_match_t *match, directive_t *directive)
 #endif
 
   char *path;
+
   asprintf(&path, "%s/%s", msg->base_directory, operands->key);
   list_t *files = enumfilesindir(path);
   free(path);
@@ -96,7 +97,32 @@ handle_for(char **buffer, key_match_t *match, directive_t *directive)
 
   for (size_t i = 0; i < files->size; i++) {
     ptr_wrapper_t *wrapper = list_get(files, i);
-    printf("%s\n", (char *) wrapper->ptr);
+    asprintf(&path,
+             "%s/%s/%s",
+             msg->base_directory,
+             operands->key,
+             (char *) wrapper->ptr);
+
+    FILE *f = fopen(path, "r");
+    free(path);
+    size_t size = fsize(f);
+    char *content = fcontent(f, size);
+    fclose(f);
+
+    config_t *config = NULL;
+
+    char *p = strstr(content, "---");
+    if (p != NULL) {
+      *p = '\0';
+      config = config_parse(content);
+    }
+
+    free(content);
+
+    for (size_t j = 0; j < config->keys->size; j++) {
+      ptr_wrapper_t *wrapper = list_get(config->keys, j);
+      printf("%s\n", (char *) wrapper->ptr);
+    }
   }
 
   exit(1);

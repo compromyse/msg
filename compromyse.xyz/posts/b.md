@@ -1,4 +1,4 @@
-title: B.md
+title = B.md
 ---
 
 # Hi there!!!!
