@@ -74,16 +74,15 @@ handle_contentfor(char **buffer,
 void
 handle_for(char **buffer, key_match_t *match, directive_t *directive)
 {
-  for_operand_t *operand = directive->operands;
+  eachdo_operands_t *operands = directive->operands;
 
 #ifdef DEBUG
-  printf("KEY: %s\n", operand->key);
-  printf("SOURCE: %s\n", operand->source);
-  printf("CONTENT: %s\n", operand->content);
-  exit(1);
+  printf("KEY: %s\n", operands->key);
+  printf("CONTENT: %s\n", operands->content);
 #endif
 
-  free(operand);
+  exit(1);
+  free(operands);
 }
 
 list_t *
@@ -125,11 +124,11 @@ ingest(char **buffer)
     case CONTENTFOR:
       handle_contentfor(buffer, match, directive, content_headers);
       break;
-    case FOR:
+    case EACHDO:
       handle_for(buffer, match, directive);
       break;
 
-    case ENDFOR:
+    case ENDEACHDO:
     case BODY:
     case CONTENT:
     case ENDCONTENT:

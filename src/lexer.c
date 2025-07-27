@@ -171,22 +171,21 @@ lexer_handle_contentfor(directive_t *directive,
 }
 
 void
-lexer_handle_for(directive_t *directive,
-                 key_match_t *match,
-                 char *buffer,
-                 size_t n)
+lexer_handle_eachdo(directive_t *directive,
+                    key_match_t *match,
+                    char *buffer,
+                    size_t n)
 {
-  directive->type = FOR;
-  for_operand_t *operands = malloc(sizeof(for_operand_t));
+  directive->type = EACHDO;
+  eachdo_operands_t *operands = malloc(sizeof(eachdo_operands_t));
 
   char *tempbuffer = strdup(buffer);
   /* For free() */
   void *orig = tempbuffer;
 
   tempbuffer += n;
-  tempbuffer += strlen("for");
+  tempbuffer += strlen("eachdo");
   operands->key = strdup(trim(strtok(tempbuffer, ":")));
-  operands->source = strdup(trim(strtok(NULL, "}")));
 
   free(orig);
 
@@ -196,7 +195,7 @@ lexer_handle_for(directive_t *directive,
   while (true) {
     new_match = find_next_key(buffer, 0);
     if (new_match == NULL) {
-      printf("Cannot find endfor\n");
+      printf("Cannot find endeachdo\n");
       free(new_match);
       free(directive);
       /* TODO: Handle early returns */
@@ -214,7 +213,7 @@ lexer_handle_for(directive_t *directive,
       return;
     }
 
-    if (new_directive->type == ENDFOR) {
+    if (new_directive->type == ENDEACHDO) {
       free(new_directive);
       break;
     }
@@ -279,8 +278,8 @@ found_start:
   } else if (DIRECTIVE_IS("endcontent")) {
     directive->type = ENDCONTENT;
     directive->operands = NULL;
-  } else if (DIRECTIVE_IS("endfor")) {
-    directive->type = ENDFOR;
+  } else if (DIRECTIVE_IS("endeachdo")) {
+    directive->type = ENDEACHDO;
     directive->operands = NULL;
   } else if (DIRECTIVE_IS("body")) {
     directive->type = BODY;
@@ -289,8 +288,8 @@ found_start:
     lexer_handle_contentfor(directive, match, buffer, content, n);
   } else if (DIRECTIVE_IS("content")) {
     lexer_handle_content(directive, match, buffer, n);
-  } else if (DIRECTIVE_IS("for")) {
-    lexer_handle_for(directive, match, buffer, n);
+  } else if (DIRECTIVE_IS("eachdo")) {
+    lexer_handle_eachdo(directive, match, buffer, n);
   } else {
     free(directive);
     return NULL;
