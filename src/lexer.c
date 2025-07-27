@@ -237,10 +237,8 @@ lexer_handle_put(directive_t *directive,
   directive->type = PUT;
 
   /* TODO: Use this for include and contentfor too instead of sscanf() */
-  char *operand = trim(strndup(buffer + n + strlen("put"),
-                               match->length - n - strlen("put") - 2));
-
-  directive->operands = operand;
+  directive->operands = trim(strndup(buffer + n + strlen("put"),
+                                     match->length - n - strlen("put") - 2));
 }
 
 void
