@@ -165,6 +165,7 @@ lexer_handle_contentfor(directive_t *directive,
   operands->content = strndup(buffer, new_match->offset);
   operands->length
       = match->offset + match->length + new_match->offset + new_match->length;
+  free(new_match);
 
   directive->operands = operands;
 }
@@ -223,11 +224,7 @@ lexer_handle_for(directive_t *directive,
   }
 
   operands->content = strndup(buffer, new_match->offset);
-
-  printf("KEY: %s\n", operands->key);
-  printf("SOURCE: %s\n", operands->source);
-  printf("CONTENT: %s\n", operands->content);
-  exit(1);
+  free(new_match);
 
   directive->operands = operands;
 }

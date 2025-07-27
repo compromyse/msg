@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DEBUG
+
 extern msg_t *msg;
 
 void
@@ -69,6 +71,21 @@ handle_contentfor(char **buffer,
   free(operand);
 }
 
+void
+handle_for(char **buffer, key_match_t *match, directive_t *directive)
+{
+  for_operand_t *operand = directive->operands;
+
+#ifdef DEBUG
+  printf("KEY: %s\n", operand->key);
+  printf("SOURCE: %s\n", operand->source);
+  printf("CONTENT: %s\n", operand->content);
+  exit(1);
+#endif
+
+  free(operand);
+}
+
 list_t *
 ingest(char **buffer)
 {
@@ -108,7 +125,11 @@ ingest(char **buffer)
     case CONTENTFOR:
       handle_contentfor(buffer, match, directive, content_headers);
       break;
+    case FOR:
+      handle_for(buffer, match, directive);
+      break;
 
+    case ENDFOR:
     case BODY:
     case CONTENT:
     case ENDCONTENT:
