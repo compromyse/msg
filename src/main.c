@@ -95,14 +95,6 @@ main(int argc, char **argv)
   (void) argc;
   (void) argv;
 
-  FILE *f = fopen("config.cfg", "r");
-  size_t s = fsize(f);
-  char *content = fcontent(f, s);
-  fclose(f);
-
-  config_t *config = config_parse(content);
-  free(content);
-
   struct stat sb;
   if (stat(DIRECTORY, &sb) != 0 || !S_ISDIR(sb.st_mode)) {
     printf("%s does not exist.\n", DIRECTORY);
@@ -119,6 +111,14 @@ main(int argc, char **argv)
 
   nftw(
       DIRECTORY "/" ASSETS, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
+
+  FILE *f = fopen("config.cfg", "r");
+  size_t s = fsize(f);
+  char *content = fcontent(f, s);
+  fclose(f);
+
+  config_t *config = config_parse(content);
+  free(content);
 
   list_t *resources = list_find_corresponding_value_from_ptr_wrapper(
       config->keys, config->array_values, "resources");
