@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 
 #include <config.h>
+#include <filehandler.h>
 #include <list.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -58,5 +59,24 @@ config_parse(char *content)
   config->keys = keys;
   config->values = values;
   config->array_values = array_values;
+  return config;
+}
+
+config_t *
+config_fetch_and_parse(char *path)
+{
+  FILE *f = fopen(path, "r");
+  if (f == NULL) {
+    printf("Could not open %s\n", path);
+    return NULL;
+  }
+
+  size_t s = fsize(f);
+  char *content = fcontent(f, s);
+  fclose(f);
+
+  config_t *config = config_parse(content);
+  free(content);
+
   return config;
 }
