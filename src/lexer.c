@@ -18,40 +18,40 @@ lex(char *buffer)
   size_t current_offset = 0;
 
   while (true) {
-    key_match_t *key = find_next_key(buffer, 0);
-    if (key == NULL)
+    key_match_t *match = find_next_key(buffer, 0);
+    if (match == NULL)
       break;
 
-    directive_t *directive = find_directive(buffer, key);
+    directive_t *directive = find_directive(buffer, match);
     /* TODO: Handle unknown directive */
     if (directive == NULL)
       break;
 
-    current_offset += key->length + key->offset;
+    current_offset += match->length + match->offset;
 
     if (current_offset != 0) {
-      char *raw_content = strndup(buffer, key->offset);
+      char *raw_content = strndup(buffer, match->offset);
 
       directive_t *raw_directive = malloc(sizeof(directive_t));
-      key_match_t *raw_key = malloc(sizeof(key_match_t));
+      key_match_t *raw_match = malloc(sizeof(key_match_t));
 
       raw_directive->type = _RAW;
       raw_directive->operands = raw_content;
 
-      raw_key->length = key->offset;
-      raw_key->offset = current_offset - key->length - key->offset;
+      raw_match->length = match->offset;
+      raw_match->offset = current_offset - match->length - match->offset;
 
       list_add(directives, raw_directive);
-      list_add(matches, raw_key);
+      list_add(matches, raw_match);
 
       free(raw_directive);
-      free(raw_key);
+      free(raw_match);
     }
 
-    buffer += key->offset + key->length;
+    buffer += match->offset + match->length;
 
     list_add(directives, directive);
-    list_add(matches, key);
+    list_add(matches, match);
   }
 
   if (strlen(buffer) > 0) {
