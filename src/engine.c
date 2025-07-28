@@ -130,7 +130,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 }
 
 list_t *
-ingest(char **buffer)
+engine_ingest(char **buffer)
 {
   key_match_t *match;
   list_t *content_headers = list_create(sizeof(contentfor_operand_t));

@@ -75,7 +75,7 @@ handle_file(const char *path)
     MMIOT *doc = mkd_string(buffer, size, 0);
     template_write(base_template, NULL, out, doc, true);
   } else if (strlen(buffer) != 0) {
-    list_t *content_headers = ingest(&buffer);
+    list_t *content_headers = engine_ingest(&buffer);
     template_write(base_template, content_headers, out, buffer, false);
     list_delete(content_headers);
   }
