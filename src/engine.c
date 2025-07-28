@@ -172,6 +172,7 @@ ingest(char **buffer)
       handle_eachdo(buffer, match, directive);
       break;
 
+    case PUT:
     case ENDEACHDO:
     case BODY:
     case CONTENT:
