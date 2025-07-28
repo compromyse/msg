@@ -1,7 +1,6 @@
 #include "util.h"
 #define _GNU_SOURCE
 
-#include <config.h>
 #include <copy.h>
 #include <engine.h>
 #include <filehandler.h>

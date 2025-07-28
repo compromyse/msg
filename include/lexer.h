@@ -39,12 +39,7 @@ typedef struct {
   char *content;
 } eachdo_operands_t;
 
-typedef struct {
-  list_t *matches;
-  list_t *directives;
-} lex_t;
-
-lex_t *lex(char *buffer);
+list_t *lex(char *buffer);
 directive_t *find_directive(char *content, key_match_t *match);
 key_match_t *find_next_key(char *buffer, size_t skip);
 char *find_contentfor_value(list_t *content_headers, char *key);

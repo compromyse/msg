@@ -28,11 +28,8 @@ template_create(void)
   fclose(base);
 
   ingest(&buffer);
-  lex_t *lexed = lex(buffer);
-  template->components = lexed->directives;
+  template->components = lex(buffer);
 
-  list_delete(lexed->matches);
-  free(lexed);
   free(buffer);
   return template;
 }
