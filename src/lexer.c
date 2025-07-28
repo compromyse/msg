@@ -33,44 +33,26 @@ lex(char *buffer)
       char *raw_content = strndup(buffer, match->offset);
 
       directive_t *raw_directive = malloc(sizeof(directive_t));
-      key_match_t *raw_match = malloc(sizeof(key_match_t));
 
       raw_directive->type = _RAW;
       raw_directive->operands = raw_content;
-
-      raw_match->length = match->offset;
-      raw_match->offset = current_offset - match->length - match->offset;
-
       list_add(directives, raw_directive);
-      list_add(matches, raw_match);
 
       free(raw_directive);
-      free(raw_match);
     }
 
     buffer += match->offset + match->length;
 
     list_add(directives, directive);
-    list_add(matches, match);
   }
 
   if (strlen(buffer) > 0) {
     char *raw_content = strdup(buffer);
 
     directive_t *raw_directive = malloc(sizeof(directive_t));
-    key_match_t *raw_key = malloc(sizeof(key_match_t));
-
     raw_directive->type = _RAW;
     raw_directive->operands = raw_content;
-
-    raw_key->length = strlen(buffer);
-    raw_key->offset = current_offset;
-
     list_add(directives, raw_directive);
-    list_add(matches, raw_key);
-
-    free(raw_directive);
-    free(raw_key);
   }
 
   out->directives = directives;
