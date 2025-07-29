@@ -105,12 +105,12 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   size_t length = 1;
 
   for (size_t i = 0; i < files->size; i++) {
-    ptr_wrapper_t *wrapper = list_get(files, i);
+    ptr_wrapper_t *file_wrp = list_get(files, i);
     asprintf(&path,
              "%s/%s/%s",
              msg->base_directory,
              operands->key,
-             (char *) wrapper->ptr);
+             (char *) file_wrp->ptr);
 
     FILE *f = fopen(path, "r");
     free(path);
@@ -131,19 +131,24 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
     for (size_t i = 0; i < directives->size; i++) {
       directive_t *directive = list_get(directives, i);
       switch (directive->type) {
-      case _RAW:
-        list_add(atoms, wrap_ptr(strdup(directive->operands)));
+      case _RAW: {
+        ptr_wrapper_t *_wrapper = wrap_ptr(strdup(directive->operands));
+        list_add(atoms, _wrapper);
+        free(_wrapper);
         length += strlen(directive->operands);
         break;
+      }
 
       case PUT: {
-        ptr_wrapper_t *wrapper
+        ptr_wrapper_t *key_wrp
             = list_find_corresponding_value_from_ptr_wrapper(
                 config->keys, config->values, (char *) directive->operands);
 
-        if (wrapper != NULL) {
-          list_add(atoms, wrap_ptr(strdup(wrapper->ptr)));
-          length += strlen(wrapper->ptr);
+        if (key_wrp != NULL) {
+          ptr_wrapper_t *_wrapper = wrap_ptr(strdup(key_wrp->ptr));
+          list_add(atoms, _wrapper);
+          free(_wrapper);
+          length += strlen(key_wrp->ptr);
         }
 
         break;
@@ -156,7 +161,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
     }
 
     config_delete(config);
-    free(wrapper->ptr);
+    free(file_wrp->ptr);
   }
 
   list_delete(files);
@@ -166,6 +171,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   for (size_t i = 0; i < atoms->size; i++) {
     ptr_wrapper_t *wrapper = list_get(atoms, i);
     strcat(content, (char *) wrapper->ptr);
+    free(wrapper->ptr);
   }
 
   char *temp_buffer = strdup(*buffer);
@@ -178,10 +184,6 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
            content,
            temp_buffer + operands->length);
 
-  for (size_t i = 0; i < atoms->size; i++) {
-    ptr_wrapper_t *wrapper = list_get(atoms, i);
-    free(wrapper->ptr);
-  }
   list_delete(atoms);
   list_delete(directives);
   free(content);
