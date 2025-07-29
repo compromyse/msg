@@ -23,7 +23,7 @@ config_parse(char *content)
 
   while (buffer != NULL) {
     buffer = ltrim(buffer);
-    list_add(keys, wrap_ptr(strdup(key)));
+    list_wrap_and_add(keys, strdup(key));
 
     if (*buffer == '{') {
       buffer++;
@@ -32,17 +32,17 @@ config_parse(char *content)
 
       char *value = strsep(&raw_array, DELIM_ARRAY);
       while (value != NULL) {
-        list_add(l, wrap_ptr(strdup(trim(value))));
+        list_wrap_and_add(l, strdup(trim(value)));
         value = strsep(&raw_array, DELIM_ARRAY);
       }
 
-      list_add(array_values, wrap_ptr(l));
-      list_add(values, wrap_ptr(NULL));
+      list_wrap_and_add(array_values, l);
+      list_wrap_and_add(values, NULL);
     } else {
       char *value = trim(strsep(&buffer, "\n"));
 
-      list_add(array_values, wrap_ptr(NULL));
-      list_add(values, wrap_ptr(strdup(value)));
+      list_wrap_and_add(array_values, NULL);
+      list_wrap_and_add(values, strdup(value));
     }
 
     key = trim(strsep(&buffer, DELIM));

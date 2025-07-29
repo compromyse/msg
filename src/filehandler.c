@@ -47,7 +47,7 @@ enumfilesindir(char *path)
 
   while ((dir = readdir(d)) != NULL)
     if (dir->d_type == DT_REG)
-      list_add(l, wrap_ptr(strdup(dir->d_name)));
+      list_wrap_and_add(l, strdup(dir->d_name));
 
   closedir(d);
   return l;

@@ -132,9 +132,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
       directive_t *directive = list_get(directives, i);
       switch (directive->type) {
       case _RAW: {
-        ptr_wrapper_t *_wrapper = wrap_ptr(strdup(directive->operands));
-        list_add(atoms, _wrapper);
-        free(_wrapper);
+        list_wrap_and_add(atoms, strdup(directive->operands));
         length += strlen(directive->operands);
         break;
       }
@@ -145,9 +143,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
                 config->keys, config->values, (char *) directive->operands);
 
         if (key_wrp != NULL) {
-          ptr_wrapper_t *_wrapper = wrap_ptr(strdup(key_wrp->ptr));
-          list_add(atoms, _wrapper);
-          free(_wrapper);
+          list_wrap_and_add(atoms, strdup(key_wrp->ptr));
           length += strlen(key_wrp->ptr);
         }
 
