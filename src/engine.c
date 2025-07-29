@@ -13,8 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG
-
 extern msg_t *msg;
 
 void
@@ -80,6 +78,9 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 {
   eachdo_operands_t *operands = directive->operands;
 
+  engine_ingest(&operands->content);
+  list_t *directives = lex(operands->content);
+
 #ifdef DEBUG
   printf("KEY: %s\n", operands->key);
   printf("CONTENT: %s\n", operands->content);
@@ -121,13 +122,34 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 
     free(content);
 
-    for (size_t j = 0; j < config->keys->size; j++) {
-      ptr_wrapper_t *wrapper = list_get(config->keys, j);
-      printf("%s\n", (char *) wrapper->ptr);
+    for (size_t i = 0; i < directives->size; i++) {
+      directive_t *directive = list_get(directives, i);
+      switch (directive->type) {
+      case _RAW:
+        printf("%s", (char *) directive->operands);
+        break;
+
+      case PUT: {
+        ptr_wrapper_t *wrapper
+            = list_find_corresponding_value_from_ptr_wrapper(
+                config->keys, config->values, (char *) directive->operands);
+
+        if (wrapper != NULL)
+          printf("%s", (char *) wrapper->ptr);
+
+        break;
+      }
+
+      default:
+        /* TODO: Handle this */
+        break;
+      }
     }
+
+    config_delete(config);
   }
 
-  exit(1);
+  list_delete(directives);
   free(operands);
 }
 
