@@ -9,5 +9,6 @@ char *ltrim(char *s);
 char *rtrim(char *s);
 char *trim(char *s);
 ptr_wrapper_t *wrap_ptr(void *ptr);
+void *get_wrapped(ptr_wrapper_t *wrapper);
 
 #endif

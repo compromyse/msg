@@ -34,3 +34,9 @@ wrap_ptr(void *ptr)
   wrapper->ptr = ptr;
   return wrapper;
 }
+
+void *
+get_wrapped(ptr_wrapper_t *wrapper)
+{
+  return wrapper->ptr;
+}
