@@ -27,6 +27,7 @@ handle_include(char **buffer, key_match_t *match, directive_t *directive)
     printf("Could not open: %s\n", partial_path);
     return;
   }
+  free(partial_path);
 
   unsigned int size = fsize(f);
   char *partial_content = fcontent(f, size);
