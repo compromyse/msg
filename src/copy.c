@@ -5,6 +5,7 @@
 #include <filehandler.h>
 #include <ftw.h>
 #include <main.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/sendfile.h>
 #include <sys/stat.h>
@@ -42,6 +43,7 @@ copy_recursively(const char *fpath,
 
   sendfile(out_fd, in_fd, 0, size);
 
+  free(output_path);
   close(in_fd);
   close(out_fd);
 
