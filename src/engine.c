@@ -45,6 +45,7 @@ handle_include(char **buffer, key_match_t *match, directive_t *directive)
 
   free(partial_content);
   free(temp_buffer);
+  free(operand);
 }
 
 void
