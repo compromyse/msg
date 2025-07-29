@@ -222,6 +222,8 @@ lexer_handle_eachdo(directive_t *directive,
   }
 
   operands->content = strndup(buffer, new_match->offset);
+  operands->length
+      = match->offset + match->length + new_match->offset + new_match->length;
   free(new_match);
 
   directive->operands = operands;

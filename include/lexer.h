@@ -37,6 +37,7 @@ typedef struct {
 typedef struct {
   char *key;
   char *content;
+  size_t length;
 } eachdo_operands_t;
 
 list_t *lex(char *buffer);
