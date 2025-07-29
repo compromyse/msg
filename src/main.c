@@ -119,8 +119,9 @@ main(int argc, char **argv)
   free(assets_directory);
 
   config_t *config = config_fetch_and_parse(CONFIG_FILE);
-  list_t *resources = list_find_corresponding_value_from_ptr_wrapper(
-      config->keys, config->array_values, "resources");
+  list_t *resources
+      = get_wrapped(list_find_corresponding_value_from_ptr_wrapper(
+          config->keys, config->array_values, "resources"));
 
   if (resources == NULL) {
     printf("Could not find resources in config.cfg\n");

@@ -13,7 +13,7 @@ config_parse(char *content)
 {
   list_t *keys = list_create(sizeof(ptr_wrapper_t));
   list_t *values = list_create(sizeof(ptr_wrapper_t));
-  list_t *array_values = list_create(sizeof(list_t));
+  list_t *array_values = list_create(sizeof(ptr_wrapper_t));
 
   char *buffer = strdup(content);
   /* For free() */
@@ -36,18 +36,13 @@ config_parse(char *content)
         value = strsep(&raw_array, DELIM_ARRAY);
       }
 
-      list_add(array_values, l);
+      list_add(array_values, wrap_ptr(l));
       list_add(values, wrap_ptr(NULL));
-
-      free(l);
     } else {
-      list_t *l = list_create(sizeof(ptr_wrapper_t));
       char *value = trim(strsep(&buffer, "\n"));
 
-      list_add(array_values, l);
+      list_add(array_values, wrap_ptr(NULL));
       list_add(values, wrap_ptr(strdup(value)));
-
-      list_delete(l);
     }
 
     key = trim(strsep(&buffer, DELIM));
@@ -76,12 +71,13 @@ config_delete(config_t *config)
     if (wrapper->ptr != NULL)
       free(wrapper->ptr);
 
-    list_t *l = list_get(config->array_values, i);
-    for (size_t y = 0; y < l->size; y++) {
-      wrapper = list_get(l, y);
-
-      if (wrapper->ptr != NULL)
+    list_t *l = get_wrapped(list_get(config->array_values, i));
+    if (l != NULL) {
+      for (size_t y = 0; y < l->size; y++) {
+        wrapper = list_get(l, y);
         free(wrapper->ptr);
+      }
+      list_delete(l);
     }
   }
 
