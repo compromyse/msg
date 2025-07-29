@@ -186,6 +186,12 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 list_t *
 engine_ingest(char **buffer)
 {
+  /* don't ingest the config if it is present */
+  char *p = strstr(*buffer, "---");
+  if (p != NULL) {
+    strcpy(*buffer, p + strlen("---"));
+  }
+
   key_match_t *match;
   list_t *content_headers = list_create(sizeof(contentfor_operand_t));
   if (content_headers == NULL) {
