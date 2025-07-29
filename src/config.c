@@ -47,7 +47,7 @@ config_parse(char *content)
       list_add(array_values, l);
       list_add(values, wrap_ptr(strdup(value)));
 
-      free(l);
+      list_delete(l);
     }
 
     key = trim(strsep(&buffer, DELIM));
