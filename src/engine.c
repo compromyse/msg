@@ -77,6 +77,7 @@ void
 handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 {
   eachdo_operands_t *operands = directive->operands;
+  char *original_content = operands->content;
 
   list_t *content_headers = engine_ingest(&operands->content);
   list_delete(content_headers);
@@ -185,6 +186,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   free(content);
   free(temp_buffer);
   free(operands);
+  free(original_content);
 }
 
 list_t *
