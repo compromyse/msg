@@ -51,6 +51,7 @@ lex(char *buffer)
     char *raw_content = strdup(buffer);
 
     directive_t *raw_directive = malloc(sizeof(directive_t));
+
     raw_directive->type = _RAW;
     raw_directive->operands = raw_content;
     list_add(directives, raw_directive);
@@ -243,8 +244,8 @@ lexer_handle_put(directive_t *directive,
   directive->type = PUT;
 
   /* TODO: Use this for include and contentfor too instead of sscanf() */
-  directive->operands = trim(strndup(buffer + n + strlen("put"),
-                                     match->length - n - strlen("put") - 2));
+  directive->operands = strndup(buffer + n + strlen("put"),
+                                match->length - n - strlen("put") - 2);
 }
 
 void

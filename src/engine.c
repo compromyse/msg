@@ -141,7 +141,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
       case PUT: {
         ptr_wrapper_t *key_wrp
             = list_find_corresponding_value_from_ptr_wrapper(
-                config->keys, config->values, (char *) directive->operands);
+                config->keys, config->values, trim(_directive->operands));
 
         if (key_wrp != NULL) {
           list_wrap_and_add(atoms, strdup(key_wrp->ptr));
