@@ -32,6 +32,7 @@ handle_include(char **buffer, key_match_t *match, directive_t *directive)
 
   unsigned int size = fsize(f);
   char *partial_content = fcontent(f, size);
+  fclose(f);
 
   char *temp_buffer = strdup(*buffer);
 
@@ -43,6 +44,7 @@ handle_include(char **buffer, key_match_t *match, directive_t *directive)
            partial_content,
            temp_buffer + match->offset + match->length);
 
+  free(partial_content);
   free(temp_buffer);
 }
 
