@@ -68,6 +68,10 @@ config_delete(config_t *config)
   for (size_t i = 0; i < config->keys->size; i++) {
     ptr_wrapper_t *wrapper;
 
+    wrapper = list_get(config->keys, i);
+    if (wrapper->ptr != NULL)
+      free(wrapper->ptr);
+
     wrapper = list_get(config->values, i);
     if (wrapper->ptr != NULL)
       free(wrapper->ptr);
