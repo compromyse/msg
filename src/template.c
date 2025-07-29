@@ -27,7 +27,8 @@ template_create(void)
   char *buffer = fcontent(base, size);
   fclose(base);
 
-  engine_ingest(&buffer);
+  list_t *content_headers = engine_ingest(&buffer);
+  list_delete(content_headers);
   template->components = lex(buffer);
 
   free(buffer);

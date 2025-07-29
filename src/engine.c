@@ -78,7 +78,8 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 {
   eachdo_operands_t *operands = directive->operands;
 
-  engine_ingest(&operands->content);
+  list_t *content_headers = engine_ingest(&operands->content);
+  list_delete(content_headers);
   list_t *directives = lex(operands->content);
 
 #ifdef DEBUG
