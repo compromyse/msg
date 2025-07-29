@@ -26,13 +26,11 @@ copy_recursively(const char *fpath,
   char *output_path = NULL;
   asprintf(&output_path, "%s/%s", OUTPUT, path);
 
-  if (typeflag == FTW_D) {
-    mkdir(output_path, 0700);
-    return FTW_CONTINUE;
-  }
+  if (typeflag == FTW_D)
+    goto exit;
 
   if (typeflag != FTW_F)
-    return FTW_CONTINUE;
+    goto exit;
 
   FILE *in = fopen(fpath, "r");
   size_t size = fsize(in);
@@ -43,9 +41,10 @@ copy_recursively(const char *fpath,
 
   sendfile(out_fd, in_fd, 0, size);
 
-  free(output_path);
   close(in_fd);
   close(out_fd);
 
+exit:
+  free(output_path);
   return FTW_CONTINUE;
 }
