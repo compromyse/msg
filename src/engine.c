@@ -172,15 +172,14 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
            content,
            temp_buffer + operands->length);
 
-  free(content);
-  free(temp_buffer);
-
   for (size_t i = 0; i < atoms->size; i++) {
     ptr_wrapper_t *wrapper = list_get(atoms, i);
     free(wrapper->ptr);
   }
   list_delete(atoms);
   list_delete(directives);
+  free(content);
+  free(temp_buffer);
   free(operands);
 }
 
