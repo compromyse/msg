@@ -130,11 +130,11 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
     free(content);
 
     for (size_t i = 0; i < directives->size; i++) {
-      directive_t *directive = list_get(directives, i);
-      switch (directive->type) {
+      directive_t *_directive = list_get(directives, i);
+      switch (_directive->type) {
       case _RAW: {
-        list_wrap_and_add(atoms, strdup(directive->operands));
-        length += strlen(directive->operands);
+        list_wrap_and_add(atoms, strdup(_directive->operands));
+        length += strlen(_directive->operands);
         break;
       }
 
@@ -181,8 +181,12 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
            content,
            temp_buffer + operands->length);
 
-  list_delete(atoms);
+  for (size_t i = 0; i < directives->size; i++) {
+    directive_t *_directive = list_get(directives, i);
+    free(_directive->operands);
+  }
   list_delete(directives);
+  list_delete(atoms);
   free(content);
   free(temp_buffer);
   free(operands);
