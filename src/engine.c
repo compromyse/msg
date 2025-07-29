@@ -92,12 +92,12 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 
   char *path;
 
-  asprintf(&path, "%s/%s", msg->base_directory, operands->key);
+  asprintf(&path, "%s/%s", msg->base_directory, trim(operands->key));
   list_t *files = enumfilesindir(path);
   free(path);
 
   if (files == NULL) {
-    printf("Could not find key %s\n", operands->key);
+    printf("Could not find key %s\n", trim(operands->key));
     free(operands);
     return;
   }
@@ -110,7 +110,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
     asprintf(&path,
              "%s/%s/%s",
              msg->base_directory,
-             operands->key,
+             trim(operands->key),
              (char *) file_wrp->ptr);
 
     FILE *f = fopen(path, "r");
@@ -189,8 +189,9 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   list_delete(atoms);
   free(content);
   free(temp_buffer);
-  free(operands);
+  free(operands->key);
   free(original_content);
+  free(operands);
 }
 
 list_t *
@@ -243,6 +244,9 @@ engine_ingest(char **buffer)
       break;
 
     case PUT:
+      free(directive->operands);
+      skip++;
+      break;
     case ENDEACHDO:
     case BODY:
     case CONTENT:

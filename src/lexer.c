@@ -188,8 +188,8 @@ lexer_handle_eachdo(directive_t *directive,
   directive->type = EACHDO;
   eachdo_operands_t *operands = malloc(sizeof(eachdo_operands_t));
 
-  operands->key = trim(strndup(buffer + n + strlen("eachdo"),
-                               match->length - n - strlen("eachdo") - 2));
+  operands->key = strndup(buffer + n + strlen("eachdo"),
+                          match->length - n - strlen("eachdo") - 2);
 
   buffer += match->length;
   key_match_t *new_match;
@@ -210,7 +210,6 @@ lexer_handle_eachdo(directive_t *directive,
       printf("Cannot find directive: %.*s\n",
              new_match->length,
              buffer + new_match->offset);
-      free(new_directive);
       free(new_match);
       free(directive);
       return;
@@ -219,6 +218,9 @@ lexer_handle_eachdo(directive_t *directive,
     if (new_directive->type == ENDEACHDO) {
       free(new_directive);
       break;
+    } else {
+      /* TODO: delete_directive */
+      free(new_directive->operands);
     }
 
     free(new_directive);
