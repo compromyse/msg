@@ -154,7 +154,10 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
     }
 
     config_delete(config);
+    free(wrapper->ptr);
   }
+
+  list_delete(files);
 
   char *content = calloc(length, sizeof(char));
 
