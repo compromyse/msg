@@ -44,6 +44,15 @@ list_add(list_t *list, void *element)
   list->size++;
 }
 
+void
+list_wrap_and_add(list_t *list, void *element)
+{
+
+  ptr_wrapper_t *wrapped = wrap_ptr(element);
+  list_add(list, wrapped);
+  free(wrapped);
+}
+
 void *
 list_get(list_t *list, size_t i)
 {
