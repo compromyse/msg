@@ -42,6 +42,9 @@ lex(char *buffer)
     buffer += match->offset + match->length;
 
     list_add(directives, directive);
+
+    free(directive);
+    free(match);
   }
 
   if (strlen(buffer) > 0) {
@@ -51,6 +54,8 @@ lex(char *buffer)
     raw_directive->type = _RAW;
     raw_directive->operands = raw_content;
     list_add(directives, raw_directive);
+
+    free(raw_directive);
   }
 
   return directives;
