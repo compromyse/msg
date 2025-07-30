@@ -325,7 +325,7 @@ found_start:
     lexer_handle_put(directive, match, buffer, n);
   } else {
     directive_delete(directive);
-    return NULL;
+    directive = NULL;
   }
 
   return directive;
