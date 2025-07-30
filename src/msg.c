@@ -128,6 +128,7 @@ run(void)
   if (config == NULL)
     return EXIT_FAILURE;
 
+  template_initialize();
   base_template = template_create(BASE_TEMPLATE);
 
   int err = mkdir(msg->output_directory, 0700);
@@ -178,6 +179,7 @@ run(void)
   }
 
   template_delete(base_template);
+  template_clean();
   config_delete(config);
 
   return EXIT_SUCCESS;

@@ -19,6 +19,7 @@
 #define _GNU_SOURCE
 
 #include <copy.h>
+#include <dirent.h>
 #include <engine.h>
 #include <filehandler.h>
 #include <lexer.h>
@@ -28,8 +29,76 @@
 #include <stdlib.h>
 #include <string.h>
 #include <template.h>
+#include <util.h>
 
 extern msg_t *msg;
+
+list_t *keys;
+list_t *templates;
+
+static void
+delete_components(template_t *template)
+{
+  for (size_t i = 0; i < template->components->size; i++) {
+    directive_t *directive = list_get(template->components, i);
+    switch (directive->type) {
+    case _RAW:
+    case CONTENT:
+      free(directive->operands);
+      break;
+
+    default:
+      break;
+    }
+  }
+  list_delete(template->components);
+}
+
+void
+template_initialize(void)
+{
+  keys = list_create(sizeof(ptr_wrapper_t));
+  templates = list_create(sizeof(template_t));
+
+  char *template_directory;
+  asprintf(&template_directory, "%s/%s", msg->base_directory, TEMPLATES);
+  DIR *dir = opendir(template_directory);
+
+  if (dir == NULL) {
+    printf("Could not open %s\n", template_directory);
+    return;
+  }
+  free(template_directory);
+
+  struct dirent *f;
+  while ((f = readdir(dir)) != NULL) {
+    if (f->d_type != DT_REG)
+      continue;
+
+    template_t *t = template_create(f->d_name);
+    list_wrap_and_add(keys, strdup(f->d_name));
+    list_add(templates, t);
+
+    free(t);
+  }
+
+  closedir(dir);
+}
+
+void
+template_clean(void)
+{
+  for (size_t i = 0; i < keys->size; i++) {
+    template_t *template = list_get(templates, i);
+    delete_components(template);
+
+    ptr_wrapper_t *wrapper = list_get(keys, i);
+    free(wrapper->ptr);
+  }
+
+  list_delete(keys);
+  list_delete(templates);
+}
 
 template_t *
 template_create(char *template_name)
@@ -56,20 +125,7 @@ template_create(char *template_name)
 void
 template_delete(template_t *template)
 {
-  for (size_t i = 0; i < template->components->size; i++) {
-    directive_t *directive = list_get(template->components, i);
-    switch (directive->type) {
-    case _RAW:
-    case CONTENT:
-      free(directive->operands);
-      break;
-
-    default:
-      break;
-    }
-  }
-
-  list_delete(template->components);
+  delete_components(template);
   free(template);
 }
 
