@@ -52,7 +52,10 @@ main(int argc, char **argv)
     }
   }
 
-  msg->base_directory = argv[optind];
+  if (optind == argc)
+    msg->base_directory = ".";
+  else
+    msg->base_directory = argv[optind];
 
   int r = run();
 
