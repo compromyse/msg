@@ -20,7 +20,6 @@
 #define __MSG_H
 
 #define PARTIALS "partials"
-#define ASSETS "assets"
 #define CONFIG_FILE "config.cfg"
 #define BASE_TEMPLATE "base.html"
 

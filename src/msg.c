@@ -136,10 +136,31 @@ run(void)
     return EXIT_FAILURE;
   }
 
-  char *assets_directory;
-  asprintf(&assets_directory, "%s/%s", msg->base_directory, ASSETS);
-  nftw(assets_directory, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
-  free(assets_directory);
+  list_t *static_ = get_wrapped(list_find_corresponding_value_from_ptr_wrapper(
+      config->keys, config->array_values, "static"));
+
+  if (static_ == NULL) {
+    printf("Could not find resources in config.cfg\n");
+    return EXIT_FAILURE;
+  }
+
+  for (size_t i = 0; i < static_->size; i++) {
+    ptr_wrapper_t *value = list_get(static_, i);
+    char *path = NULL;
+    asprintf(&path, "%s/%s", msg->base_directory, (char *) value->ptr);
+
+    struct stat path_stat;
+    stat(path, &path_stat);
+
+    if (S_ISREG(path_stat.st_mode))
+      copy_recursively(path, NULL, FTW_F, NULL);
+    else if (S_ISDIR(path_stat.st_mode)) {
+      printf("%s\n", path);
+      nftw(path, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
+    }
+
+    free(path);
+  }
 
   list_t *resources
       = get_wrapped(list_find_corresponding_value_from_ptr_wrapper(
