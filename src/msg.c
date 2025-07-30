@@ -128,7 +128,7 @@ run(void)
   if (config == NULL)
     return EXIT_FAILURE;
 
-  base_template = template_create();
+  base_template = template_create(BASE_TEMPLATE);
 
   int err = mkdir(msg->output_directory, 0700);
   if (err != 0 && errno != EEXIST) {

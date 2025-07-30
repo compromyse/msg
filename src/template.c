@@ -32,12 +32,12 @@
 extern msg_t *msg;
 
 template_t *
-template_create(void)
+template_create(char *template_name)
 {
   template_t *template = malloc(sizeof(template_t));
 
   char *path;
-  asprintf(&path, "%s/%s/%s", msg->base_directory, TEMPLATES, BASE_TEMPLATE);
+  asprintf(&path, "%s/%s/%s", msg->base_directory, TEMPLATES, template_name);
   FILE *base = fopen(path, "r");
   free(path);
 

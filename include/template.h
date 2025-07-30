@@ -27,7 +27,7 @@ typedef struct {
   list_t *components;
 } template_t;
 
-template_t *template_create(void);
+template_t *template_create(char *template_name);
 void template_delete(template_t *template);
 void template_write(template_t *template,
                     list_t *content_headers,
