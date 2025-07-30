@@ -19,7 +19,6 @@
 #ifndef __MSG_H
 #define __MSG_H
 
-#define OUTPUT "dist"
 #define PARTIALS "partials"
 #define ASSETS "assets"
 #define CONFIG_FILE "config.cfg"
@@ -27,6 +26,7 @@
 
 typedef struct {
   char *base_directory;
+  char *output_directory;
 } msg_t;
 
 int run(void);

@@ -42,7 +42,7 @@ copy_recursively(const char *fpath,
 
   const char *path = fpath + strlen(msg->base_directory) + 1;
   char *output_path = NULL;
-  asprintf(&output_path, "%s/%s", OUTPUT, path);
+  asprintf(&output_path, "%s/%s", msg->output_directory, path);
 
   if (typeflag == FTW_D)
     goto exit;

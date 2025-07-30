@@ -39,11 +39,13 @@ main(int argc, char **argv)
 {
   int opt;
   msg = malloc(sizeof(msg_t));
+  msg->base_directory = ".";
+  msg->output_directory = "dist";
 
   while ((opt = getopt(argc, argv, "o:h")) != -1) {
     switch (opt) {
     case 'o':
-      /* msg.output_directory = optarg; */
+      msg->output_directory = optarg;
       break;
     case 'h':
     default:
@@ -52,9 +54,7 @@ main(int argc, char **argv)
     }
   }
 
-  if (optind == argc)
-    msg->base_directory = ".";
-  else
+  if (optind < argc)
     msg->base_directory = argv[optind];
 
   int r = run();

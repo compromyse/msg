@@ -49,9 +49,13 @@ handle_file(const char *path)
 
   char *dot = strrchr(inpath, '.');
   if (dot && strcmp(dot, ".md") == 0) {
-    asprintf(&outpath, "%s/%.*s.html", OUTPUT, (int) strlen(path) - 3, path);
+    asprintf(&outpath,
+             "%s/%.*s.html",
+             msg->output_directory,
+             (int) strlen(path) - 3,
+             path);
   } else {
-    asprintf(&outpath, "%s/%s", OUTPUT, path);
+    asprintf(&outpath, "%s/%s", msg->output_directory, path);
   }
 
   char *temp_outpath = strdup(outpath);
@@ -118,7 +122,7 @@ run(void)
 
   base_template = template_create();
 
-  int err = mkdir(OUTPUT, 0700);
+  int err = mkdir(msg->output_directory, 0700);
   if (err != 0 && errno != EEXIST) {
     perror("mkdir");
     return EXIT_FAILURE;
