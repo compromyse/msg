@@ -12,10 +12,11 @@
           clang-tools
           clang
           lldb
-          cmake
-          valgrind
 
-          discount
+          cmake
+          ninja
+
+          valgrind
         ];
       };
     };
