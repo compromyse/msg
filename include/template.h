@@ -19,6 +19,7 @@
 #ifndef __TEMPLATE_H
 #define __TEMPLATE_H
 
+#include <engine.h>
 #include <list.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -31,10 +32,6 @@ void template_initialize(void);
 void template_clean(void);
 template_t *template_create(char *template_name);
 void template_delete(template_t *template);
-void template_write(template_t *template,
-                    list_t *content_headers,
-                    FILE *f,
-                    void *doc,
-                    bool is_markdown);
+void template_write(engine_t *engine, FILE *f, void *doc, bool is_markdown);
 
 #endif

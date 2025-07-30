@@ -96,8 +96,8 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 {
   eachdo_operands_t *operands = directive->operands;
 
-  list_t *content_headers = engine_ingest(&operands->content);
-  list_delete(content_headers);
+  engine_t *engine = engine_ingest(&operands->content);
+  engine_delete(engine);
   list_t *directives = lex(operands->content);
 
 #ifdef DEBUG
@@ -206,18 +206,21 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   free(temp_buffer);
 }
 
-list_t *
+engine_t *
 engine_ingest(char **buffer)
 {
-  /* don't ingest the config if it is present */
+  engine_t *engine = malloc(sizeof(engine_t));
+  engine->config = NULL;
+
   char *p = strstr(*buffer, "---");
   if (p != NULL) {
+    engine->config = config_parse(p);
     strcpy(*buffer, p + strlen("---"));
   }
 
   key_match_t *match;
-  list_t *content_headers = list_create(sizeof(contentfor_operand_t));
-  if (content_headers == NULL) {
+  engine->content_headers = list_create(sizeof(contentfor_operand_t));
+  if (engine->content_headers == NULL) {
     printf("Could not create content_headers\n");
     return NULL;
   }
@@ -249,7 +252,7 @@ engine_ingest(char **buffer)
       handle_include(buffer, match, directive);
       break;
     case CONTENTFOR:
-      handle_contentfor(buffer, match, directive, content_headers);
+      handle_contentfor(buffer, match, directive, engine->content_headers);
       break;
     case EACHDO:
       handle_eachdo(buffer, match, directive);
@@ -271,5 +274,15 @@ engine_ingest(char **buffer)
     free(match);
   }
 
-  return content_headers;
+  return engine;
+}
+
+void
+engine_delete(engine_t *engine)
+{
+  if (engine->config != NULL)
+    config_delete(engine->config);
+
+  list_delete(engine->content_headers);
+  free(engine);
 }

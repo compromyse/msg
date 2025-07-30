@@ -23,6 +23,7 @@
 #include <engine.h>
 #include <filehandler.h>
 #include <lexer.h>
+#include <list.h>
 #include <mkdio.h>
 #include <msg.h>
 #include <stdio.h>
@@ -114,8 +115,8 @@ template_create(char *template_name)
   char *buffer = fcontent(base, size);
   fclose(base);
 
-  list_t *content_headers = engine_ingest(&buffer);
-  list_delete(content_headers);
+  engine_t *engine = engine_ingest(&buffer);
+  engine_delete(engine);
   template->components = lex(buffer);
 
   free(buffer);
@@ -130,14 +131,11 @@ template_delete(template_t *template)
 }
 
 void
-template_write(template_t *template,
-               list_t *content_headers,
-               FILE *f,
-               void *doc,
-               bool is_markdown)
+template_write(engine_t *engine, FILE *f, void *doc, bool is_markdown)
 {
-  char *output = malloc(1);
-  strcpy(output, "");
+  template_t *template = template
+      = list_find_corresponding_value_from_ptr_wrapper(
+          keys, templates, "base.html");
 
   for (size_t i = 0; i < template->components->size; i++) {
     directive_t *match = list_get(template->components, i);
@@ -151,7 +149,7 @@ template_write(template_t *template,
       /* TODO: handle this gracefully */
       if (!is_markdown) {
         char *content
-            = find_contentfor_value(content_headers, match->operands);
+            = find_contentfor_value(engine->content_headers, match->operands);
         fprintf(f, "%s", content);
       }
       break;

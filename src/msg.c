@@ -37,7 +37,6 @@
 #include <util.h>
 
 extern msg_t *msg;
-template_t *base_template;
 
 void
 handle_file(const char *path)
@@ -95,11 +94,11 @@ handle_file(const char *path)
 
   if (dot && strcmp(dot, ".md") == 0) {
     MMIOT *doc = mkd_string(buffer, size, 0);
-    template_write(base_template, NULL, out, doc, true);
+    template_write(NULL, out, doc, true);
   } else if (strlen(buffer) != 0) {
-    list_t *content_headers = engine_ingest(&buffer);
-    template_write(base_template, content_headers, out, buffer, false);
-    list_delete(content_headers);
+    engine_t *engine = engine_ingest(&buffer);
+    template_write(engine, out, buffer, false);
+    engine_delete(engine);
   }
 
   free(buffer);
@@ -129,7 +128,6 @@ run(void)
     return EXIT_FAILURE;
 
   template_initialize();
-  base_template = template_create(BASE_TEMPLATE);
 
   int err = mkdir(msg->output_directory, 0700);
   if (err != 0 && errno != EEXIST) {
@@ -178,7 +176,6 @@ run(void)
     handle_file(path);
   }
 
-  template_delete(base_template);
   template_clean();
   config_delete(config);
 

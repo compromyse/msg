@@ -19,10 +19,17 @@
 #ifndef __ENGINE_H
 #define __ENGINE_H
 
+#include <config.h>
 #include <lexer.h>
 #include <list.h>
 
-list_t *engine_ingest(char **buffer);
+typedef struct {
+  list_t *content_headers;
+  config_t *config;
+} engine_t;
+
+engine_t *engine_ingest(char **buffer);
+void engine_delete(engine_t *engine);
 void handle_include(char **buffer, key_match_t *match, directive_t *directive);
 void handle_contentfor(char **buffer,
                        key_match_t *match,
