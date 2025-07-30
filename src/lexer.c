@@ -128,6 +128,7 @@ lexer_handle_contentfor(directive_t *directive,
                         size_t n)
 {
   directive->type = CONTENTFOR;
+  directive->operands = NULL;
   contentfor_operand_t *operands = malloc(sizeof(contentfor_operand_t));
 
   for (size_t i = n + strlen("contentfor"); i < match->length; i++)
@@ -163,8 +164,8 @@ lexer_handle_contentfor(directive_t *directive,
     }
 
     if (new_directive->type == ENDCONTENT) {
-      break;
       free(new_directive);
+      break;
     }
 
     free(new_directive);
@@ -333,4 +334,31 @@ find_contentfor_value(list_t *content_headers, char *key)
   }
 
   return NULL;
+}
+
+void
+directive_delete(directive_t *directive)
+{
+  switch (directive->type) {
+  case EACHDO: {
+    eachdo_operands_t *operands = directive->operands;
+    free(operands->content);
+    free(operands->key);
+    free(operands);
+  }
+  case CONTENTFOR: {
+    contentfor_operand_t *operands = directive->operands;
+    free(operands->content);
+    free(operands->key);
+    free(operands);
+  }
+  case PUT:
+  case CONTENT:
+  case INCLUDE:
+    if (directive->operands != NULL)
+      free(directive->operands);
+    break;
+  default:
+    break;
+  }
 }

@@ -45,6 +45,8 @@ directive_t *find_directive(char *content, key_match_t *match);
 key_match_t *find_next_key(char *buffer, size_t skip);
 char *find_contentfor_value(list_t *content_headers, char *key);
 
+void directive_delete(directive_t *directive);
+
 void lexer_handle_include(directive_t *directive,
                           key_match_t *match,
                           char *buffer,
