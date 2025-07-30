@@ -16,14 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __MAIN_H
-#define __MAIN_H
+#ifndef __MSG_H
+#define __MSG_H
 
+#define OUTPUT "dist"
+#define PARTIALS "partials"
 #define ASSETS "assets"
 #define CONFIG_FILE "config.cfg"
 #define BASE_TEMPLATE "base.html"
-#define OUTPUT "dist"
-#define PARTIALS "partials"
 
 typedef struct {
   char *base_directory;
