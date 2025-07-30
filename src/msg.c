@@ -154,10 +154,8 @@ run(void)
 
     if (S_ISREG(path_stat.st_mode))
       copy_recursively(path, NULL, FTW_F, NULL);
-    else if (S_ISDIR(path_stat.st_mode)) {
-      printf("%s\n", path);
+    else if (S_ISDIR(path_stat.st_mode))
       nftw(path, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
-    }
 
     free(path);
   }
