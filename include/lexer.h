@@ -49,7 +49,7 @@ typedef struct {
 typedef struct {
   char *key;
   char *content;
-  unsigned int length;
+  size_t length;
 } contentfor_operand_t;
 
 typedef struct {
