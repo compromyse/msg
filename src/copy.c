@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <filehandler.h>
 #include <ftw.h>
+#include <libgen.h>
 #include <msg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,6 +50,27 @@ copy_recursively(const char *fpath,
 
   if (typeflag != FTW_F)
     goto exit;
+
+  char *temppath = strdup(path);
+  char *directory;
+  asprintf(&directory, "%s/%s", msg->output_directory, dirname(temppath));
+  char *next = calloc(strlen(directory) + 1, sizeof(char));
+  strcpy(next, "");
+
+  char *token;
+  for (token = strtok(directory, "/"); token != NULL;
+       token = strtok(NULL, "/")) {
+    if (strcmp(next, "") != 0) {
+      strcat(next, "/");
+    }
+
+    strcat(next, token);
+    mkdir(next, 0700);
+  }
+
+  free(temppath);
+  free(directory);
+  free(next);
 
   FILE *in = fopen(fpath, "r");
   size_t size = fsize(in);
