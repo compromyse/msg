@@ -39,9 +39,13 @@ target_include_directories(msg PRIVATE include)
 target_include_directories(msg PRIVATE discount)
 target_link_libraries(msg libmarkdown)
 
-target_compile_options(libmarkdown PRIVATE
-  $<$<COMPILE_LANGUAGE:C>: -w>
-)
+# The compiler isn't very happy with discount
+target_compile_options(libmarkdown PRIVATE -w)
+target_compile_options(mkd2html PRIVATE -w)
+target_compile_options(makepage PRIVATE -w)
+target_compile_options(markdown PRIVATE -w)
+target_compile_options(common PRIVATE -w)
+
 target_compile_options(msg PRIVATE
   $<$<COMPILE_LANGUAGE:C>: ${C_COMPILE_OPTIONS}>
 )
