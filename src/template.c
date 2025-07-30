@@ -38,6 +38,19 @@ template_create(void)
 void
 template_delete(template_t *template)
 {
+  for (size_t i = 0; i < template->components->size; i++) {
+    directive_t *directive = list_get(template->components, i);
+    switch (directive->type) {
+    case _RAW:
+    case CONTENT:
+      free(directive->operands);
+      break;
+
+    default:
+      break;
+    }
+  }
+
   list_delete(template->components);
   free(template);
 }
