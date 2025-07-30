@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
+add_subdirectory(discount/cmake)
+
 project(msg C)
 
 set(SRC
@@ -14,20 +16,16 @@ set(SRC
   src/util.c
 )
 
-add_executable(msg ${SRC})
-target_include_directories(msg PRIVATE include)
-target_link_libraries(msg markdown)
-
 set(C_COMPILE_OPTIONS
-  # -O3
-  -Og
+  -O3
+  # -Og
 
   -Wall
   -Wextra
-  # -Werror
+  -Werror
 
-  -g3
-  -glldb
+  # -g3
+  # -glldb
 
   -std=c99
 
@@ -35,6 +33,15 @@ set(C_COMPILE_OPTIONS
   -Wno-unused-variable
 )
 
+add_executable(msg ${SRC})
+target_include_directories(msg PRIVATE include)
+
+target_include_directories(msg PRIVATE discount)
+target_link_libraries(msg libmarkdown)
+
+target_compile_options(libmarkdown PRIVATE
+  $<$<COMPILE_LANGUAGE:C>: -w>
+)
 target_compile_options(msg PRIVATE
   $<$<COMPILE_LANGUAGE:C>: ${C_COMPILE_OPTIONS}>
 )
