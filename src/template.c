@@ -137,6 +137,22 @@ template_write(engine_t *engine, FILE *f, void *doc, bool is_markdown)
       = list_find_corresponding_value_from_ptr_wrapper(
           keys, templates, "base.html");
 
+  if (engine != NULL && engine->config != NULL) {
+    char *template_name
+        = get_wrapped(list_find_corresponding_value_from_ptr_wrapper(
+            engine->config->keys, engine->config->values, "template"));
+
+    if (template_name != NULL) {
+      template = list_find_corresponding_value_from_ptr_wrapper(
+          keys, templates, template_name);
+
+      if (template == NULL) {
+        printf("Could not find template %s\n", template_name);
+        return;
+      }
+    }
+  }
+
   for (size_t i = 0; i < template->components->size; i++) {
     directive_t *match = list_get(template->components, i);
 
