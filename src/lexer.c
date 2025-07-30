@@ -36,7 +36,7 @@ lex(char *buffer)
       raw_directive->operands = raw_content;
       list_add(directives, raw_directive);
 
-      free(raw_directive);
+      directive_delete(raw_directive);
     }
 
     buffer += match->offset + match->length;
@@ -56,7 +56,7 @@ lex(char *buffer)
     raw_directive->operands = raw_content;
     list_add(directives, raw_directive);
 
-    free(raw_directive);
+    directive_delete(raw_directive);
   }
 
   return directives;
@@ -147,7 +147,7 @@ lexer_handle_contentfor(directive_t *directive,
     if (new_match == NULL) {
       printf("Cannot find endcontent\n");
       free(new_match);
-      free(directive);
+      directive_delete(directive);
       /* TODO: Handle early returns */
       return;
     }
@@ -157,18 +157,18 @@ lexer_handle_contentfor(directive_t *directive,
       printf("Cannot find directive: %.*s\n",
              new_match->length,
              buffer + new_match->offset);
-      free(new_directive);
+      directive_delete(new_directive);
       free(new_match);
-      free(directive);
+      directive_delete(directive);
       return;
     }
 
     if (new_directive->type == ENDCONTENT) {
-      free(new_directive);
+      directive_delete(new_directive);
       break;
     }
 
-    free(new_directive);
+    directive_delete(new_directive);
     free(new_match);
   }
 
@@ -201,7 +201,7 @@ lexer_handle_eachdo(directive_t *directive,
     if (new_match == NULL) {
       printf("Cannot find endeachdo\n");
       free(new_match);
-      free(directive);
+      directive_delete(directive);
       /* TODO: Handle early returns */
       return;
     }
@@ -212,19 +212,19 @@ lexer_handle_eachdo(directive_t *directive,
              new_match->length,
              buffer + new_match->offset);
       free(new_match);
-      free(directive);
+      directive_delete(directive);
       return;
     }
 
     if (new_directive->type == ENDEACHDO) {
-      free(new_directive);
+      directive_delete(new_directive);
       break;
     } else {
       /* TODO: delete_directive */
-      free(new_directive->operands);
+      directive_delete(new_directive->operands);
     }
 
-    free(new_directive);
+    directive_delete(new_directive);
     free(new_match);
 
     skip++;
@@ -316,7 +316,7 @@ found_start:
   } else if (DIRECTIVE_IS("put")) {
     lexer_handle_put(directive, match, buffer, n);
   } else {
-    free(directive);
+    directive_delete(directive);
     return NULL;
   }
 
@@ -345,12 +345,14 @@ directive_delete(directive_t *directive)
     free(operands->content);
     free(operands->key);
     free(operands);
+    break;
   }
   case CONTENTFOR: {
     contentfor_operand_t *operands = directive->operands;
     free(operands->content);
     free(operands->key);
     free(operands);
+    break;
   }
   case PUT:
   case CONTENT:

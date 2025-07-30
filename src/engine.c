@@ -45,7 +45,6 @@ handle_include(char **buffer, key_match_t *match, directive_t *directive)
 
   free(partial_content);
   free(temp_buffer);
-  free(operand);
 }
 
 void
@@ -72,14 +71,12 @@ handle_contentfor(char **buffer,
            temp_buffer + operand->length);
 
   free(temp_buffer);
-  free(operand);
 }
 
 void
 handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 {
   eachdo_operands_t *operands = directive->operands;
-  char *original_content = operands->content;
 
   list_t *content_headers = engine_ingest(&operands->content);
   list_delete(content_headers);
@@ -189,9 +186,6 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   list_delete(atoms);
   free(content);
   free(temp_buffer);
-  free(operands->key);
-  free(original_content);
-  free(operands);
 }
 
 list_t *
@@ -244,7 +238,6 @@ engine_ingest(char **buffer)
       break;
 
     case PUT:
-      free(directive->operands);
       skip++;
       break;
     case ENDEACHDO:
@@ -256,11 +249,8 @@ engine_ingest(char **buffer)
       break;
     }
 
-    if (directive != NULL)
-      free(directive);
-
-    if (match != NULL)
-      free(match);
+    directive_delete(directive);
+    free(match);
   }
 
   return content_headers;
