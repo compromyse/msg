@@ -13,6 +13,7 @@
           clang
           lldb
           cmake
+          valgrind
 
           discount
         ];
