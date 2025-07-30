@@ -294,17 +294,10 @@ find_directive(char *content, key_match_t *match)
   size_t n = 0;
 
   for (size_t i = 0; i < match->length; i++)
-    switch (buffer[i]) {
-    case '{':
-    case ' ':
-    case '\t':
-    case '\n':
+    if (isspace(buffer[i]) || buffer[i] == '{')
       n++;
-      break;
-
-    default:
+    else
       goto found_start;
-    }
 
   return NULL;
 
