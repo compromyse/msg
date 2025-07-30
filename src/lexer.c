@@ -36,7 +36,7 @@ lex(char *buffer)
       raw_directive->operands = raw_content;
       list_add(directives, raw_directive);
 
-      directive_delete(raw_directive);
+      free(raw_directive);
     }
 
     buffer += match->offset + match->length;
@@ -56,7 +56,7 @@ lex(char *buffer)
     raw_directive->operands = raw_content;
     list_add(directives, raw_directive);
 
-    directive_delete(raw_directive);
+    free(raw_directive);
   }
 
   return directives;
