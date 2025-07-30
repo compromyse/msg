@@ -120,6 +120,14 @@ run(void)
     return EXIT_FAILURE;
   }
 
+  char *config_path;
+  asprintf(&config_path, "%s/%s", msg->base_directory, CONFIG_FILE);
+  config_t *config = config_fetch_and_parse(config_path);
+  free(config_path);
+
+  if (config == NULL)
+    return EXIT_FAILURE;
+
   base_template = template_create();
 
   int err = mkdir(msg->output_directory, 0700);
@@ -132,14 +140,6 @@ run(void)
   asprintf(&assets_directory, "%s/%s", msg->base_directory, ASSETS);
   nftw(assets_directory, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
   free(assets_directory);
-
-  char *config_path;
-  asprintf(&config_path, "%s/%s", msg->base_directory, CONFIG_FILE);
-  config_t *config = config_fetch_and_parse(config_path);
-  free(config_path);
-
-  if (config == NULL)
-    return EXIT_FAILURE;
 
   list_t *resources
       = get_wrapped(list_find_corresponding_value_from_ptr_wrapper(
