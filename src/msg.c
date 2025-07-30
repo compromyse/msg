@@ -133,7 +133,14 @@ run(void)
   nftw(assets_directory, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
   free(assets_directory);
 
-  config_t *config = config_fetch_and_parse(CONFIG_FILE);
+  char *config_path;
+  asprintf(&config_path, "%s/%s", msg->base_directory, CONFIG_FILE);
+  config_t *config = config_fetch_and_parse(config_path);
+  free(config_path);
+
+  if (config == NULL)
+    return EXIT_FAILURE;
+
   list_t *resources
       = get_wrapped(list_find_corresponding_value_from_ptr_wrapper(
           config->keys, config->array_values, "resources"));
