@@ -356,9 +356,10 @@ directive_delete(directive_t *directive)
   case INCLUDE:
     if (directive->operands != NULL)
       free(directive->operands);
-    free(directive);
     break;
   default:
     break;
   }
+
+  free(directive);
 }
