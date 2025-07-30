@@ -52,7 +52,7 @@ main(int argc, char **argv)
     }
   }
 
-  msg->base_directory = "compromyse.xyz";
+  msg->base_directory = argv[optind];
 
   int r = run();
 
