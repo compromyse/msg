@@ -16,14 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #ifndef __COPY_H
 #define __COPY_H
 
 #include <ftw.h>
 #include <sys/stat.h>
-
-#define OUTPUT "dist"
 
 typedef struct FTW FTW;
 

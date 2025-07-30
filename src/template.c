@@ -22,7 +22,7 @@
 #include <engine.h>
 #include <filehandler.h>
 #include <lexer.h>
-#include <main.h>
+#include <msg.h>
 #include <mkdio.h>
 #include <stdio.h>
 #include <stdlib.h>

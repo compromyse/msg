@@ -9,6 +9,7 @@ set(SRC
   src/lexer.c
   src/list.c
   src/main.c
+  src/msg.c
   src/template.c
   src/util.c
 )

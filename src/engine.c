@@ -25,7 +25,7 @@
 #include <filehandler.h>
 #include <lexer.h>
 #include <list.h>
-#include <main.h>
+#include <msg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>

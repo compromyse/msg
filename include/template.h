@@ -23,8 +23,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define BASE_TEMPLATE "base.html"
-
 typedef struct {
   list_t *components;
 } template_t;

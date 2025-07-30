@@ -21,9 +21,14 @@
 
 #define ASSETS "assets"
 #define CONFIG_FILE "config.cfg"
+#define BASE_TEMPLATE "base.html"
+#define OUTPUT "dist"
+#define PARTIALS "partials"
 
 typedef struct {
   char *base_directory;
 } msg_t;
+
+int run(int argc, char **argv);
 
 #endif

@@ -22,7 +22,7 @@
 #include <fcntl.h>
 #include <filehandler.h>
 #include <ftw.h>
-#include <main.h>
+#include <msg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/sendfile.h>
