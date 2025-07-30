@@ -311,9 +311,7 @@ find_directive(char *content, key_match_t *match)
 found_start:
   directive = (directive_t *) calloc(1, sizeof(directive_t));
 
-  if (DIRECTIVE_IS("include")) {
-    lexer_handle_include(directive, match, buffer, n);
-  } else if (DIRECTIVE_IS("endcontent")) {
+  if (DIRECTIVE_IS("endcontent")) {
     directive->type = ENDCONTENT;
     directive->operands = NULL;
   } else if (DIRECTIVE_IS("endeachdo")) {
@@ -322,6 +320,8 @@ found_start:
   } else if (DIRECTIVE_IS("body")) {
     directive->type = BODY;
     directive->operands = NULL;
+  } else if (DIRECTIVE_IS("include")) {
+    lexer_handle_include(directive, match, buffer, n);
   } else if (DIRECTIVE_IS("contentfor")) {
     lexer_handle_contentfor(directive, match, buffer, content, n);
   } else if (DIRECTIVE_IS("content")) {
