@@ -36,8 +36,8 @@
 #include <template.h>
 #include <util.h>
 
+extern msg_t *msg;
 template_t *base_template;
-msg_t *msg;
 
 void
 handle_file(const char *path)
@@ -108,15 +108,8 @@ handle_file(const char *path)
 }
 
 int
-run(int argc, char **argv)
+run(void)
 {
-  if (argc < 2) {
-    printf("Usage: %s [directory]\n", argv[0]);
-    return EXIT_FAILURE;
-  }
-  msg = malloc(sizeof(msg_t));
-  msg->base_directory = argv[1];
-
   struct stat sb;
   if (stat(msg->base_directory, &sb) != 0 || !S_ISDIR(sb.st_mode)) {
     printf("%s does not exist.\n", msg->base_directory);
@@ -156,6 +149,5 @@ run(int argc, char **argv)
   template_delete(base_template);
   config_delete(config);
 
-  free(msg);
   return EXIT_SUCCESS;
 }

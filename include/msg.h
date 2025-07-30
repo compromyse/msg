@@ -29,6 +29,6 @@ typedef struct {
   char *base_directory;
 } msg_t;
 
-int run(int argc, char **argv);
+int run(void);
 
 #endif

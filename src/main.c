@@ -19,9 +19,43 @@
 #define _GNU_SOURCE
 
 #include <msg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+msg_t *msg;
+
+void
+usage(char *program)
+{
+  printf("Usage: %s [-o <output>] [-h] <directory>\n", program);
+  printf("\t-o <output>: Output directory\n");
+  printf("\t-h         : Help\n");
+  printf("\t<directory>: Working directory\n");
+}
 
 int
 main(int argc, char **argv)
 {
-  return run(argc, argv);
+  int opt;
+  msg = malloc(sizeof(msg_t));
+
+  while ((opt = getopt(argc, argv, "o:h")) != -1) {
+    switch (opt) {
+    case 'o':
+      /* msg.output_directory = optarg; */
+      break;
+    case 'h':
+    default:
+      usage(argv[0]);
+      return EXIT_SUCCESS;
+    }
+  }
+
+  msg->base_directory = "compromyse.xyz";
+
+  int r = run();
+
+  free(msg);
+  return r;
 }
