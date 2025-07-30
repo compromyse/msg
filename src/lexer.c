@@ -219,9 +219,6 @@ lexer_handle_eachdo(directive_t *directive,
     if (new_directive->type == ENDEACHDO) {
       directive_delete(new_directive);
       break;
-    } else {
-      /* TODO: delete_directive */
-      directive_delete(new_directive->operands);
     }
 
     directive_delete(new_directive);
@@ -359,6 +356,7 @@ directive_delete(directive_t *directive)
   case INCLUDE:
     if (directive->operands != NULL)
       free(directive->operands);
+    free(directive);
     break;
   default:
     break;
