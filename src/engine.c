@@ -214,7 +214,10 @@ engine_ingest(char **buffer)
 
   char *p = strstr(*buffer, "---");
   if (p != NULL) {
-    engine->config = config_parse(p);
+    char *config;
+    asprintf(&config, "%.*s\n", (int) (p - *buffer), *buffer);
+    engine->config = config_parse(config);
+    free(config);
     strcpy(*buffer, p + strlen("---"));
   }
 
