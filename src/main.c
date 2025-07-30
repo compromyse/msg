@@ -29,14 +29,23 @@ void
 usage(char *program)
 {
   printf("Usage: %s [-o <output>] [-h] <directory>\n", program);
-  printf("\t-o <output>: Output directory\n");
   printf("\t-h         : Help\n");
+  printf("\t-o <output>: Output directory\n");
   printf("\t<directory>: Working directory\n");
+}
+
+void
+config(void)
+{
+  printf("Base Directory: %s\n", msg->base_directory);
+  printf("Output Directory: %s\n\n", msg->output_directory);
 }
 
 int
 main(int argc, char **argv)
 {
+  printf("msg: The Minimal Static Site Generator\n\n");
+
   int opt;
   msg = malloc(sizeof(msg_t));
   msg->base_directory = ".";
@@ -57,8 +66,9 @@ main(int argc, char **argv)
   if (optind < argc)
     msg->base_directory = argv[optind];
 
-  int r = run();
+  config();
 
+  int r = run();
   free(msg);
   return r;
 }
