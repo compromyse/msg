@@ -135,6 +135,7 @@ main(int argc, char **argv)
     handle_file(path);
   }
 
+  template_delete(base_template);
   config_delete(config);
 
   free(msg);
