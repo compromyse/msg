@@ -152,6 +152,7 @@ run(void)
     struct stat path_stat;
     stat(path, &path_stat);
 
+    /* TODO: Error handling */
     if (S_ISREG(path_stat.st_mode))
       copy_recursively(path, NULL, FTW_F, NULL);
     else if (S_ISDIR(path_stat.st_mode))

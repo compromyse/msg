@@ -20,8 +20,9 @@
 #define __MSG_H
 
 #define PARTIALS "partials"
-#define CONFIG_FILE "config.cfg"
+#define TEMPLATES "templates"
 #define BASE_TEMPLATE "base.html"
+#define CONFIG_FILE "config.cfg"
 
 typedef struct {
   char *base_directory;
