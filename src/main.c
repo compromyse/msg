@@ -118,8 +118,6 @@ main(int argc, char **argv)
       if (event->len) {
         switch (event->mask) {
         case IN_MODIFY:
-        case IN_CREATE:
-        case IN_DELETE:
           printf("\n\n");
           run();
           break;
