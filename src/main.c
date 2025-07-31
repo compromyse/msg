@@ -18,20 +18,58 @@
 
 #define _GNU_SOURCE
 
+#include <ftw.h>
 #include <limits.h>
+#include <list.h>
 #include <msg.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/inotify.h>
 #include <unistd.h>
+#include <util.h>
 
 #define BUFFER_SIZE ((sizeof(struct inotify_event) + NAME_MAX + 1) * 4096)
 
 msg_t *msg;
 bool stop = false;
 bool watch = false;
+int inotify_fd;
+
+list_t *directory_names;
+list_t *wds;
+
+void
+add_directory_to_watch(const char *directory)
+{
+  int wd = inotify_add_watch(
+      inotify_fd, directory, IN_MODIFY | IN_CREATE | IN_DELETE);
+  if (wd < 0)
+    perror("inotify_add_watch");
+
+  list_add(wds, &wd);
+  list_wrap_and_add(directory_names, strdup(directory));
+}
+
+int
+watch_directory(const char *fpath,
+                const struct stat *sb,
+                int typeflag,
+                struct FTW *ftwbuf)
+{
+  (void) sb;
+  (void) ftwbuf;
+
+  if (typeflag != FTW_D)
+    goto exit;
+
+  add_directory_to_watch(fpath);
+
+exit:
+  return FTW_CONTINUE;
+}
 
 void
 signal_handler(int x)
@@ -105,25 +143,23 @@ main(int argc, char **argv)
   signal(SIGKILL, signal_handler);
   signal(SIGINT, signal_handler);
 
-  int fd = inotify_init1(IN_NONBLOCK);
-  if (fd < 0) {
+  inotify_fd = inotify_init1(IN_NONBLOCK);
+  if (inotify_fd < 0) {
     perror("inotify");
     return EXIT_FAILURE;
   }
 
-  int wd = inotify_add_watch(
-      fd, msg->base_directory, IN_MODIFY | IN_CREATE | IN_DELETE);
-  if (wd < 0) {
-    perror("inotify_add_watch");
-    return EXIT_FAILURE;
-  }
+  wds = list_create(sizeof(int));
+  directory_names = list_create(sizeof(ptr_wrapper_t));
+  nftw(msg->base_directory, watch_directory, 64, FTW_PHYS | FTW_ACTIONRETVAL);
 
   char *buffer = malloc(BUFFER_SIZE);
 
   while (!stop) {
     size_t i = 0;
-    size_t length = read(fd, buffer, BUFFER_SIZE);
+    size_t length = read(inotify_fd, buffer, BUFFER_SIZE);
     if (length == 0) {
+      printf("Reading from inotify fd failed");
     }
 
     if (length < 0) {
@@ -136,14 +172,24 @@ main(int argc, char **argv)
       struct inotify_event *event = (struct inotify_event *) p;
 
       if (event->len) {
-        switch (event->mask) {
-        case IN_MODIFY:
+        if (event->mask & IN_MODIFY) {
           printf("\n\n");
-          run();
-          break;
+          r = run();
+        } else if (event->mask & IN_CREATE && event->mask & IN_ISDIR) {
+          for (size_t i = 0; i < wds->size; i++) {
+            int *wd = list_get(wds, i);
 
-        default:
-          break;
+            if (*wd == event->wd) {
+              char *directory_name;
+              char *name = get_wrapped(list_get(directory_names, i));
+              asprintf(&directory_name, "%s/%s", name, event->name);
+
+              add_directory_to_watch(directory_name);
+
+              free(directory_name);
+              break;
+            }
+          }
         }
       }
       p += sizeof(struct inotify_event) + event->len;
