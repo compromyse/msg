@@ -37,6 +37,8 @@
 #include <time.h>
 #include <util.h>
 
+#define LOG_THRESHOLD 3
+
 extern msg_t *msg;
 
 void
@@ -179,7 +181,11 @@ run(void)
   for (size_t i = 0; i < resources->size; i++) {
     ptr_wrapper_t *value = list_get(resources, i);
     char *path = value->ptr;
-    printf("HANDLING: %s\n", path);
+    if (i < LOG_THRESHOLD)
+      printf("\tProcessing %s\n", path);
+    else if (i == LOG_THRESHOLD)
+      printf("\t...\n");
+
     handle_file(path);
   }
 
