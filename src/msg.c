@@ -37,7 +37,7 @@
 #include <time.h>
 #include <util.h>
 
-#define LOG_THRESHOLD 3
+#define LOG_THRESHOLD 6
 
 extern msg_t *msg;
 
