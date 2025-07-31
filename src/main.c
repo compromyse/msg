@@ -27,7 +27,7 @@
 #include <sys/inotify.h>
 #include <unistd.h>
 
-#define BUFFER_SIZE ((sizeof(struct inotify_event) + NAME_MAX + 1) * 1024)
+#define BUFFER_SIZE ((sizeof(struct inotify_event) + NAME_MAX + 1) * 4096)
 
 msg_t *msg;
 bool stop = false;
@@ -99,6 +99,9 @@ main(int argc, char **argv)
     return r;
   }
 
+  signal(SIGKILL, signal_handler);
+  signal(SIGINT, signal_handler);
+
   int fd = inotify_init1(IN_NONBLOCK);
   if (fd < 0) {
     perror("inotify");
@@ -114,8 +117,6 @@ main(int argc, char **argv)
 
   char *buffer = malloc(BUFFER_SIZE);
 
-  signal(SIGKILL, signal_handler);
-  signal(SIGINT, signal_handler);
   while (!stop) {
     size_t i = 0;
     size_t length = read(fd, buffer, BUFFER_SIZE);
