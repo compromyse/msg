@@ -196,6 +196,13 @@ main(int argc, char **argv)
     }
   }
 
+  for (size_t i = 0; i < wds->size; i++) {
+    char *name = get_wrapped(list_get(directory_names, i));
+    free(name);
+  }
+  list_delete(wds);
+  list_delete(directory_names);
+
   free(buffer);
   free(msg);
   return r;
