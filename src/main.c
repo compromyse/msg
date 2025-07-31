@@ -31,6 +31,7 @@
 
 msg_t *msg;
 bool stop = false;
+bool watch = false;
 
 void
 signal_handler(int x)
@@ -54,15 +55,17 @@ void
 config(void)
 {
   printf("Base Directory: %s\n", msg->base_directory);
-  printf("Output Directory: %s\n\n", msg->output_directory);
+  printf("Output Directory: %s\n", msg->output_directory);
+  printf("Verbose: %s\n", msg->verbose ? "true" : "false");
+  printf("Watching: %s\n", watch ? "true" : "false");
+
+  printf("\n");
 }
 
 int
 main(int argc, char **argv)
 {
   printf("msg: The Minimal Static Site Generator\n\n");
-
-  bool watch = false;
 
   int opt;
   msg = malloc(sizeof(msg_t));
