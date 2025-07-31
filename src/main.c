@@ -33,9 +33,10 @@ msg_t *msg;
 void
 usage(char *program)
 {
-  printf("Usage: %s [-h] [-w] [-o <output>] <directory>\n", program);
+  printf("Usage: %s [-h] [-w] [-v] [-o <output>] <directory>\n", program);
   printf("\t-h         : Help\n");
   printf("\t-w         : Watch working directory for changes\n");
+  printf("\t-v         : Verbose\n");
   printf("\t-o <output>: Output directory\n");
   printf("\t<directory>: Working directory\n");
 }
@@ -58,14 +59,18 @@ main(int argc, char **argv)
   msg = malloc(sizeof(msg_t));
   msg->base_directory = ".";
   msg->output_directory = "dist";
+  msg->verbose = false;
 
-  while ((opt = getopt(argc, argv, "o:hw")) != -1) {
+  while ((opt = getopt(argc, argv, "o:hvw")) != -1) {
     switch (opt) {
     case 'o':
       msg->output_directory = optarg;
       break;
     case 'w':
       watch = true;
+      break;
+    case 'v':
+      msg->verbose = true;
       break;
     case 'h':
     default:

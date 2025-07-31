@@ -181,9 +181,9 @@ run(void)
   for (size_t i = 0; i < resources->size; i++) {
     ptr_wrapper_t *value = list_get(resources, i);
     char *path = value->ptr;
-    if (i < LOG_THRESHOLD)
+    if (i < LOG_THRESHOLD || msg->verbose)
       printf("\tProcessing %s\n", path);
-    else if (i == LOG_THRESHOLD)
+    else if (i == LOG_THRESHOLD && !msg->verbose)
       printf("\t...\n");
 
     handle_file(path);

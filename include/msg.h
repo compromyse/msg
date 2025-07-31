@@ -19,6 +19,8 @@
 #ifndef __MSG_H
 #define __MSG_H
 
+#include <stdbool.h>
+
 #define PARTIALS "partials"
 #define TEMPLATES "templates"
 #define BASE_TEMPLATE "base.html"
@@ -27,6 +29,7 @@
 typedef struct {
   char *base_directory;
   char *output_directory;
+  bool verbose;
 } msg_t;
 
 int run(void);
