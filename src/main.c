@@ -18,18 +18,24 @@
 
 #define _GNU_SOURCE
 
+#include <limits.h>
 #include <msg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/inotify.h>
 #include <unistd.h>
+
+#define BUFFER_SIZE ((sizeof(struct inotify_event) + NAME_MAX + 1) * 1024)
 
 msg_t *msg;
 
 void
 usage(char *program)
 {
-  printf("Usage: %s [-o <output>] [-h] <directory>\n", program);
+  printf("Usage: %s [-h] [-w] [-o <output>] <directory>\n", program);
   printf("\t-h         : Help\n");
+  printf("\t-w         : Watch working directory for changes\n");
   printf("\t-o <output>: Output directory\n");
   printf("\t<directory>: Working directory\n");
 }
@@ -46,15 +52,20 @@ main(int argc, char **argv)
 {
   printf("msg: The Minimal Static Site Generator\n\n");
 
+  bool watch = false;
+
   int opt;
   msg = malloc(sizeof(msg_t));
   msg->base_directory = ".";
   msg->output_directory = "dist";
 
-  while ((opt = getopt(argc, argv, "o:h")) != -1) {
+  while ((opt = getopt(argc, argv, "o:hw")) != -1) {
     switch (opt) {
     case 'o':
       msg->output_directory = optarg;
+      break;
+    case 'w':
+      watch = true;
       break;
     case 'h':
     default:
@@ -69,6 +80,55 @@ main(int argc, char **argv)
   config();
 
   int r = run();
-  free(msg);
-  return r;
+  if (!watch) {
+    free(msg);
+    return r;
+  }
+
+  int fd = inotify_init1(IN_NONBLOCK);
+  if (fd < 0) {
+    perror("inotify");
+    return EXIT_FAILURE;
+  }
+
+  int wd = inotify_add_watch(
+      fd, msg->base_directory, IN_MODIFY | IN_CREATE | IN_DELETE);
+  if (wd < 0) {
+    perror("inotify_add_watch");
+    return EXIT_FAILURE;
+  }
+
+  char *buffer = malloc(BUFFER_SIZE);
+
+  while (true) {
+    size_t i = 0;
+    size_t length = read(fd, buffer, BUFFER_SIZE);
+    if (length == 0) {
+    }
+
+    if (length < 0) {
+      perror("read");
+      return EXIT_FAILURE;
+    }
+
+    char *p;
+    for (p = buffer; p < buffer + length;) {
+      struct inotify_event *event = (struct inotify_event *) p;
+
+      if (event->len) {
+        switch (event->mask) {
+        case IN_MODIFY:
+        case IN_CREATE:
+        case IN_DELETE:
+          printf("\n\n");
+          run();
+          break;
+
+        default:
+          break;
+        }
+      }
+      p += sizeof(struct inotify_event) + event->len;
+    }
+  }
 }
