@@ -20,6 +20,7 @@
 
 #include <limits.h>
 #include <msg.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +30,14 @@
 #define BUFFER_SIZE ((sizeof(struct inotify_event) + NAME_MAX + 1) * 1024)
 
 msg_t *msg;
+bool stop = false;
+
+void
+signal_handler(int x)
+{
+  (void) x;
+  stop = true;
+}
 
 void
 usage(char *program)
@@ -105,7 +114,9 @@ main(int argc, char **argv)
 
   char *buffer = malloc(BUFFER_SIZE);
 
-  while (true) {
+  signal(SIGKILL, signal_handler);
+  signal(SIGINT, signal_handler);
+  while (!stop) {
     size_t i = 0;
     size_t length = read(fd, buffer, BUFFER_SIZE);
     if (length == 0) {
@@ -134,4 +145,8 @@ main(int argc, char **argv)
       p += sizeof(struct inotify_event) + event->len;
     }
   }
+
+  free(buffer);
+  free(msg);
+  return r;
 }

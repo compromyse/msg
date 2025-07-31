@@ -132,10 +132,10 @@ run(void)
 {
   time_t rawtime;
   struct tm *timeinfo;
-
   time(&rawtime);
   timeinfo = localtime(&rawtime);
   printf("Generation started at: %s", asctime(timeinfo));
+
   struct stat sb;
   if (stat(msg->base_directory, &sb) != 0 || !S_ISDIR(sb.st_mode)) {
     printf("%s does not exist.\n", msg->base_directory);
