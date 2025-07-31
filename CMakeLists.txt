@@ -17,15 +17,15 @@ set(SRC
 )
 
 set(C_COMPILE_OPTIONS
-  -O3
-  # -Og
+  # -O3
+  -Og
 
   -Wall
   -Wextra
   -Werror
 
-  # -g3
-  # -glldb
+  -g3
+  -glldb
 
   -std=c99
 

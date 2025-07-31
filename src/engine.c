@@ -72,7 +72,10 @@ handle_contentfor(char **buffer,
                   list_t *content_headers)
 {
   contentfor_operand_t *operand = directive->operands;
-  list_add(content_headers, operand);
+  contentfor_operand_t new_operand = { .content = strdup(operand->content),
+                                       .key = strdup(operand->key),
+                                       .length = operand->length };
+  list_add(content_headers, &new_operand);
 
 #ifdef DEBUG
   printf("CONTENTFOR: %s\n", operand->key);
@@ -286,6 +289,11 @@ engine_delete(engine_t *engine)
   if (engine->config != NULL)
     config_delete(engine->config);
 
+  for (size_t i = 0; i < engine->content_headers->size; i++) {
+    contentfor_operand_t *operand = list_get(engine->content_headers, i);
+    free(operand->content);
+    free(operand->key);
+  }
   list_delete(engine->content_headers);
   free(engine);
 }
