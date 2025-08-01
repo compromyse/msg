@@ -1,6 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    self.submodules = true;
   };
 
   outputs = { self, nixpkgs, ... }:
@@ -19,5 +20,7 @@
           valgrind
         ];
       };
+
+      packages.x86_64-linux.default = pkgs.callPackage ./default.nix {};
     };
 }
