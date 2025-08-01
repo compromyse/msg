@@ -138,7 +138,7 @@ main(int argc, char **argv)
   config();
 
   int r = run();
-  if (!watch) {
+  if (!watch || r != EXIT_SUCCESS) {
     free(msg);
     return r;
   }
