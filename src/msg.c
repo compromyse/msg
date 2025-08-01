@@ -107,7 +107,7 @@ handle_file(const char *path)
       strcpy(buffer, p + strlen("---"));
     }
 
-    MMIOT *doc = mkd_string(buffer, size, 0);
+    MMIOT *doc = mkd_string(buffer, strlen(buffer), 0);
     template_write(&engine, out, doc, true);
 
     if (engine.config != NULL)
