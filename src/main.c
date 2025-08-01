@@ -81,23 +81,26 @@ signal_handler(int x)
 void
 usage(char *program)
 {
-  printf("Usage: %s [-h] [-w] [-v] [-o <output>] <directory>\n", program);
-  printf("\t-h         : Help\n");
-  printf("\t-w         : Watch working directory for changes\n");
-  printf("\t-v         : Verbose\n");
-  printf("\t-o <output>: Output directory\n");
-  printf("\t<directory>: Working directory\n");
+  printf("Usage: %s [-h] [-w] [-v] [-o <output>] <directory>\n"
+         "\t-h         : Help\n"
+         "\t-w         : Watch working directory for changes\n"
+         "\t-v         : Verbose\n"
+         "\t-o <output>: Output directory\n"
+         "\t<directory>: Working directory\n",
+         program);
 }
 
 void
 config(void)
 {
-  printf("Base Directory: %s\n", msg->base_directory);
-  printf("Output Directory: %s\n", msg->output_directory);
-  printf("Verbose: %s\n", msg->verbose ? "true" : "false");
-  printf("Watching: %s\n", watch ? "true" : "false");
-
-  printf("\n");
+  printf("Base Directory: %s\n"
+         "Output Directory: %s\n"
+         "Verbose: %s\n"
+         "Watching: %s\n\n",
+         msg->base_directory,
+         msg->output_directory,
+         msg->verbose ? "true" : "false",
+         watch ? "true" : "false");
 }
 
 int
