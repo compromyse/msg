@@ -131,6 +131,14 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
              trim(operands->key),
              (char *) file_wrp->ptr);
 
+    int len = strlen(path);
+    char *comparable = &path[len - strlen("index.html")];
+    if (strcmp(comparable, "index.html") == 0) {
+      free(path);
+      free(file_wrp->ptr);
+      continue;
+    }
+
     FILE *f = fopen(path, "r");
     free(path);
     size_t size = fsize(f);
