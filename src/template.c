@@ -154,18 +154,18 @@ template_write(engine_t *engine, FILE *f, void *doc, bool is_markdown)
   }
 
   for (size_t i = 0; i < template->components->size; i++) {
-    directive_t *match = list_get(template->components, i);
+    directive_t *directive = list_get(template->components, i);
 
-    switch (match->type) {
+    switch (directive->type) {
     case _RAW:
-      fprintf(f, "%s", (char *) match->operands);
+      fprintf(f, "%s", (char *) directive->operands);
       break;
 
     case CONTENT: {
       /* TODO: handle this gracefully */
       if (!is_markdown) {
-        char *content
-            = find_contentfor_value(engine->content_headers, match->operands);
+        char *content = find_contentfor_value(engine->content_headers,
+                                              directive->operands);
         fprintf(f, "%s", content);
       }
       break;
