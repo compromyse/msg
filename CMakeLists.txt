@@ -49,3 +49,5 @@ target_compile_options(common PRIVATE -w)
 target_compile_options(msg PRIVATE
   $<$<COMPILE_LANGUAGE:C>: ${C_COMPILE_OPTIONS}>
 )
+
+install(TARGETS msg)
