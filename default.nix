@@ -15,7 +15,7 @@ llvmPackages.stdenv.mkDerivation rec {
   meta = with lib; {
     homepage = "https://github.com/compromyse/msg";
     description = "Minimal Static Site Generator";
-    licencse = licenses.gpl2;
+    licencse = licenses.gpl3;
     platforms = with platforms; linux ++ darwin;
     maintainers = [ maintainers.compromyse ];
   };
