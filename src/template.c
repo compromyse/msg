@@ -139,7 +139,7 @@ template_write(engine_t *engine, FILE *f, void *doc, bool is_markdown)
 
   if (engine != NULL && engine->config != NULL) {
     char *template_name
-        = get_wrapped(list_find_corresponding_value_from_ptr_wrapper(
+        = unwrap(list_find_corresponding_value_from_ptr_wrapper(
             engine->config->keys, engine->config->values, "template"));
 
     if (template_name != NULL) {

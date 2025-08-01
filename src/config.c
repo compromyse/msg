@@ -89,7 +89,7 @@ config_delete(config_t *config)
     if (wrapper->ptr != NULL)
       free(wrapper->ptr);
 
-    list_t *l = get_wrapped(list_get(config->array_values, i));
+    list_t *l = unwrap(list_get(config->array_values, i));
     if (l != NULL) {
       for (size_t y = 0; y < l->size; y++) {
         wrapper = list_get(l, y);

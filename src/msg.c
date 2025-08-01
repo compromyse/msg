@@ -158,7 +158,7 @@ run(void)
     return EXIT_FAILURE;
   }
 
-  list_t *static_ = get_wrapped(list_find_corresponding_value_from_ptr_wrapper(
+  list_t *static_ = unwrap(list_find_corresponding_value_from_ptr_wrapper(
       config->keys, config->array_values, "static"));
 
   if (static_ == NULL) {
@@ -183,9 +183,8 @@ run(void)
     free(path);
   }
 
-  list_t *resources
-      = get_wrapped(list_find_corresponding_value_from_ptr_wrapper(
-          config->keys, config->array_values, "resources"));
+  list_t *resources = unwrap(list_find_corresponding_value_from_ptr_wrapper(
+      config->keys, config->array_values, "resources"));
 
   if (resources == NULL) {
     printf("Could not find resources in config.cfg\n");

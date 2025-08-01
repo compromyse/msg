@@ -184,7 +184,7 @@ main(int argc, char **argv)
 
             if (*wd == event->wd) {
               char *directory_name;
-              char *name = get_wrapped(list_get(directory_names, i));
+              char *name = unwrap(list_get(directory_names, i));
               asprintf(&directory_name, "%s/%s", name, event->name);
 
               add_directory_to_watch(directory_name);
@@ -200,7 +200,7 @@ main(int argc, char **argv)
   }
 
   for (size_t i = 0; i < wds->size; i++) {
-    char *name = get_wrapped(list_get(directory_names, i));
+    char *name = unwrap(list_get(directory_names, i));
     free(name);
   }
   list_delete(wds);

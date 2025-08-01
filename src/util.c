@@ -54,7 +54,7 @@ wrap_ptr(void *ptr)
 }
 
 void *
-get_wrapped(ptr_wrapper_t *wrapper)
+unwrap(ptr_wrapper_t *wrapper)
 {
   if (wrapper == NULL)
     return NULL;
