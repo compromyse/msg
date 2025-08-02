@@ -272,9 +272,9 @@ engine_ingest(char **buffer)
       handle_eachdo(buffer, match, directive);
       break;
 
+    case PUTPAGE:
+      /* TODO: handle */
     case PUT:
-      skip++;
-      break;
     case ENDEACHDO:
     case BODY:
     case CONTENT:

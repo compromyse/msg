@@ -267,6 +267,17 @@ lexer_handle_put(directive_t *directive,
 }
 
 void
+lexer_handle_putpage(directive_t *directive,
+                     key_match_t *match,
+                     char *buffer,
+                     size_t n)
+{
+  directive->type = PUTPAGE;
+  directive->operands = strndup(buffer + n + strlen("putpage"),
+                                match->length - n - strlen("putpage") - 2);
+}
+
+void
 lexer_handle_content(directive_t *directive,
                      key_match_t *match,
                      char *buffer,
@@ -321,6 +332,8 @@ found_start:
     lexer_handle_content(directive, match, buffer, n);
   } else if (DIRECTIVE_IS("eachdo")) {
     lexer_handle_eachdo(directive, match, buffer, n);
+  } else if (DIRECTIVE_IS("putpage")) {
+    lexer_handle_putpage(directive, match, buffer, n);
   } else if (DIRECTIVE_IS("put")) {
     lexer_handle_put(directive, match, buffer, n);
   } else {

@@ -133,9 +133,8 @@ template_delete(template_t *template)
 void
 template_write(engine_t *engine, FILE *f, void *doc, bool is_markdown)
 {
-  template_t *template = template
-      = list_find_corresponding_value_from_ptr_wrapper(
-          keys, templates, "base.html");
+  template_t *template = list_find_corresponding_value_from_ptr_wrapper(
+      keys, templates, "base.html");
 
   if (engine != NULL && engine->config != NULL) {
     char *template_name
@@ -180,6 +179,17 @@ template_write(engine_t *engine, FILE *f, void *doc, bool is_markdown)
       } else {
         fprintf(f, "%s", (char *) doc);
       }
+
+      break;
+    }
+
+    case PUTPAGE: {
+
+      char *content = unwrap(list_find_corresponding_value_from_ptr_wrapper(
+          engine->config->keys,
+          engine->config->values,
+          trim(directive->operands)));
+      fprintf(f, "%s", content);
 
       break;
     }
