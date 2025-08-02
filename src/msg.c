@@ -101,6 +101,7 @@ handle_file(const char *path)
     mkd_flag_t *flags = mkd_flags();
     mkd_set_flag_num(flags, MKD_FENCEDCODE);
     MMIOT *doc = mkd_string(buffer, strlen(buffer), flags);
+    free(flags);
 
     template_write(engine, out, doc, true);
 
