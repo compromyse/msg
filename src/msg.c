@@ -96,16 +96,25 @@ handle_file(const char *path)
   char *buffer = fcontent(in, size);
 
   if (dot && strcmp(dot, ".md") == 0) {
-    engine_t *engine = engine_ingest(&buffer);
+    engine_t engine = { .config = NULL, .content_headers = NULL };
+
+    char *p = strstr(buffer, "---");
+    if (p != NULL) {
+      char *config;
+      asprintf(&config, "%.*s\n", (int) (p - buffer), buffer);
+      engine.config = config_parse(config);
+      free(config);
+      strcpy(buffer, p + strlen("---"));
+    }
 
     mkd_flag_t *flags = mkd_flags();
     mkd_set_flag_num(flags, MKD_FENCEDCODE);
     MMIOT *doc = mkd_string(buffer, strlen(buffer), flags);
     free(flags);
+    template_write(&engine, out, doc, true);
 
-    template_write(engine, out, doc, true);
-
-    engine_delete(engine);
+    if (engine.config != NULL)
+      config_delete(engine.config);
   } else if (strlen(buffer) != 0) {
     engine_t *engine = engine_ingest(&buffer);
     template_write(engine, out, buffer, false);
