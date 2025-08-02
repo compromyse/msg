@@ -233,7 +233,7 @@ engine_ingest(char **buffer)
     char *tempbuffer = strdup(p);
 
     free(*buffer);
-    asprintf(buffer, "%s", p + strlen("---"));
+    asprintf(buffer, "%s", tempbuffer + strlen("---"));
 
     free(tempbuffer);
   }
