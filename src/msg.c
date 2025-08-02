@@ -104,7 +104,12 @@ handle_file(const char *path)
       asprintf(&config, "%.*s\n", (int) (p - buffer), buffer);
       engine.config = config_parse(config);
       free(config);
-      strcpy(buffer, p + strlen("---"));
+      char *tempbuffer = strdup(p);
+
+      free(buffer);
+      asprintf(&buffer, "%s", tempbuffer + strlen("---"));
+
+      free(tempbuffer);
     }
 
     mkd_flag_t *flags = mkd_flags();
