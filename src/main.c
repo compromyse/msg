@@ -158,6 +158,9 @@ main(int argc, char **argv)
 
   char *buffer = malloc(BUFFER_SIZE);
 
+  char *dot_directory;
+  asprintf(&dot_directory, "%s/.", msg->base_directory);
+
   while (!stop) {
     size_t i = 0;
     size_t length = read(inotify_fd, buffer, BUFFER_SIZE);
@@ -176,8 +179,32 @@ main(int argc, char **argv)
 
       if (event->len) {
         if (event->mask & IN_MODIFY) {
-          printf("\n\n");
-          r = run();
+
+          for (size_t i = 0; i < wds->size; i++) {
+            int *wd = list_get(wds, i);
+
+            if (*wd == event->wd) {
+              char *directory_name;
+
+              char *name = unwrap(list_get(directory_names, i));
+              asprintf(&directory_name, "%s/%s", name, event->name);
+
+              /* don't track changes in dot directories or the output directory
+               */
+              if (strncmp(directory_name, dot_directory, strlen(dot_directory))
+                      != 0
+                  && strncmp(directory_name,
+                             msg->output_directory,
+                             strlen(msg->output_directory))
+                         != 0) {
+                printf("\n\n");
+                r = run();
+              }
+
+              free(directory_name);
+              break;
+            }
+          }
         } else if (event->mask & IN_CREATE && event->mask & IN_ISDIR) {
           for (size_t i = 0; i < wds->size; i++) {
             int *wd = list_get(wds, i);
@@ -198,6 +225,7 @@ main(int argc, char **argv)
       p += sizeof(struct inotify_event) + event->len;
     }
   }
+  free(dot_directory);
 
   for (size_t i = 0; i < wds->size; i++) {
     char *name = unwrap(list_get(directory_names, i));
