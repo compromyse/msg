@@ -229,7 +229,13 @@ engine_ingest(char **buffer)
     asprintf(&config, "%.*s\n", (int) (p - *buffer), *buffer);
     engine->config = config_parse(config);
     free(config);
-    strcpy(*buffer, p + strlen("---"));
+
+    char *tempbuffer = strdup(p);
+
+    free(*buffer);
+    asprintf(buffer, "%s", p + strlen("---"));
+
+    free(tempbuffer);
   }
 
   key_match_t *match;
