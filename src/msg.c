@@ -107,7 +107,9 @@ handle_file(const char *path)
       strcpy(buffer, p + strlen("---"));
     }
 
-    MMIOT *doc = mkd_string(buffer, strlen(buffer), 0);
+    mkd_flag_t *flags = mkd_flags();
+    mkd_set_flag_num(flags, MKD_FENCEDCODE);
+    MMIOT *doc = mkd_string(buffer, strlen(buffer), flags);
     template_write(&engine, out, doc, true);
 
     if (engine.config != NULL)
