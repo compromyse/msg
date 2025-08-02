@@ -122,13 +122,15 @@ handle_file(const char *path)
 }
 
 int
-run(void)
+run(bool log)
 {
-  time_t rawtime;
-  struct tm *timeinfo;
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
-  printf("Generation started at: %s", asctime(timeinfo));
+  if (log) {
+    time_t rawtime;
+    struct tm *timeinfo;
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    printf("Generation started at: %s", asctime(timeinfo));
+  }
 
   struct stat sb;
   if (stat(msg->base_directory, &sb) != 0 || !S_ISDIR(sb.st_mode)) {
@@ -188,10 +190,12 @@ run(void)
   for (size_t i = 0; i < resources->size; i++) {
     ptr_wrapper_t *value = list_get(resources, i);
     char *path = value->ptr;
-    if (i < LOG_THRESHOLD || msg->verbose)
-      printf("\tProcessing %s\n", path);
-    else if (i == LOG_THRESHOLD && !msg->verbose)
-      printf("\t...\n");
+    if (log) {
+      if (i < LOG_THRESHOLD || msg->verbose)
+        printf("\tProcessing %s\n", path);
+      else if (i == LOG_THRESHOLD && !msg->verbose)
+        printf("\t...\n");
+    }
 
     handle_file(path);
   }

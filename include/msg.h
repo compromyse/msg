@@ -32,6 +32,6 @@ typedef struct {
   bool verbose;
 } msg_t;
 
-int run(void);
+int run(bool log);
 
 #endif

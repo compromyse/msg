@@ -18,7 +18,6 @@
 
 #define _GNU_SOURCE
 
-#include <ftw.h>
 #include <limits.h>
 #include <list.h>
 #include <msg.h>
@@ -26,50 +25,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/inotify.h>
 #include <unistd.h>
 #include <util.h>
 
-#define BUFFER_SIZE ((sizeof(struct inotify_event) + NAME_MAX + 1) * 4096)
-
 msg_t *msg;
 bool stop = false;
-bool watch = false;
-int inotify_fd;
-
-list_t *directory_names;
-list_t *wds;
-
-void
-add_directory_to_watch(const char *directory)
-{
-  int wd = inotify_add_watch(
-      inotify_fd, directory, IN_MODIFY | IN_CREATE | IN_DELETE);
-  if (wd < 0)
-    perror("inotify_add_watch");
-
-  list_add(wds, &wd);
-  list_wrap_and_add(directory_names, strdup(directory));
-}
-
-int
-watch_directory(const char *fpath,
-                const struct stat *sb,
-                int typeflag,
-                struct FTW *ftwbuf)
-{
-  (void) sb;
-  (void) ftwbuf;
-
-  if (typeflag != FTW_D)
-    goto exit;
-
-  add_directory_to_watch(fpath);
-
-exit:
-  return FTW_CONTINUE;
-}
+bool regen = false;
 
 void
 signal_handler(int x)
@@ -81,10 +42,10 @@ signal_handler(int x)
 void
 usage(char *program)
 {
-  printf("Usage: %s [-h] [-w] [-v] [-o <output>] <directory>\n"
+  printf("Usage: %s [-h] [-r] [-v] [-o <output>] <directory>\n"
          "\t-h         : Help\n"
-         "\t-w         : Watch working directory for changes\n"
          "\t-v         : Verbose\n"
+         "\t-r         : Regenerate every 500ms\n"
          "\t-o <output>: Output directory\n"
          "\t<directory>: Working directory\n",
          program);
@@ -96,11 +57,11 @@ config(void)
   printf("Base Directory: %s\n"
          "Output Directory: %s\n"
          "Verbose: %s\n"
-         "Watching: %s\n\n",
+         "Regenerating: %s\n\n",
          msg->base_directory,
          msg->output_directory,
          msg->verbose ? "true" : "false",
-         watch ? "true" : "false");
+         regen ? "true" : "false");
 }
 
 int
@@ -114,13 +75,13 @@ main(int argc, char **argv)
   msg->output_directory = "dist";
   msg->verbose = false;
 
-  while ((opt = getopt(argc, argv, "o:hvw")) != -1) {
+  while ((opt = getopt(argc, argv, "o:hvr")) != -1) {
     switch (opt) {
     case 'o':
       msg->output_directory = optarg;
       break;
-    case 'w':
-      watch = true;
+    case 'r':
+      regen = true;
       break;
     case 'v':
       msg->verbose = true;
@@ -137,104 +98,21 @@ main(int argc, char **argv)
 
   config();
 
-  int r = run();
-  if (!watch || r != EXIT_SUCCESS) {
+  int r = run(true);
+  if (!regen || r != EXIT_SUCCESS) {
     free(msg);
     return r;
   }
 
-  signal(SIGKILL, signal_handler);
   signal(SIGINT, signal_handler);
 
-  inotify_fd = inotify_init1(IN_NONBLOCK);
-  if (inotify_fd < 0) {
-    perror("inotify");
-    return EXIT_FAILURE;
-  }
-
-  wds = list_create(sizeof(int));
-  directory_names = list_create(sizeof(ptr_wrapper_t));
-  nftw(msg->base_directory, watch_directory, 64, FTW_PHYS | FTW_ACTIONRETVAL);
-
-  char *buffer = malloc(BUFFER_SIZE);
-
-  char *dot_directory;
-  asprintf(&dot_directory, "%s/.", msg->base_directory);
-
   while (!stop) {
-    size_t i = 0;
-    size_t length = read(inotify_fd, buffer, BUFFER_SIZE);
-    if (length == 0) {
-      printf("Reading from inotify fd failed");
-    }
-
-    if (length < 0) {
-      perror("read");
-      return EXIT_FAILURE;
-    }
-
-    char *p;
-    for (p = buffer; p < buffer + length;) {
-      struct inotify_event *event = (struct inotify_event *) p;
-
-      if (event->len) {
-        if (event->mask & IN_MODIFY) {
-
-          for (size_t i = 0; i < wds->size; i++) {
-            int *wd = list_get(wds, i);
-
-            if (*wd == event->wd) {
-              char *directory_name;
-
-              char *name = unwrap(list_get(directory_names, i));
-              asprintf(&directory_name, "%s/%s", name, event->name);
-
-              /* don't track changes in dot directories or the output directory
-               */
-              if (strncmp(directory_name, dot_directory, strlen(dot_directory))
-                      != 0
-                  && strncmp(directory_name,
-                             msg->output_directory,
-                             strlen(msg->output_directory))
-                         != 0) {
-                printf("\n\n");
-                r = run();
-              }
-
-              free(directory_name);
-              break;
-            }
-          }
-        } else if (event->mask & IN_CREATE && event->mask & IN_ISDIR) {
-          for (size_t i = 0; i < wds->size; i++) {
-            int *wd = list_get(wds, i);
-
-            if (*wd == event->wd) {
-              char *directory_name;
-              char *name = unwrap(list_get(directory_names, i));
-              asprintf(&directory_name, "%s/%s", name, event->name);
-
-              add_directory_to_watch(directory_name);
-
-              free(directory_name);
-              break;
-            }
-          }
-        }
-      }
-      p += sizeof(struct inotify_event) + event->len;
-    }
+    printf(".");
+    fflush(stdout);
+    r = run(false);
+    msleep(500);
   }
-  free(dot_directory);
 
-  for (size_t i = 0; i < wds->size; i++) {
-    char *name = unwrap(list_get(directory_names, i));
-    free(name);
-  }
-  list_delete(wds);
-  list_delete(directory_names);
-
-  free(buffer);
   free(msg);
   return r;
 }

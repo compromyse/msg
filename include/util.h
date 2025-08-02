@@ -23,6 +23,7 @@ typedef struct {
   void *ptr;
 } ptr_wrapper_t;
 
+int msleep(long msec);
 char *ltrim(char *s);
 char *rtrim(char *s);
 char *trim(char *s);
