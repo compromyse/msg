@@ -375,13 +375,10 @@ directive_delete(directive_t *directive)
     free(operands);
     break;
   }
-  case PUT:
-  case CONTENT:
-  case INCLUDE:
+
+  default:
     if (directive->operands != NULL)
       free(directive->operands);
-    break;
-  default:
     break;
   }
 

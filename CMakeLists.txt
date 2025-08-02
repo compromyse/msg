@@ -18,11 +18,11 @@ set(SRC
 
 set(C_COMPILE_OPTIONS
   # -O3
-  -Og
+  -O0
 
   -Wall
   -Wextra
-  -Werror
+  # -Werror
 
   -g3
   -glldb

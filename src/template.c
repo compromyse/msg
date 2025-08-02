@@ -45,6 +45,7 @@ delete_components(template_t *template)
     switch (directive->type) {
     case _RAW:
     case CONTENT:
+    case PUTPAGE:
       free(directive->operands);
       break;
 
