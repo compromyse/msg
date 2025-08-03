@@ -6,7 +6,10 @@ project(msg C)
 set(SRC
   src/config.c
   src/copy.c
-  src/engine.c
+  src/engine/contentfor.c
+  src/engine/eachdo.c
+  src/engine/engine.c
+  src/engine/include.c
   src/filehandler.c
   src/lexer.c
   src/list.c
