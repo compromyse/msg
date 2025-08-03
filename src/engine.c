@@ -139,21 +139,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
       continue;
     }
 
-    FILE *f = fopen(path, "r");
-    free(path);
-    size_t size = fsize(f);
-    char *content = fcontent(f, size);
-    fclose(f);
-
-    config_t *config = NULL;
-
-    char *p = strstr(content, "---");
-    if (p != NULL) {
-      *p = '\0';
-      config = config_parse(content);
-    }
-
-    free(content);
+    config_t *config = config_fetch_and_parse(path);
 
     for (size_t i = 0; i < directives->size; i++) {
       directive_t *_directive = list_get(directives, i);
