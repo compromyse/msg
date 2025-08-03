@@ -207,8 +207,20 @@ lexer_handle_eachdo(directive_t *directive,
   directive->type = EACHDO;
   eachdo_operands_t *operands = malloc(sizeof(eachdo_operands_t));
 
-  operands->key = strndup(buffer + n + strlen("eachdo"),
-                          match->length - n - strlen("eachdo") - 2);
+  char *subbuffer = strndup(buffer + n + strlen("eachdo"),
+                            match->length - n - strlen("eachdo") - 2);
+  char *original_subbuffer = subbuffer;
+
+  char *source = trim(strsep(&subbuffer, "."));
+  if (subbuffer == NULL) {
+    printf("Failed to split eachdo operands by .\n");
+    return;
+  }
+
+  operands->key = strdup(subbuffer);
+  operands->source = strdup(source);
+
+  free(original_subbuffer);
 
   buffer += match->length;
   key_match_t *new_match;
@@ -365,6 +377,7 @@ directive_delete(directive_t *directive)
     eachdo_operands_t *operands = directive->operands;
     free(operands->content);
     free(operands->key);
+    free(operands->source);
     free(operands);
     break;
   }

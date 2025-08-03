@@ -54,6 +54,7 @@ typedef struct {
 } contentfor_operand_t;
 
 typedef struct {
+  char *source;
   char *key;
   char *content;
   size_t length;
