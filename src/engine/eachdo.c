@@ -29,10 +29,7 @@
 extern msg_t *msg;
 
 static void
-fetch_files(eachdo_operands_t *operands,
-            list_t *directives,
-            list_t *atoms,
-            size_t *length)
+fetch_files(eachdo_operands_t *operands, list_t *directives, char **content)
 {
   char *path;
   asprintf(&path, "%s/%s", msg->base_directory, trim(operands->key));
@@ -67,8 +64,9 @@ fetch_files(eachdo_operands_t *operands,
       directive_t *_directive = list_get(directives, i);
       switch (_directive->type) {
       case _RAW: {
-        list_wrap_and_add(atoms, strdup(_directive->operands));
-        *length += strlen(_directive->operands);
+        *content = realloc(
+            *content, strlen(*content) + strlen(_directive->operands) + 1);
+        strcat(*content, _directive->operands);
         break;
       }
 
@@ -77,8 +75,8 @@ fetch_files(eachdo_operands_t *operands,
             config->keys, config->values, trim(_directive->operands)));
 
         if (key != NULL) {
-          list_wrap_and_add(atoms, strdup(key));
-          *length += strlen(key);
+          *content = realloc(*content, strlen(*content) + strlen(key) + 1);
+          strcat(*content, key);
         }
 
         break;
@@ -106,18 +104,10 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   engine_delete(engine);
   list_t *directives = lex(operands->content);
 
-  list_t *atoms = list_create(sizeof(ptr_wrapper_t));
-  size_t length = 1;
+  char *content = calloc(1, sizeof(char));
+  strcpy(content, "");
 
-  fetch_files(operands, directives, atoms, &length);
-
-  char *content = calloc(length, sizeof(char));
-
-  for (size_t i = 0; i < atoms->size; i++) {
-    ptr_wrapper_t *wrapper = list_get(atoms, i);
-    strcat(content, (char *) wrapper->ptr);
-    free(wrapper->ptr);
-  }
+  fetch_files(operands, directives, &content);
 
   char *temp_buffer = strdup(*buffer);
 
@@ -135,7 +125,6 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   }
 
   list_delete(directives);
-  list_delete(atoms);
   free(content);
   free(temp_buffer);
 }
