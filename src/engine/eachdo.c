@@ -73,13 +73,12 @@ fetch_files(eachdo_operands_t *operands,
       }
 
       case PUT: {
-        ptr_wrapper_t *key_wrp
-            = list_find_corresponding_value_from_ptr_wrapper(
-                config->keys, config->values, trim(_directive->operands));
+        char *key = unwrap(list_find_corresponding_value_from_ptr_wrapper(
+            config->keys, config->values, trim(_directive->operands)));
 
-        if (key_wrp != NULL) {
-          list_wrap_and_add(atoms, strdup(key_wrp->ptr));
-          *length += strlen(key_wrp->ptr);
+        if (key != NULL) {
+          list_wrap_and_add(atoms, strdup(key));
+          *length += strlen(key);
         }
 
         break;
