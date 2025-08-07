@@ -13,6 +13,7 @@
           clang-tools
           clang
           lldb
+          ccls
 
           cmake
           ninja
