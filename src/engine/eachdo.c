@@ -28,22 +28,13 @@
 
 extern msg_t *msg;
 
-void
-handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
+static void
+fetch_files(eachdo_operands_t *operands,
+            list_t *directives,
+            list_t *atoms,
+            size_t *length)
 {
-  eachdo_operands_t *operands = directive->operands;
-
-  engine_t *engine = engine_ingest(&operands->content);
-  engine_delete(engine);
-  list_t *directives = lex(operands->content);
-
-#ifdef DEBUG
-  printf("KEY: %s\n", operands->key);
-  printf("CONTENT: %s\n", operands->content);
-#endif
-
   char *path;
-
   asprintf(&path, "%s/%s", msg->base_directory, trim(operands->key));
   list_t *files = enumfilesindir(path);
   free(path);
@@ -54,22 +45,19 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
     return;
   }
 
-  list_t *atoms = list_create(sizeof(ptr_wrapper_t));
-  size_t length = 1;
-
   for (size_t i = 0; i < files->size; i++) {
-    ptr_wrapper_t *file_wrp = list_get(files, i);
+    char *file_path = unwrap(list_get(files, i));
     asprintf(&path,
              "%s/%s/%s",
              msg->base_directory,
              trim(operands->key),
-             (char *) file_wrp->ptr);
+             file_path);
 
     int len = strlen(path);
     char *comparable = &path[len - strlen("index.html")];
     if (strcmp(comparable, "index.html") == 0) {
       free(path);
-      free(file_wrp->ptr);
+      free(file_path);
       continue;
     }
 
@@ -80,7 +68,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
       switch (_directive->type) {
       case _RAW: {
         list_wrap_and_add(atoms, strdup(_directive->operands));
-        length += strlen(_directive->operands);
+        *length += strlen(_directive->operands);
         break;
       }
 
@@ -91,7 +79,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 
         if (key_wrp != NULL) {
           list_wrap_and_add(atoms, strdup(key_wrp->ptr));
-          length += strlen(key_wrp->ptr);
+          *length += strlen(key_wrp->ptr);
         }
 
         break;
@@ -104,10 +92,25 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
     }
 
     config_delete(config);
-    free(file_wrp->ptr);
+    free(file_path);
+    free(path);
   }
-
   list_delete(files);
+}
+
+void
+handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
+{
+  eachdo_operands_t *operands = directive->operands;
+
+  engine_t *engine = engine_ingest(&operands->content);
+  engine_delete(engine);
+  list_t *directives = lex(operands->content);
+
+  list_t *atoms = list_create(sizeof(ptr_wrapper_t));
+  size_t length = 1;
+
+  fetch_files(operands, directives, atoms, &length);
 
   char *content = calloc(length, sizeof(char));
 
@@ -131,6 +134,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
     directive_t *_directive = list_get(directives, i);
     free(_directive->operands);
   }
+
   list_delete(directives);
   list_delete(atoms);
   free(content);
