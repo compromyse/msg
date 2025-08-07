@@ -105,8 +105,6 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   list_t *directives = lex(operands->content);
 
   char *content = calloc(1, sizeof(char));
-  strcpy(content, "");
-
   fetch_files(operands, directives, &content);
 
   char *temp_buffer = strdup(*buffer);
