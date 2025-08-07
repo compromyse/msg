@@ -112,13 +112,6 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   fetch_files(operands, directives, atoms, &length);
 
   char *content = calloc(length, sizeof(char));
-
-  for (size_t i = 0; i < atoms->size; i++) {
-    ptr_wrapper_t *wrapper = list_get(atoms, i);
-    strcat(content, (char *) wrapper->ptr);
-    free(wrapper->ptr);
-  }
-
   char *temp_buffer = strdup(*buffer);
 
   free(*buffer);
@@ -132,6 +125,12 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   for (size_t i = 0; i < directives->size; i++) {
     directive_t *_directive = list_get(directives, i);
     free(_directive->operands);
+  }
+
+  for (size_t i = 0; i < atoms->size; i++) {
+    ptr_wrapper_t *wrapper = list_get(atoms, i);
+    strcat(content, (char *) wrapper->ptr);
+    free(wrapper->ptr);
   }
 
   list_delete(directives);
