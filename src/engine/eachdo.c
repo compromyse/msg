@@ -45,15 +45,17 @@ write_eachdo_iteration(list_t *atoms,
                        list_t *keys,
                        list_t *values)
 {
-  char *content = calloc(1, sizeof(char));
+  atom_t *atom = malloc(sizeof(atom_t));
+  atom->content = calloc(1, sizeof(char));
 
   for (size_t i = 0; i < directives->size; i++) {
     directive_t *_directive = list_get(directives, i);
     switch (_directive->type) {
     case _RAW: {
-      content = realloc(content,
-                        strlen(content) + strlen(_directive->operands) + 1);
-      strcat(content, _directive->operands);
+      atom->content
+          = realloc(atom->content,
+                    strlen(atom->content) + strlen(_directive->operands) + 1);
+      strcat(atom->content, _directive->operands);
       break;
     }
 
@@ -62,8 +64,9 @@ write_eachdo_iteration(list_t *atoms,
           keys, values, trim(_directive->operands)));
 
       if (key != NULL) {
-        content = realloc(content, strlen(content) + strlen(key) + 1);
-        strcat(content, key);
+        atom->content
+            = realloc(atom->content, strlen(atom->content) + strlen(key) + 1);
+        strcat(atom->content, key);
       }
 
       break;
@@ -75,7 +78,8 @@ write_eachdo_iteration(list_t *atoms,
     }
   }
 
-  list_wrap_and_add(atoms, content);
+  list_add(atoms, atom);
+  free(atom);
 }
 
 /*
@@ -148,7 +152,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   engine_delete(engine);
   list_t *directives = lex(operands->content);
 
-  list_t *atoms = list_create(sizeof(ptr_wrapper_t));
+  list_t *atoms = list_create(sizeof(atom_t));
 
   char *content = calloc(1, sizeof(char));
 
@@ -161,9 +165,9 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   }
 
   for (size_t i = 0; i < atoms->size; i++) {
-    char *atom = unwrap(list_get(atoms, i));
-    content = realloc(content, strlen(content) + strlen(atom) + 1);
-    strcat(content, atom);
+    atom_t *atom = list_get(atoms, i);
+    content = realloc(content, strlen(content) + strlen(atom->content) + 1);
+    strcat(content, atom->content);
   }
 
   char *temp_buffer = strdup(*buffer);
@@ -184,8 +188,8 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   list_delete(directives);
 
   for (size_t i = 0; i < atoms->size; i++) {
-    ptr_wrapper_t *wrapper = list_get(atoms, i);
-    free(wrapper->ptr);
+    atom_t *atom = list_get(atoms, i);
+    free(atom->content);
   }
   list_delete(atoms);
 }

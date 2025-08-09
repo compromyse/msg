@@ -34,6 +34,14 @@ typedef struct {
   config_t *config;
 } engine_t;
 
+/*
+ * An atom is a single iteration of an EACHDO.
+ */
+typedef struct {
+  char *content;
+  size_t priority;
+} atom_t;
+
 engine_t *engine_ingest(char **buffer);
 void engine_delete(engine_t *engine);
 
