@@ -27,6 +27,14 @@
 
 extern msg_t *msg;
 
+/*
+ * Handles INCLUDE calls. Given a pointer to the buffer, it replaces the
+ * INCLUDE call with the operand file's content.
+ *
+ * buffer: Pointer to the buffer that is modified
+ * match: Pointer to the key match
+ * directive: Pointer to the directive struct
+ */
 void
 handle_include(char **buffer, key_match_t *match, directive_t *directive)
 {
