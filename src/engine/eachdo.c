@@ -126,6 +126,15 @@ handle_file_source(eachdo_operands_t *operands,
   list_delete(files);
 }
 
+/*
+ * Handles EACHDO calls. Given a pointer to the buffer, it replaces the EACHDO
+ * call along with its content block and ENDEACHDO call with the fetched
+ * content.
+ *
+ * buffer: Pointer to the buffer that is modified
+ * match: Pointer to the key match
+ * directive: Pointer to the directive struct
+ */
 void
 handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 {
