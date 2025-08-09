@@ -43,9 +43,11 @@ static void
 write_eachdo_iteration(list_t *atoms,
                        list_t *directives,
                        list_t *keys,
-                       list_t *values)
+                       list_t *values,
+                       size_t priority)
 {
   atom_t *atom = malloc(sizeof(atom_t));
+  atom->priority = priority;
   atom->content = calloc(1, sizeof(char));
 
   for (size_t i = 0; i < directives->size; i++) {
@@ -125,7 +127,15 @@ handle_file_source(list_t *atoms,
 
     config_t *config = config_fetch_and_parse(path);
 
-    write_eachdo_iteration(atoms, directives, config->keys, config->values);
+    size_t priority = 0;
+    char *priority_string
+        = unwrap(list_find_corresponding_value_from_ptr_wrapper(
+            config->keys, config->values, "priority"));
+    if (priority_string != NULL)
+      priority = atoll(priority_string);
+
+    write_eachdo_iteration(
+        atoms, directives, config->keys, config->values, priority);
 
     config_delete(config);
     free(file_path);
@@ -167,6 +177,9 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   for (size_t i = 0; i < atoms->size; i++) {
     atom_t *atom = list_get(atoms, i);
     content = realloc(content, strlen(content) + strlen(atom->content) + 1);
+#ifdef DEBUG
+    printf("PRIORITY: %lu\n", atom->priority);
+#endif
     strcat(content, atom->content);
   }
 
