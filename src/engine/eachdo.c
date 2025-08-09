@@ -44,7 +44,7 @@ write_eachdo_iteration(list_t *atoms,
                        list_t *directives,
                        list_t *keys,
                        list_t *values,
-                       size_t priority)
+                       int priority)
 {
   atom_t *atom = malloc(sizeof(atom_t));
   atom->priority = priority;
@@ -127,7 +127,7 @@ handle_file_source(list_t *atoms,
 
     config_t *config = config_fetch_and_parse(path);
 
-    size_t priority = 0;
+    int priority = 0;
     char *priority_string
         = unwrap(list_find_corresponding_value_from_ptr_wrapper(
             config->keys, config->values, "priority"));

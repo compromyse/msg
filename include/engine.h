@@ -39,7 +39,7 @@ typedef struct {
  */
 typedef struct {
   char *content;
-  size_t priority;
+  int priority;
 } atom_t;
 
 engine_t *engine_ingest(char **buffer);
