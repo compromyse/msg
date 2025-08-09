@@ -28,6 +28,51 @@
 
 extern msg_t *msg;
 
+/*
+ * A generic function that accepts keys, corresponding values and the
+ * directives. It appends to the buffer the corresponding value of the key for
+ * each PUT in the directives.
+ *
+ * ARGS:
+ * content: A pointer to the buffer that is appended to
+ * directives: A list of the EACHDO directives (only _RAW and PUT)
+ * keys, values: A hash of PUT keys and their corresponding values
+ */
+static void
+write_eachdo_iteration(char **content,
+                       list_t *directives,
+                       list_t *keys,
+                       list_t *values)
+{
+  for (size_t i = 0; i < directives->size; i++) {
+    directive_t *_directive = list_get(directives, i);
+    switch (_directive->type) {
+    case _RAW: {
+      *content = realloc(*content,
+                         strlen(*content) + strlen(_directive->operands) + 1);
+      strcat(*content, _directive->operands);
+      break;
+    }
+
+    case PUT: {
+      char *key = unwrap(list_find_corresponding_value_from_ptr_wrapper(
+          keys, values, trim(_directive->operands)));
+
+      if (key != NULL) {
+        *content = realloc(*content, strlen(*content) + strlen(key) + 1);
+        strcat(*content, key);
+      }
+
+      break;
+    }
+
+    default:
+      /* TODO: Handle this */
+      break;
+    }
+  }
+}
+
 static void
 fetch_files(eachdo_operands_t *operands, list_t *directives, char **content)
 {
@@ -60,33 +105,7 @@ fetch_files(eachdo_operands_t *operands, list_t *directives, char **content)
 
     config_t *config = config_fetch_and_parse(path);
 
-    for (size_t i = 0; i < directives->size; i++) {
-      directive_t *_directive = list_get(directives, i);
-      switch (_directive->type) {
-      case _RAW: {
-        *content = realloc(
-            *content, strlen(*content) + strlen(_directive->operands) + 1);
-        strcat(*content, _directive->operands);
-        break;
-      }
-
-      case PUT: {
-        char *key = unwrap(list_find_corresponding_value_from_ptr_wrapper(
-            config->keys, config->values, trim(_directive->operands)));
-
-        if (key != NULL) {
-          *content = realloc(*content, strlen(*content) + strlen(key) + 1);
-          strcat(*content, key);
-        }
-
-        break;
-      }
-
-      default:
-        /* TODO: Handle this */
-        break;
-      }
-    }
+    write_eachdo_iteration(content, directives, config->keys, config->values);
 
     config_delete(config);
     free(file_path);
