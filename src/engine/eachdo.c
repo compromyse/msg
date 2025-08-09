@@ -33,7 +33,8 @@ extern msg_t *msg;
  * directives. It appends to the buffer the corresponding value of the key for
  * each PUT in the directives.
  *
- * ARGS:
+ * NOTE: The keys and values must be wrapped.
+ *
  * content: A pointer to the buffer that is appended to
  * directives: A list of the EACHDO directives (only _RAW and PUT)
  * keys, values: A hash of PUT keys and their corresponding values
@@ -73,6 +74,15 @@ write_eachdo_iteration(char **content,
   }
 }
 
+/*
+ * Handles EACHDOs on files. Fetches each file from a given directory
+ * (operands->key) and parses each of its configs before handing off the
+ * config->keys and config->values to write_eachdo_iteration.
+ *
+ * operands: Operands to the EACHDO call
+ * directives: List of all directives (from lexing the EACHDO's content block)
+ * content: A pointer to the buffer that is appended to
+ */
 static void
 fetch_files(eachdo_operands_t *operands, list_t *directives, char **content)
 {
