@@ -84,7 +84,9 @@ write_eachdo_iteration(char **content,
  * content: A pointer to the buffer that is appended to
  */
 static void
-fetch_files(eachdo_operands_t *operands, list_t *directives, char **content)
+handle_file_source(eachdo_operands_t *operands,
+                   list_t *directives,
+                   char **content)
 {
   char *path;
   asprintf(&path, "%s/%s", msg->base_directory, trim(operands->key));
@@ -134,10 +136,10 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   list_t *directives = lex(operands->content);
 
   char *content = calloc(1, sizeof(char));
-  fetch_files(operands, directives, &content);
+
+  handle_file_source(operands, directives, &content);
 
   char *temp_buffer = strdup(*buffer);
-
   free(*buffer);
   asprintf(buffer,
            "%.*s%s%s\n",
