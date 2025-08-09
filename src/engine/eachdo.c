@@ -45,15 +45,15 @@ write_eachdo_iteration(list_t *atoms,
                        list_t *keys,
                        list_t *values)
 {
+  char *content = calloc(1, sizeof(char));
+
   for (size_t i = 0; i < directives->size; i++) {
     directive_t *_directive = list_get(directives, i);
     switch (_directive->type) {
     case _RAW: {
-      /* *content = realloc(*content,
-                         strlen(*content) + strlen(_directive->operands) + 1);
-      strcat(*content, _directive->operands); */
-
-      list_wrap_and_add(atoms, strdup(_directive->operands));
+      content = realloc(content,
+                        strlen(content) + strlen(_directive->operands) + 1);
+      strcat(content, _directive->operands);
       break;
     }
 
@@ -62,10 +62,8 @@ write_eachdo_iteration(list_t *atoms,
           keys, values, trim(_directive->operands)));
 
       if (key != NULL) {
-        /* *content = realloc(*content, strlen(*content) + strlen(key) + 1);
-        strcat(*content, key); */
-
-        list_wrap_and_add(atoms, strdup(key));
+        content = realloc(content, strlen(content) + strlen(key) + 1);
+        strcat(content, key);
       }
 
       break;
@@ -76,6 +74,8 @@ write_eachdo_iteration(list_t *atoms,
       break;
     }
   }
+
+  list_wrap_and_add(atoms, content);
 }
 
 /*
