@@ -146,7 +146,13 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 
   char *content = calloc(1, sizeof(char));
 
-  handle_file_source(operands, directives, &content);
+  if (!strcmp(operands->source, "resources"))
+    handle_file_source(operands, directives, &content);
+  else {
+    printf("Unknown source: %s\n", operands->source);
+    /* TODO: handle this gracefully */
+    return;
+  }
 
   char *temp_buffer = strdup(*buffer);
   free(*buffer);
