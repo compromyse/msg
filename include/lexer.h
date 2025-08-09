@@ -46,11 +46,9 @@ typedef struct {
   void *operands;
 } directive_t;
 
-/* TODO: strlen(content) instead of length? */
 typedef struct {
   char *key;
   char *content;
-  size_t length;
 } contentfor_operand_t;
 
 typedef struct {

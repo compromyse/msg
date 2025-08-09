@@ -31,9 +31,8 @@ handle_contentfor(char **buffer,
                   list_t *content_headers)
 {
   contentfor_operand_t *operand = directive->operands;
-  contentfor_operand_t new_operand = { .content = strdup(operand->content),
-                                       .key = strdup(operand->key),
-                                       .length = operand->length };
+  contentfor_operand_t new_operand
+      = { .content = strdup(operand->content), .key = strdup(operand->key) };
   list_add(content_headers, &new_operand);
 
 #ifdef DEBUG
@@ -48,7 +47,7 @@ handle_contentfor(char **buffer,
            "%.*s%s",
            match->offset,
            temp_buffer,
-           temp_buffer + operand->length);
+           temp_buffer + strlen(operand->content));
 
   free(temp_buffer);
 }
