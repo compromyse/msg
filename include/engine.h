@@ -23,6 +23,12 @@
 #include <lexer.h>
 #include <list.h>
 
+/*
+ * Simply just there to return content headers and config.
+ *
+ * content_headers: List of contentfor operands (CONTENTFOR directive operands)
+ * config: Config of the ingested file
+ */
 typedef struct {
   list_t *content_headers;
   config_t *config;
