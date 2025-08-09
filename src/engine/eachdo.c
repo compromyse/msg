@@ -35,12 +35,12 @@ extern msg_t *msg;
  *
  * NOTE: The keys and values must be wrapped.
  *
- * content: A pointer to the buffer that is appended to
+ * atoms: List of atoms to which the content is appended
  * directives: A list of the EACHDO directives (only _RAW and PUT)
  * keys, values: A hash of PUT keys and their corresponding values
  */
 static void
-write_eachdo_iteration(char **content,
+write_eachdo_iteration(list_t *atoms,
                        list_t *directives,
                        list_t *keys,
                        list_t *values)
@@ -49,9 +49,11 @@ write_eachdo_iteration(char **content,
     directive_t *_directive = list_get(directives, i);
     switch (_directive->type) {
     case _RAW: {
-      *content = realloc(*content,
+      /* *content = realloc(*content,
                          strlen(*content) + strlen(_directive->operands) + 1);
-      strcat(*content, _directive->operands);
+      strcat(*content, _directive->operands); */
+
+      list_wrap_and_add(atoms, strdup(_directive->operands));
       break;
     }
 
@@ -60,8 +62,10 @@ write_eachdo_iteration(char **content,
           keys, values, trim(_directive->operands)));
 
       if (key != NULL) {
-        *content = realloc(*content, strlen(*content) + strlen(key) + 1);
-        strcat(*content, key);
+        /* *content = realloc(*content, strlen(*content) + strlen(key) + 1);
+        strcat(*content, key); */
+
+        list_wrap_and_add(atoms, strdup(key));
       }
 
       break;
@@ -79,14 +83,14 @@ write_eachdo_iteration(char **content,
  * (operands->key) and parses each of its configs before handing off the
  * config->keys and config->values to write_eachdo_iteration.
  *
+ * atoms: List of atoms to which the content is appended
  * operands: Operands to the EACHDO call
  * directives: List of all directives (from lexing the EACHDO's content block)
- * content: A pointer to the buffer that is appended to
  */
 static void
-handle_file_source(eachdo_operands_t *operands,
-                   list_t *directives,
-                   char **content)
+handle_file_source(list_t *atoms,
+                   eachdo_operands_t *operands,
+                   list_t *directives)
 {
   char *path;
   asprintf(&path, "%s/%s", msg->base_directory, trim(operands->key));
@@ -117,7 +121,7 @@ handle_file_source(eachdo_operands_t *operands,
 
     config_t *config = config_fetch_and_parse(path);
 
-    write_eachdo_iteration(content, directives, config->keys, config->values);
+    write_eachdo_iteration(atoms, directives, config->keys, config->values);
 
     config_delete(config);
     free(file_path);
@@ -144,14 +148,22 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
   engine_delete(engine);
   list_t *directives = lex(operands->content);
 
+  list_t *atoms = list_create(sizeof(ptr_wrapper_t));
+
   char *content = calloc(1, sizeof(char));
 
   if (!strcmp(operands->source, "resources"))
-    handle_file_source(operands, directives, &content);
+    handle_file_source(atoms, operands, directives);
   else {
     printf("Unknown source: %s\n", operands->source);
     /* TODO: handle this gracefully */
     return;
+  }
+
+  for (size_t i = 0; i < atoms->size; i++) {
+    char *atom = unwrap(list_get(atoms, i));
+    content = realloc(content, strlen(content) + strlen(atom) + 1);
+    strcat(content, atom);
   }
 
   char *temp_buffer = strdup(*buffer);
@@ -167,8 +179,13 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
     directive_t *_directive = list_get(directives, i);
     free(_directive->operands);
   }
+  for (size_t i = 0; i < atoms->size; i++) {
+    ptr_wrapper_t *wrapper = list_get(atoms, i);
+    free(wrapper->ptr);
+  }
 
   list_delete(directives);
+  list_delete(atoms);
   free(content);
   free(temp_buffer);
 }
