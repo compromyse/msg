@@ -33,6 +33,15 @@
 
 extern msg_t *msg;
 
+/*
+ * First reads the config, if present. Then streams each directive and parses
+ * it, modifying the buffer. At the end, all applicable directives in the
+ * buffer are parsed and evaluated.
+ *
+ * ENDEACHDO, BODY, CONTENT, _RAW, etc. are not applicable,
+ * for varying reasons. For example, ENDEACHDO isn't really meant to be parsed.
+ * It's only there to define the end of the EACHDO content block.
+ */
 engine_t *
 engine_ingest(char **buffer)
 {
@@ -113,6 +122,9 @@ engine_ingest(char **buffer)
   return engine;
 }
 
+/*
+ * Frees the provided engine_t's children before freeing the structure itself.
+ */
 void
 engine_delete(engine_t *engine)
 {

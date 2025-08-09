@@ -36,6 +36,7 @@ typedef struct {
 
 engine_t *engine_ingest(char **buffer);
 void engine_delete(engine_t *engine);
+
 void handle_include(char **buffer, key_match_t *match, directive_t *directive);
 void handle_contentfor(char **buffer,
                        key_match_t *match,
