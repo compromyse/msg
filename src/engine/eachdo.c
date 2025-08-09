@@ -29,6 +29,15 @@
 extern msg_t *msg;
 
 /*
+ * Compares two atoms based on priority. Used for qsort()
+ */
+static int
+comp(const void *a, const void *b)
+{
+  return ((atom_t *) b)->priority - ((atom_t *) a)->priority;
+}
+
+/*
  * A generic function that accepts keys, corresponding values and the
  * directives. It appends to the buffer the corresponding value of the key for
  * each PUT in the directives.
@@ -173,6 +182,9 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
     /* TODO: handle this gracefully */
     return;
   }
+
+  /* Sort atoms by priority */
+  qsort(atoms->elements, atoms->size, sizeof(atom_t), comp);
 
   for (size_t i = 0; i < atoms->size; i++) {
     atom_t *atom = list_get(atoms, i);
