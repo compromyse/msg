@@ -24,6 +24,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*
+ * Handles CONTENTFOR calls. Given a pointer to the buffer, it creates a new
+ * CONTENTFOR operand with the content block and the key. This operand is
+ * appended to the content_headers list.
+ *
+ * buffer: Pointer to the buffer
+ * match: Pointer to the key match
+ * directive: Pointer to the directive struct
+ * content_headers: Pointer to the list of content headers that is appended to
+ */
 void
 handle_contentfor(char **buffer,
                   key_match_t *match,
