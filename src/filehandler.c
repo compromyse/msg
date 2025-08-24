@@ -29,7 +29,7 @@
 char *
 fcontent(FILE *f, unsigned int size)
 {
-  char *buffer = (char *) calloc(size, sizeof(char));
+  char *buffer = calloc(size, sizeof(char));
 
   fseek(f, 0, SEEK_SET);
   int bytesread = fread(buffer, sizeof(char), size, f);
