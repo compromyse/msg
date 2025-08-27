@@ -24,6 +24,12 @@
 #define DELIM "="
 #define DELIM_ARRAY ","
 
+/*
+ * Each config has a list of "top-level keys", with corresponding values.
+ * Simple string values are stored in the values array, with array-values being
+ * stored in array_values. When a key has an array value, its corresponding
+ * entry in values is NULL, and vice versa with simple string values.
+ */
 typedef struct {
     list_t *keys;
     list_t *values;
