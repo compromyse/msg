@@ -44,178 +44,178 @@ extern msg_t *msg;
 void
 handle_file(const char *path)
 {
-  char *inpath;
-  char *outpath;
+    char *inpath;
+    char *outpath;
 
-  asprintf(&inpath, "%s/%s", msg->base_directory, path);
+    asprintf(&inpath, "%s/%s", msg->base_directory, path);
 
-  char *dot = strrchr(inpath, '.');
-  if (dot && strcmp(dot, ".md") == 0) {
-    asprintf(&outpath,
-             "%s/%.*s.html",
-             msg->output_directory,
-             (int) strlen(path) - 3,
-             path);
-  } else {
-    asprintf(&outpath, "%s/%s", msg->output_directory, path);
-  }
-
-  char *temp_outpath = strdup(outpath);
-  char *directory = dirname(temp_outpath);
-  char *next = calloc(strlen(directory) + 1, sizeof(char));
-  strcpy(next, "");
-
-  char *token;
-  for (token = strtok(directory, "/"); token != NULL;
-       token = strtok(NULL, "/")) {
-    if (strcmp(next, "") != 0) {
-      strcat(next, "/");
+    char *dot = strrchr(inpath, '.');
+    if (dot && strcmp(dot, ".md") == 0) {
+        asprintf(&outpath,
+                 "%s/%.*s.html",
+                 msg->output_directory,
+                 (int) strlen(path) - 3,
+                 path);
+    } else {
+        asprintf(&outpath, "%s/%s", msg->output_directory, path);
     }
 
-    strcat(next, token);
-    mkdir(next, 0700);
-  }
+    char *temp_outpath = strdup(outpath);
+    char *directory = dirname(temp_outpath);
+    char *next = calloc(strlen(directory) + 1, sizeof(char));
+    strcpy(next, "");
 
-  free(next);
-  free(temp_outpath);
+    char *token;
+    for (token = strtok(directory, "/"); token != NULL;
+         token = strtok(NULL, "/")) {
+        if (strcmp(next, "") != 0) {
+            strcat(next, "/");
+        }
 
-  FILE *in = fopen(inpath, "r");
-  if (in == NULL) {
-    printf("Failed to open %s\n", inpath);
-    return;
-  }
+        strcat(next, token);
+        mkdir(next, 0700);
+    }
 
-  FILE *out = fopen(outpath, "w");
-  if (out == NULL) {
-    printf("Failed to open %s\n", outpath);
+    free(next);
+    free(temp_outpath);
+
+    FILE *in = fopen(inpath, "r");
+    if (in == NULL) {
+        printf("Failed to open %s\n", inpath);
+        return;
+    }
+
+    FILE *out = fopen(outpath, "w");
+    if (out == NULL) {
+        printf("Failed to open %s\n", outpath);
+        fclose(in);
+        return;
+    }
+
+    unsigned int size = fsize(in);
+    char *buffer = fcontent(in, size);
+
+    if (dot && strcmp(dot, ".md") == 0) {
+        engine_t engine = { .config = NULL, .content_headers = NULL };
+
+        char *p = strstr(buffer, "---");
+        if (p != NULL) {
+            char *config;
+            asprintf(&config, "%.*s\n", (int) (p - buffer), buffer);
+            engine.config = config_parse(config);
+            free(config);
+            char *tempbuffer = strdup(p);
+
+            free(buffer);
+            asprintf(&buffer, "%s", tempbuffer + strlen("---"));
+
+            free(tempbuffer);
+        }
+
+        mkd_flag_t *flags = mkd_flags();
+        mkd_set_flag_num(flags, MKD_FENCEDCODE);
+        MMIOT *doc = mkd_string(buffer, strlen(buffer), flags);
+        free(flags);
+        template_write(&engine, out, doc, true);
+
+        if (engine.config != NULL)
+            config_delete(engine.config);
+    } else if (strlen(buffer) != 0) {
+        engine_t *engine = engine_ingest(&buffer);
+        template_write(engine, out, buffer, false);
+        engine_delete(engine);
+    }
+
+    free(buffer);
+
     fclose(in);
-    return;
-  }
+    fclose(out);
 
-  unsigned int size = fsize(in);
-  char *buffer = fcontent(in, size);
-
-  if (dot && strcmp(dot, ".md") == 0) {
-    engine_t engine = { .config = NULL, .content_headers = NULL };
-
-    char *p = strstr(buffer, "---");
-    if (p != NULL) {
-      char *config;
-      asprintf(&config, "%.*s\n", (int) (p - buffer), buffer);
-      engine.config = config_parse(config);
-      free(config);
-      char *tempbuffer = strdup(p);
-
-      free(buffer);
-      asprintf(&buffer, "%s", tempbuffer + strlen("---"));
-
-      free(tempbuffer);
-    }
-
-    mkd_flag_t *flags = mkd_flags();
-    mkd_set_flag_num(flags, MKD_FENCEDCODE);
-    MMIOT *doc = mkd_string(buffer, strlen(buffer), flags);
-    free(flags);
-    template_write(&engine, out, doc, true);
-
-    if (engine.config != NULL)
-      config_delete(engine.config);
-  } else if (strlen(buffer) != 0) {
-    engine_t *engine = engine_ingest(&buffer);
-    template_write(engine, out, buffer, false);
-    engine_delete(engine);
-  }
-
-  free(buffer);
-
-  fclose(in);
-  fclose(out);
-
-  free(inpath);
-  free(outpath);
+    free(inpath);
+    free(outpath);
 }
 
 int
 run(bool log)
 {
-  if (log) {
-    time_t rawtime;
-    struct tm *timeinfo;
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-    printf("Generation started at: %s", asctime(timeinfo));
-  }
-
-  struct stat sb;
-  if (stat(msg->base_directory, &sb) != 0 || !S_ISDIR(sb.st_mode)) {
-    printf("%s does not exist.\n", msg->base_directory);
-    return EXIT_FAILURE;
-  }
-
-  char *config_path;
-  asprintf(&config_path, "%s/%s", msg->base_directory, CONFIG_FILE);
-  config_t *config = config_fetch_and_parse(config_path);
-  free(config_path);
-
-  if (config == NULL)
-    return EXIT_FAILURE;
-
-  template_initialize();
-
-  int err = mkdir(msg->output_directory, 0700);
-  if (err != 0 && errno != EEXIST) {
-    perror("mkdir");
-    return EXIT_FAILURE;
-  }
-
-  list_t *static_ = unwrap(list_find_corresponding_value_from_ptr_wrapper(
-      config->keys, config->array_values, "static"));
-
-  if (static_ == NULL) {
-    printf("Could not find resources in config.cfg\n");
-    return EXIT_FAILURE;
-  }
-
-  for (size_t i = 0; i < static_->size; i++) {
-    ptr_wrapper_t *value = list_get(static_, i);
-    char *path = NULL;
-    asprintf(&path, "%s/%s", msg->base_directory, (char *) value->ptr);
-
-    struct stat path_stat;
-    stat(path, &path_stat);
-
-    /* TODO: Error handling */
-    if (S_ISREG(path_stat.st_mode))
-      copy_recursively(path, NULL, FTW_F, NULL);
-    else if (S_ISDIR(path_stat.st_mode))
-      nftw(path, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
-
-    free(path);
-  }
-
-  list_t *resources = unwrap(list_find_corresponding_value_from_ptr_wrapper(
-      config->keys, config->array_values, "resources"));
-
-  if (resources == NULL) {
-    printf("Could not find resources in config.cfg\n");
-    return EXIT_FAILURE;
-  }
-
-  for (size_t i = 0; i < resources->size; i++) {
-    ptr_wrapper_t *value = list_get(resources, i);
-    char *path = value->ptr;
     if (log) {
-      if (i < LOG_THRESHOLD || msg->verbose)
-        printf("\tProcessing %s\n", path);
-      else if (i == LOG_THRESHOLD && !msg->verbose)
-        printf("\t...\n");
+        time_t rawtime;
+        struct tm *timeinfo;
+        time(&rawtime);
+        timeinfo = localtime(&rawtime);
+        printf("Generation started at: %s", asctime(timeinfo));
     }
 
-    handle_file(path);
-  }
+    struct stat sb;
+    if (stat(msg->base_directory, &sb) != 0 || !S_ISDIR(sb.st_mode)) {
+        printf("%s does not exist.\n", msg->base_directory);
+        return EXIT_FAILURE;
+    }
 
-  template_clean();
-  config_delete(config);
+    char *config_path;
+    asprintf(&config_path, "%s/%s", msg->base_directory, CONFIG_FILE);
+    config_t *config = config_fetch_and_parse(config_path);
+    free(config_path);
 
-  return EXIT_SUCCESS;
+    if (config == NULL)
+        return EXIT_FAILURE;
+
+    template_initialize();
+
+    int err = mkdir(msg->output_directory, 0700);
+    if (err != 0 && errno != EEXIST) {
+        perror("mkdir");
+        return EXIT_FAILURE;
+    }
+
+    list_t *static_ = unwrap(list_find_corresponding_value_from_ptr_wrapper(
+        config->keys, config->array_values, "static"));
+
+    if (static_ == NULL) {
+        printf("Could not find resources in config.cfg\n");
+        return EXIT_FAILURE;
+    }
+
+    for (size_t i = 0; i < static_->size; i++) {
+        ptr_wrapper_t *value = list_get(static_, i);
+        char *path = NULL;
+        asprintf(&path, "%s/%s", msg->base_directory, (char *) value->ptr);
+
+        struct stat path_stat;
+        stat(path, &path_stat);
+
+        /* TODO: Error handling */
+        if (S_ISREG(path_stat.st_mode))
+            copy_recursively(path, NULL, FTW_F, NULL);
+        else if (S_ISDIR(path_stat.st_mode))
+            nftw(path, copy_recursively, 64, FTW_PHYS | FTW_ACTIONRETVAL);
+
+        free(path);
+    }
+
+    list_t *resources = unwrap(list_find_corresponding_value_from_ptr_wrapper(
+        config->keys, config->array_values, "resources"));
+
+    if (resources == NULL) {
+        printf("Could not find resources in config.cfg\n");
+        return EXIT_FAILURE;
+    }
+
+    for (size_t i = 0; i < resources->size; i++) {
+        ptr_wrapper_t *value = list_get(resources, i);
+        char *path = value->ptr;
+        if (log) {
+            if (i < LOG_THRESHOLD || msg->verbose)
+                printf("\tProcessing %s\n", path);
+            else if (i == LOG_THRESHOLD && !msg->verbose)
+                printf("\t...\n");
+        }
+
+        handle_file(path);
+    }
+
+    template_clean();
+    config_delete(config);
+
+    return EXIT_SUCCESS;
 }

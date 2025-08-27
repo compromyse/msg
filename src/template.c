@@ -40,165 +40,166 @@ list_t *templates;
 static void
 delete_components(template_t *template)
 {
-  for (size_t i = 0; i < template->components->size; i++) {
-    directive_t *directive = list_get(template->components, i);
-    switch (directive->type) {
-    case _RAW:
-    case CONTENT:
-    case PUTPAGE:
-      free(directive->operands);
-      break;
+    for (size_t i = 0; i < template->components->size; i++) {
+        directive_t *directive = list_get(template->components, i);
+        switch (directive->type) {
+        case _RAW:
+        case CONTENT:
+        case PUTPAGE:
+            free(directive->operands);
+            break;
 
-    default:
-      break;
+        default:
+            break;
+        }
     }
-  }
-  list_delete(template->components);
+    list_delete(template->components);
 }
 
 void
 template_initialize(void)
 {
-  keys = list_create(sizeof(ptr_wrapper_t));
-  templates = list_create(sizeof(template_t));
+    keys = list_create(sizeof(ptr_wrapper_t));
+    templates = list_create(sizeof(template_t));
 
-  char *template_directory;
-  asprintf(&template_directory, "%s/%s", msg->base_directory, TEMPLATES);
-  DIR *dir = opendir(template_directory);
+    char *template_directory;
+    asprintf(&template_directory, "%s/%s", msg->base_directory, TEMPLATES);
+    DIR *dir = opendir(template_directory);
 
-  if (dir == NULL) {
-    printf("Could not open %s\n", template_directory);
-    return;
-  }
-  free(template_directory);
+    if (dir == NULL) {
+        printf("Could not open %s\n", template_directory);
+        return;
+    }
+    free(template_directory);
 
-  struct dirent *f;
-  while ((f = readdir(dir)) != NULL) {
-    if (f->d_type != DT_REG)
-      continue;
+    struct dirent *f;
+    while ((f = readdir(dir)) != NULL) {
+        if (f->d_type != DT_REG)
+            continue;
 
-    template_t *t = template_create(f->d_name);
-    list_wrap_and_add(keys, strdup(f->d_name));
-    list_add(templates, t);
+        template_t *t = template_create(f->d_name);
+        list_wrap_and_add(keys, strdup(f->d_name));
+        list_add(templates, t);
 
-    free(t);
-  }
+        free(t);
+    }
 
-  closedir(dir);
+    closedir(dir);
 }
 
 void
 template_clean(void)
 {
-  for (size_t i = 0; i < keys->size; i++) {
-    template_t *template = list_get(templates, i);
-    delete_components(template);
+    for (size_t i = 0; i < keys->size; i++) {
+        template_t *template = list_get(templates, i);
+        delete_components(template);
 
-    ptr_wrapper_t *wrapper = list_get(keys, i);
-    free(wrapper->ptr);
-  }
+        ptr_wrapper_t *wrapper = list_get(keys, i);
+        free(wrapper->ptr);
+    }
 
-  list_delete(keys);
-  list_delete(templates);
+    list_delete(keys);
+    list_delete(templates);
 }
 
 template_t *
 template_create(char *template_name)
 {
-  template_t *template = malloc(sizeof(template_t));
+    template_t *template = malloc(sizeof(template_t));
 
-  char *path;
-  asprintf(&path, "%s/%s/%s", msg->base_directory, TEMPLATES, template_name);
-  FILE *base = fopen(path, "r");
-  free(path);
+    char *path;
+    asprintf(&path, "%s/%s/%s", msg->base_directory, TEMPLATES, template_name);
+    FILE *base = fopen(path, "r");
+    free(path);
 
-  unsigned int size = fsize(base);
-  char *buffer = fcontent(base, size);
-  fclose(base);
+    unsigned int size = fsize(base);
+    char *buffer = fcontent(base, size);
+    fclose(base);
 
-  engine_t *engine = engine_ingest(&buffer);
-  engine_delete(engine);
-  template->components = lex(buffer);
+    engine_t *engine = engine_ingest(&buffer);
+    engine_delete(engine);
+    template->components = lex(buffer);
 
-  free(buffer);
-  return template;
+    free(buffer);
+    return template;
 }
 
 void
 template_delete(template_t *template)
 {
-  delete_components(template);
-  free(template);
+    delete_components(template);
+    free(template);
 }
 
 void
 template_write(engine_t *engine, FILE *f, void *doc, bool is_markdown)
 {
-  template_t *template = list_find_corresponding_value_from_ptr_wrapper(
-      keys, templates, "base.html");
+    template_t *template = list_find_corresponding_value_from_ptr_wrapper(
+        keys, templates, "base.html");
 
-  if (engine != NULL && engine->config != NULL) {
-    char *template_name
-        = unwrap(list_find_corresponding_value_from_ptr_wrapper(
-            engine->config->keys, engine->config->values, "template"));
+    if (engine != NULL && engine->config != NULL) {
+        char *template_name
+            = unwrap(list_find_corresponding_value_from_ptr_wrapper(
+                engine->config->keys, engine->config->values, "template"));
 
-    if (template_name != NULL) {
-      template = list_find_corresponding_value_from_ptr_wrapper(
-          keys, templates, template_name);
+        if (template_name != NULL) {
+            template = list_find_corresponding_value_from_ptr_wrapper(
+                keys, templates, template_name);
 
-      if (template == NULL) {
-        printf("Could not find template %s\n", template_name);
-        return;
-      }
-    }
-  }
-
-  for (size_t i = 0; i < template->components->size; i++) {
-    directive_t *directive = list_get(template->components, i);
-
-    switch (directive->type) {
-    case _RAW:
-      fprintf(f, "%s", (char *) directive->operands);
-      break;
-
-    case CONTENT: {
-      /* TODO: handle this gracefully */
-      if (!is_markdown) {
-        char *content = find_contentfor_value(engine->content_headers,
-                                              directive->operands);
-        fprintf(f, "%s", content);
-      }
-      break;
+            if (template == NULL) {
+                printf("Could not find template %s\n", template_name);
+                return;
+            }
+        }
     }
 
-    case BODY: {
-      if (is_markdown) {
+    for (size_t i = 0; i < template->components->size; i++) {
+        directive_t *directive = list_get(template->components, i);
 
-        mkd_flag_t *flags = mkd_flags();
-        mkd_set_flag_num(flags, MKD_FENCEDCODE);
-        markdown(doc, f, flags);
-        free(flags);
-      } else {
-        fprintf(f, "%s", (char *) doc);
-      }
+        switch (directive->type) {
+        case _RAW:
+            fprintf(f, "%s", (char *) directive->operands);
+            break;
 
-      break;
+        case CONTENT: {
+            /* TODO: handle this gracefully */
+            if (!is_markdown) {
+                char *content = find_contentfor_value(engine->content_headers,
+                                                      directive->operands);
+                fprintf(f, "%s", content);
+            }
+            break;
+        }
+
+        case BODY: {
+            if (is_markdown) {
+
+                mkd_flag_t *flags = mkd_flags();
+                mkd_set_flag_num(flags, MKD_FENCEDCODE);
+                markdown(doc, f, flags);
+                free(flags);
+            } else {
+                fprintf(f, "%s", (char *) doc);
+            }
+
+            break;
+        }
+
+        case PUTPAGE: {
+
+            char *content
+                = unwrap(list_find_corresponding_value_from_ptr_wrapper(
+                    engine->config->keys,
+                    engine->config->values,
+                    trim(directive->operands)));
+            fprintf(f, "%s", content);
+
+            break;
+        }
+
+        /* TODO: Handle this gracefully */
+        default:
+            break;
+        }
     }
-
-    case PUTPAGE: {
-
-      char *content = unwrap(list_find_corresponding_value_from_ptr_wrapper(
-          engine->config->keys,
-          engine->config->values,
-          trim(directive->operands)));
-      fprintf(f, "%s", content);
-
-      break;
-    }
-
-    /* TODO: Handle this gracefully */
-    default:
-      break;
-    }
-  }
 }

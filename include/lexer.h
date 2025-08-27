@@ -24,38 +24,38 @@
 #define DIRECTIVE_IS(key) strncmp(buffer + n, key, strlen(key)) == 0
 
 typedef enum {
-  _RAW,
-  INCLUDE,
-  CONTENT,
-  CONTENTFOR,
-  ENDCONTENT,
-  BODY,
-  EACHDO,
-  ENDEACHDO,
-  PUT,
-  PUTPAGE
+    _RAW,
+    INCLUDE,
+    CONTENT,
+    CONTENTFOR,
+    ENDCONTENT,
+    BODY,
+    EACHDO,
+    ENDEACHDO,
+    PUT,
+    PUTPAGE
 } directive_e;
 
 typedef struct {
-  unsigned int offset;
-  unsigned int length;
+    unsigned int offset;
+    unsigned int length;
 } key_match_t;
 
 typedef struct {
-  directive_e type;
-  void *operands;
+    directive_e type;
+    void *operands;
 } directive_t;
 
 typedef struct {
-  char *key;
-  char *content;
+    char *key;
+    char *content;
 } contentfor_operand_t;
 
 typedef struct {
-  char *source;
-  char *key;
-  char *content;
-  size_t length;
+    char *source;
+    char *key;
+    char *content;
+    size_t length;
 } eachdo_operands_t;
 
 list_t *lex(char *buffer);

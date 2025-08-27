@@ -27,9 +27,9 @@
 #define CONFIG_FILE "config.cfg"
 
 typedef struct {
-  char *base_directory;
-  char *output_directory;
-  bool verbose;
+    char *base_directory;
+    char *output_directory;
+    bool verbose;
 } msg_t;
 
 int run(bool log);

@@ -28,61 +28,61 @@
 int
 msleep(long msec)
 {
-  struct timespec ts;
-  int res;
+    struct timespec ts;
+    int res;
 
-  if (msec < 0) {
-    errno = EINVAL;
-    return -1;
-  }
+    if (msec < 0) {
+        errno = EINVAL;
+        return -1;
+    }
 
-  ts.tv_sec = msec / 1000;
-  ts.tv_nsec = (msec % 1000) * 1000000;
+    ts.tv_sec = msec / 1000;
+    ts.tv_nsec = (msec % 1000) * 1000000;
 
-  do {
-    res = nanosleep(&ts, &ts);
-  } while (res && errno == EINTR);
+    do {
+        res = nanosleep(&ts, &ts);
+    } while (res && errno == EINTR);
 
-  return res;
+    return res;
 }
 
 char *
 ltrim(char *s)
 {
-  while (isspace(*s))
-    s++;
-  return s;
+    while (isspace(*s))
+        s++;
+    return s;
 }
 
 char *
 rtrim(char *s)
 {
-  char *back = s + strlen(s);
-  while (isspace(*--back))
-    ;
-  *(back + 1) = '\0';
-  return s;
+    char *back = s + strlen(s);
+    while (isspace(*--back))
+        ;
+    *(back + 1) = '\0';
+    return s;
 }
 
 char *
 trim(char *s)
 {
-  return rtrim(ltrim(s));
+    return rtrim(ltrim(s));
 }
 
 ptr_wrapper_t *
 wrap_ptr(void *ptr)
 {
-  ptr_wrapper_t *wrapper = malloc(sizeof(ptr_wrapper_t));
-  wrapper->ptr = ptr;
-  return wrapper;
+    ptr_wrapper_t *wrapper = malloc(sizeof(ptr_wrapper_t));
+    wrapper->ptr = ptr;
+    return wrapper;
 }
 
 void *
 unwrap(ptr_wrapper_t *wrapper)
 {
-  if (wrapper == NULL)
-    return NULL;
+    if (wrapper == NULL)
+        return NULL;
 
-  return wrapper->ptr;
+    return wrapper->ptr;
 }

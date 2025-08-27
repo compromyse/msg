@@ -45,81 +45,83 @@ extern msg_t *msg;
 engine_t *
 engine_ingest(char **buffer)
 {
-  engine_t *engine = malloc(sizeof(engine_t));
-  engine->config = NULL;
+    engine_t *engine = malloc(sizeof(engine_t));
+    engine->config = NULL;
 
-  char *p = strstr(*buffer, "---");
-  if (p != NULL) {
-    char *config;
-    asprintf(&config, "%.*s\n", (int) (p - *buffer), *buffer);
-    engine->config = config_parse(config);
-    free(config);
+    char *p = strstr(*buffer, "---");
+    if (p != NULL) {
+        char *config;
+        asprintf(&config, "%.*s\n", (int) (p - *buffer), *buffer);
+        engine->config = config_parse(config);
+        free(config);
 
-    char *tempbuffer = strdup(p);
+        char *tempbuffer = strdup(p);
 
-    free(*buffer);
-    asprintf(buffer, "%s", tempbuffer + strlen("---"));
+        free(*buffer);
+        asprintf(buffer, "%s", tempbuffer + strlen("---"));
 
-    free(tempbuffer);
-  }
+        free(tempbuffer);
+    }
 
-  key_match_t *match;
-  engine->content_headers = list_create(sizeof(contentfor_operand_t));
-  if (engine->content_headers == NULL) {
-    printf("Could not create content_headers\n");
-    return NULL;
-  }
+    key_match_t *match;
+    engine->content_headers = list_create(sizeof(contentfor_operand_t));
+    if (engine->content_headers == NULL) {
+        printf("Could not create content_headers\n");
+        return NULL;
+    }
 
-  size_t skip = 0;
-  while (true) {
-    match = find_next_key(*buffer, skip);
-    if (match == NULL)
-      break;
+    size_t skip = 0;
+    while (true) {
+        match = find_next_key(*buffer, skip);
+        if (match == NULL)
+            break;
 
 #ifdef DEBUG
-    printf("Match: %.*s LENGTH(%d) OFFSET(%d)\n",
-           match->length,
-           *buffer + match->offset,
-           match->length,
-           match->offset);
+        printf("Match: %.*s LENGTH(%d) OFFSET(%d)\n",
+               match->length,
+               *buffer + match->offset,
+               match->length,
+               match->offset);
 #endif
 
-    directive_t *directive = find_directive(*buffer, match);
-    if (directive == NULL) {
-      printf(
-          "Unknown directive: %.*s\n", match->length, *buffer + match->offset);
+        directive_t *directive = find_directive(*buffer, match);
+        if (directive == NULL) {
+            printf("Unknown directive: %.*s\n",
+                   match->length,
+                   *buffer + match->offset);
 
-      break;
+            break;
+        }
+
+        switch (directive->type) {
+        case INCLUDE:
+            handle_include(buffer, match, directive);
+            break;
+        case CONTENTFOR:
+            handle_contentfor(
+                buffer, match, directive, engine->content_headers);
+            break;
+        case EACHDO:
+            handle_eachdo(buffer, match, directive);
+            break;
+
+        case PUTPAGE:
+            /* TODO: handle */
+        case PUT:
+        case ENDEACHDO:
+        case BODY:
+        case CONTENT:
+        case ENDCONTENT:
+        case _RAW:
+            skip++;
+            break;
+        }
+
+        directive_delete(directive);
+        free(match);
     }
 
-    switch (directive->type) {
-    case INCLUDE:
-      handle_include(buffer, match, directive);
-      break;
-    case CONTENTFOR:
-      handle_contentfor(buffer, match, directive, engine->content_headers);
-      break;
-    case EACHDO:
-      handle_eachdo(buffer, match, directive);
-      break;
-
-    case PUTPAGE:
-      /* TODO: handle */
-    case PUT:
-    case ENDEACHDO:
-    case BODY:
-    case CONTENT:
-    case ENDCONTENT:
-    case _RAW:
-      skip++;
-      break;
-    }
-
-    directive_delete(directive);
-    free(match);
-  }
-
-  return engine;
+    return engine;
 }
 
 /*
@@ -128,14 +130,14 @@ engine_ingest(char **buffer)
 void
 engine_delete(engine_t *engine)
 {
-  if (engine->config != NULL)
-    config_delete(engine->config);
+    if (engine->config != NULL)
+        config_delete(engine->config);
 
-  for (size_t i = 0; i < engine->content_headers->size; i++) {
-    contentfor_operand_t *operand = list_get(engine->content_headers, i);
-    free(operand->content);
-    free(operand->key);
-  }
-  list_delete(engine->content_headers);
-  free(engine);
+    for (size_t i = 0; i < engine->content_headers->size; i++) {
+        contentfor_operand_t *operand = list_get(engine->content_headers, i);
+        free(operand->content);
+        free(operand->key);
+    }
+    list_delete(engine->content_headers);
+    free(engine);
 }

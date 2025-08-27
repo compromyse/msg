@@ -1,6 +1,6 @@
 BasedOnStyle: GNU
-IndentWidth: 2
-TabWidth: 2
+IndentWidth: 4
+TabWidth: 4
 BreakBeforeBraces: Linux
 SpaceBeforeParens: ControlStatements
 SpaceAfterCStyleCast: true

@@ -40,24 +40,24 @@ handle_contentfor(char **buffer,
                   directive_t *directive,
                   list_t *content_headers)
 {
-  contentfor_operand_t *operand = directive->operands;
-  contentfor_operand_t new_operand
-      = { .content = strdup(operand->content), .key = strdup(operand->key) };
-  list_add(content_headers, &new_operand);
+    contentfor_operand_t *operand = directive->operands;
+    contentfor_operand_t new_operand
+        = { .content = strdup(operand->content), .key = strdup(operand->key) };
+    list_add(content_headers, &new_operand);
 
 #ifdef DEBUG
-  printf("CONTENTFOR: %s\n", operand->key);
-  printf("CONTENT: %s\n", operand->content);
+    printf("CONTENTFOR: %s\n", operand->key);
+    printf("CONTENT: %s\n", operand->content);
 #endif
 
-  char *temp_buffer = strdup(*buffer);
+    char *temp_buffer = strdup(*buffer);
 
-  free(*buffer);
-  asprintf(buffer,
-           "%.*s%s",
-           match->offset,
-           temp_buffer,
-           temp_buffer + strlen(operand->content));
+    free(*buffer);
+    asprintf(buffer,
+             "%.*s%s",
+             match->offset,
+             temp_buffer,
+             temp_buffer + strlen(operand->content));
 
-  free(temp_buffer);
+    free(temp_buffer);
 }

@@ -29,97 +29,97 @@
 config_t *
 config_parse(char *content)
 {
-  list_t *keys = list_create(sizeof(ptr_wrapper_t));
-  list_t *values = list_create(sizeof(ptr_wrapper_t));
-  list_t *array_values = list_create(sizeof(ptr_wrapper_t));
+    list_t *keys = list_create(sizeof(ptr_wrapper_t));
+    list_t *values = list_create(sizeof(ptr_wrapper_t));
+    list_t *array_values = list_create(sizeof(ptr_wrapper_t));
 
-  char *buffer = strdup(content);
-  /* For free() */
-  char *x = buffer;
+    char *buffer = strdup(content);
+    /* For free() */
+    char *x = buffer;
 
-  char *key = trim(strsep(&buffer, DELIM));
+    char *key = trim(strsep(&buffer, DELIM));
 
-  while (buffer != NULL) {
-    buffer = ltrim(buffer);
-    list_wrap_and_add(keys, strdup(key));
+    while (buffer != NULL) {
+        buffer = ltrim(buffer);
+        list_wrap_and_add(keys, strdup(key));
 
-    if (*buffer == '{') {
-      buffer++;
-      list_t *l = list_create(sizeof(ptr_wrapper_t));
-      char *raw_array = strsep(&buffer, "}");
+        if (*buffer == '{') {
+            buffer++;
+            list_t *l = list_create(sizeof(ptr_wrapper_t));
+            char *raw_array = strsep(&buffer, "}");
 
-      char *value = strsep(&raw_array, DELIM_ARRAY);
-      while (value != NULL) {
-        list_wrap_and_add(l, strdup(trim(value)));
-        value = strsep(&raw_array, DELIM_ARRAY);
-      }
+            char *value = strsep(&raw_array, DELIM_ARRAY);
+            while (value != NULL) {
+                list_wrap_and_add(l, strdup(trim(value)));
+                value = strsep(&raw_array, DELIM_ARRAY);
+            }
 
-      list_wrap_and_add(array_values, l);
-      list_wrap_and_add(values, NULL);
-    } else {
-      char *value = trim(strsep(&buffer, "\n"));
+            list_wrap_and_add(array_values, l);
+            list_wrap_and_add(values, NULL);
+        } else {
+            char *value = trim(strsep(&buffer, "\n"));
 
-      list_wrap_and_add(array_values, NULL);
-      list_wrap_and_add(values, strdup(value));
+            list_wrap_and_add(array_values, NULL);
+            list_wrap_and_add(values, strdup(value));
+        }
+
+        key = trim(strsep(&buffer, DELIM));
     }
 
-    key = trim(strsep(&buffer, DELIM));
-  }
+    free(x);
 
-  free(x);
-
-  config_t *config = malloc(sizeof(config_t));
-  config->keys = keys;
-  config->values = values;
-  config->array_values = array_values;
-  return config;
+    config_t *config = malloc(sizeof(config_t));
+    config->keys = keys;
+    config->values = values;
+    config->array_values = array_values;
+    return config;
 }
 
 void
 config_delete(config_t *config)
 {
-  for (size_t i = 0; i < config->keys->size; i++) {
-    ptr_wrapper_t *wrapper;
+    for (size_t i = 0; i < config->keys->size; i++) {
+        ptr_wrapper_t *wrapper;
 
-    wrapper = list_get(config->keys, i);
-    if (wrapper->ptr != NULL)
-      free(wrapper->ptr);
+        wrapper = list_get(config->keys, i);
+        if (wrapper->ptr != NULL)
+            free(wrapper->ptr);
 
-    wrapper = list_get(config->values, i);
-    if (wrapper->ptr != NULL)
-      free(wrapper->ptr);
+        wrapper = list_get(config->values, i);
+        if (wrapper->ptr != NULL)
+            free(wrapper->ptr);
 
-    list_t *l = unwrap(list_get(config->array_values, i));
-    if (l != NULL) {
-      for (size_t y = 0; y < l->size; y++) {
-        wrapper = list_get(l, y);
-        free(wrapper->ptr);
-      }
-      list_delete(l);
+        list_t *l = unwrap(list_get(config->array_values, i));
+        if (l != NULL) {
+            for (size_t y = 0; y < l->size; y++) {
+                wrapper = list_get(l, y);
+                free(wrapper->ptr);
+            }
+            list_delete(l);
+        }
     }
-  }
 
-  list_delete(config->keys);
-  list_delete(config->values);
-  list_delete(config->array_values);
-  free(config);
+    list_delete(config->keys);
+    list_delete(config->values);
+    list_delete(config->array_values);
+    free(config);
 }
 
 config_t *
 config_fetch_and_parse(char *path)
 {
-  FILE *f = fopen(path, "r");
-  if (f == NULL) {
-    printf("Could not open %s\n", path);
-    return NULL;
-  }
+    FILE *f = fopen(path, "r");
+    if (f == NULL) {
+        printf("Could not open %s\n", path);
+        return NULL;
+    }
 
-  size_t s = fsize(f);
-  char *content = fcontent(f, s);
-  fclose(f);
+    size_t s = fsize(f);
+    char *content = fcontent(f, s);
+    fclose(f);
 
-  config_t *config = config_parse(content);
-  free(content);
+    config_t *config = config_parse(content);
+    free(content);
 
-  return config;
+    return config;
 }

@@ -20,7 +20,7 @@
 #define __UTIL_H
 
 typedef struct {
-  void *ptr;
+    void *ptr;
 } ptr_wrapper_t;
 
 int msleep(long msec);

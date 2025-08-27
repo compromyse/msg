@@ -26,10 +26,10 @@
 #define INCREMENT_BY 5
 
 typedef struct {
-  size_t element_size;
-  size_t max;
-  size_t size;
-  uint8_t *elements;
+    size_t element_size;
+    size_t max;
+    size_t size;
+    uint8_t *elements;
 } list_t;
 
 list_t *list_create(size_t element_size);

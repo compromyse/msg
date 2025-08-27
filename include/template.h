@@ -25,7 +25,7 @@
 #include <stdio.h>
 
 typedef struct {
-  list_t *components;
+    list_t *components;
 } template_t;
 
 void template_initialize(void);

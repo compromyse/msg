@@ -35,84 +35,84 @@ bool regen = false;
 void
 signal_handler(int x)
 {
-  (void) x;
-  stop = true;
+    (void) x;
+    stop = true;
 }
 
 void
 usage(char *program)
 {
-  printf("Usage: %s [-h] [-r] [-v] [-o <output>] <directory>\n"
-         "\t-h         : Help\n"
-         "\t-v         : Verbose\n"
-         "\t-r         : Regenerate every 500ms\n"
-         "\t-o <output>: Output directory\n"
-         "\t<directory>: Working directory\n",
-         program);
+    printf("Usage: %s [-h] [-r] [-v] [-o <output>] <directory>\n"
+           "\t-h         : Help\n"
+           "\t-v         : Verbose\n"
+           "\t-r         : Regenerate every 500ms\n"
+           "\t-o <output>: Output directory\n"
+           "\t<directory>: Working directory\n",
+           program);
 }
 
 void
 config(void)
 {
-  printf("Base Directory: %s\n"
-         "Output Directory: %s\n"
-         "Verbose: %s\n"
-         "Regenerating: %s\n\n",
-         msg->base_directory,
-         msg->output_directory,
-         msg->verbose ? "true" : "false",
-         regen ? "true" : "false");
+    printf("Base Directory: %s\n"
+           "Output Directory: %s\n"
+           "Verbose: %s\n"
+           "Regenerating: %s\n\n",
+           msg->base_directory,
+           msg->output_directory,
+           msg->verbose ? "true" : "false",
+           regen ? "true" : "false");
 }
 
 int
 main(int argc, char **argv)
 {
-  printf("msg: The Minimal Static Site Generator\n\n");
+    printf("msg: The Minimal Static Site Generator\n\n");
 
-  int opt;
-  msg = malloc(sizeof(msg_t));
-  msg->base_directory = ".";
-  msg->output_directory = "dist";
-  msg->verbose = false;
+    int opt;
+    msg = malloc(sizeof(msg_t));
+    msg->base_directory = ".";
+    msg->output_directory = "dist";
+    msg->verbose = false;
 
-  while ((opt = getopt(argc, argv, "o:hvr")) != -1) {
-    switch (opt) {
-    case 'o':
-      msg->output_directory = optarg;
-      break;
-    case 'r':
-      regen = true;
-      break;
-    case 'v':
-      msg->verbose = true;
-      break;
-    case 'h':
-    default:
-      usage(argv[0]);
-      return EXIT_SUCCESS;
+    while ((opt = getopt(argc, argv, "o:hvr")) != -1) {
+        switch (opt) {
+        case 'o':
+            msg->output_directory = optarg;
+            break;
+        case 'r':
+            regen = true;
+            break;
+        case 'v':
+            msg->verbose = true;
+            break;
+        case 'h':
+        default:
+            usage(argv[0]);
+            return EXIT_SUCCESS;
+        }
     }
-  }
 
-  if (optind < argc)
-    msg->base_directory = argv[optind];
+    if (optind < argc)
+        msg->base_directory = argv[optind];
 
-  config();
+    config();
 
-  int r = run(true);
-  if (!regen || r != EXIT_SUCCESS) {
+    int r = run(true);
+    if (!regen || r != EXIT_SUCCESS) {
+        free(msg);
+        return r;
+    }
+
+    signal(SIGINT, signal_handler);
+
+    while (!stop) {
+        printf(".");
+        fflush(stdout);
+        r = run(false);
+        msleep(500);
+    }
+
     free(msg);
     return r;
-  }
-
-  signal(SIGINT, signal_handler);
-
-  while (!stop) {
-    printf(".");
-    fflush(stdout);
-    r = run(false);
-    msleep(500);
-  }
-
-  free(msg);
-  return r;
 }

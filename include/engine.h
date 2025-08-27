@@ -30,16 +30,16 @@
  * config: Config of the ingested file
  */
 typedef struct {
-  list_t *content_headers;
-  config_t *config;
+    list_t *content_headers;
+    config_t *config;
 } engine_t;
 
 /*
  * An atom is a single iteration of an EACHDO.
  */
 typedef struct {
-  char *content;
-  int priority;
+    char *content;
+    int priority;
 } atom_t;
 
 engine_t *engine_ingest(char **buffer);
