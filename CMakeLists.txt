@@ -21,7 +21,7 @@ set(SRC
 
 set(C_COMPILE_OPTIONS
   # -O3
-  -O0
+  # -O0
 
   -Wall
   -Wextra
