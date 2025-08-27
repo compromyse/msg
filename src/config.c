@@ -26,6 +26,29 @@
 #include <string.h>
 #include <util.h>
 
+static void
+parse_array(char **buffer, list_t *array_values)
+{
+    (*buffer)++;
+    list_t *l = list_create(sizeof(ptr_wrapper_t));
+    char *raw_array = strsep(buffer, "}");
+
+    char *value = strsep(&raw_array, DELIM_ARRAY);
+    while (value != NULL) {
+        list_wrap_and_add(l, strdup(trim(value)));
+        value = strsep(&raw_array, DELIM_ARRAY);
+    }
+
+    list_wrap_and_add(array_values, l);
+}
+
+static void
+parse_simple_string(char **buffer, list_t *values)
+{
+    char *value = trim(strsep(buffer, "\n"));
+    list_wrap_and_add(values, strdup(value));
+}
+
 config_t *
 config_parse(char *content)
 {
@@ -44,23 +67,11 @@ config_parse(char *content)
         list_wrap_and_add(keys, strdup(key));
 
         if (*buffer == '{') {
-            buffer++;
-            list_t *l = list_create(sizeof(ptr_wrapper_t));
-            char *raw_array = strsep(&buffer, "}");
-
-            char *value = strsep(&raw_array, DELIM_ARRAY);
-            while (value != NULL) {
-                list_wrap_and_add(l, strdup(trim(value)));
-                value = strsep(&raw_array, DELIM_ARRAY);
-            }
-
-            list_wrap_and_add(array_values, l);
+            parse_array(&buffer, array_values);
             list_wrap_and_add(values, NULL);
         } else {
-            char *value = trim(strsep(&buffer, "\n"));
-
+            parse_simple_string(&buffer, values);
             list_wrap_and_add(array_values, NULL);
-            list_wrap_and_add(values, strdup(value));
         }
 
         key = trim(strsep(&buffer, DELIM));
