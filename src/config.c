@@ -27,6 +27,16 @@
 #include <util.h>
 
 static void
+parse_nested_block(char **buffer, list_t *nested_config_values)
+{
+    (*buffer)++;
+    char *raw_block = strsep(buffer, "]");
+
+    config_t *config = config_parse(raw_block);
+    list_wrap_and_add(nested_config_values, config);
+}
+
+static void
 parse_array(char **buffer, list_t *array_values)
 {
     (*buffer)++;
@@ -55,6 +65,7 @@ config_parse(char *content)
     list_t *keys = list_create(sizeof(ptr_wrapper_t));
     list_t *values = list_create(sizeof(ptr_wrapper_t));
     list_t *array_values = list_create(sizeof(ptr_wrapper_t));
+    list_t *nested_config_values = list_create(sizeof(ptr_wrapper_t));
 
     char *buffer = strdup(content);
     /* For free() */
@@ -68,10 +79,19 @@ config_parse(char *content)
 
         if (*buffer == '{') {
             parse_array(&buffer, array_values);
+
             list_wrap_and_add(values, NULL);
+            list_wrap_and_add(nested_config_values, NULL);
+        } else if (*buffer == '[') {
+            parse_nested_block(&buffer, nested_config_values);
+
+            list_wrap_and_add(values, NULL);
+            list_wrap_and_add(array_values, NULL);
         } else {
             parse_simple_string(&buffer, values);
+
             list_wrap_and_add(array_values, NULL);
+            list_wrap_and_add(nested_config_values, NULL);
         }
 
         key = trim(strsep(&buffer, DELIM));
@@ -83,6 +103,7 @@ config_parse(char *content)
     config->keys = keys;
     config->values = values;
     config->array_values = array_values;
+    config->nested_config_values = nested_config_values;
     return config;
 }
 
@@ -100,6 +121,10 @@ config_delete(config_t *config)
         if (wrapper->ptr != NULL)
             free(wrapper->ptr);
 
+        wrapper = list_get(config->nested_config_values, i);
+        if (wrapper->ptr != NULL)
+            config_delete(wrapper->ptr);
+
         list_t *l = unwrap(list_get(config->array_values, i));
         if (l != NULL) {
             for (size_t y = 0; y < l->size; y++) {
@@ -113,6 +138,7 @@ config_delete(config_t *config)
     list_delete(config->keys);
     list_delete(config->values);
     list_delete(config->array_values);
+    list_delete(config->nested_config_values);
     free(config);
 }
 
