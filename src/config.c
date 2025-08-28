@@ -131,16 +131,16 @@ void
 config_delete(config_t *config)
 {
     for (size_t i = 0; i < config->keys->size; i++) {
-        ptr_wrapper_t *wrapper;
+        char *value;
         list_t *l;
 
-        wrapper = list_get(config->keys, i);
-        if (wrapper->ptr != NULL)
-            free(wrapper->ptr);
+        value = unwrap(list_get(config->keys, i));
+        if (value != NULL)
+            free(value);
 
-        wrapper = list_get(config->values, i);
-        if (wrapper->ptr != NULL)
-            free(wrapper->ptr);
+        value = unwrap(list_get(config->values, i));
+        if (value != NULL)
+            free(value);
 
         l = unwrap(list_get(config->nested_config_values, i));
         if (l != NULL) {
@@ -154,8 +154,8 @@ config_delete(config_t *config)
         l = unwrap(list_get(config->array_values, i));
         if (l != NULL) {
             for (size_t y = 0; y < l->size; y++) {
-                wrapper = list_get(l, y);
-                free(wrapper->ptr);
+                value = unwrap(list_get(l, y));
+                free(value);
             }
             list_delete(l);
         }
