@@ -129,6 +129,10 @@ config_fetch_and_parse(char *path)
     char *content = fcontent(f, s);
     fclose(f);
 
+    char *p = strstr(content, "---");
+    if (p != NULL)
+        content[p - content] = '\0';
+
     config_t *config = config_parse(content);
     free(content);
 
