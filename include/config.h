@@ -23,6 +23,7 @@
 
 #define DELIM "="
 #define DELIM_ARRAY ","
+#define DELIM_BLOCK "___"
 
 /*
  * Each config has a list of "top-level keys", with corresponding values.

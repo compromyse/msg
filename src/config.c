@@ -21,6 +21,7 @@
 #include <config.h>
 #include <filehandler.h>
 #include <list.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,8 +33,27 @@ parse_nested_block(char **buffer, list_t *nested_config_values)
     (*buffer)++;
     char *raw_block = strsep(buffer, "]");
 
-    config_t *config = config_parse(raw_block);
-    list_wrap_and_add(nested_config_values, config);
+    list_t *l = list_create(sizeof(ptr_wrapper_t));
+
+    while (true) {
+        char *next = strstr(raw_block, DELIM_BLOCK);
+
+        if (next == NULL) {
+            config_t *config = config_parse(raw_block);
+            list_wrap_and_add(l, config);
+
+            break;
+        } else {
+            char *block = strndup(raw_block, next - raw_block);
+            config_t *config = config_parse(block);
+            list_wrap_and_add(l, config);
+            free(block);
+
+            raw_block += next - raw_block + strlen(DELIM_BLOCK);
+        }
+    }
+
+    list_wrap_and_add(nested_config_values, l);
 }
 
 static void
@@ -112,6 +132,7 @@ config_delete(config_t *config)
 {
     for (size_t i = 0; i < config->keys->size; i++) {
         ptr_wrapper_t *wrapper;
+        list_t *l;
 
         wrapper = list_get(config->keys, i);
         if (wrapper->ptr != NULL)
@@ -121,11 +142,16 @@ config_delete(config_t *config)
         if (wrapper->ptr != NULL)
             free(wrapper->ptr);
 
-        wrapper = list_get(config->nested_config_values, i);
-        if (wrapper->ptr != NULL)
-            config_delete(wrapper->ptr);
+        l = unwrap(list_get(config->nested_config_values, i));
+        if (l != NULL) {
+            for (size_t y = 0; y < l->size; y++) {
+                config_t *config = unwrap(list_get(l, y));
+                config_delete(config);
+            }
+            list_delete(l);
+        }
 
-        list_t *l = unwrap(list_get(config->array_values, i));
+        l = unwrap(list_get(config->array_values, i));
         if (l != NULL) {
             for (size_t y = 0; y < l->size; y++) {
                 wrapper = list_get(l, y);
