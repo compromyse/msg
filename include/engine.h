@@ -53,7 +53,10 @@ void handle_contentfor(char **buffer,
                        list_t *content_headers);
 
 /* EACHDO */
-void handle_eachdo(char **buffer, key_match_t *match, directive_t *directive);
+void handle_eachdo(char **buffer,
+                   key_match_t *match,
+                   directive_t *directive,
+                   config_t *config);
 void handle_page_source(list_t *atoms,
                         eachdo_operands_t *operands,
                         list_t *directives,

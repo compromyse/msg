@@ -108,7 +108,7 @@ engine_ingest(char **buffer, bool is_template)
             if (is_template && !strcmp(operands->source, "page"))
                 skip++;
             else
-                handle_eachdo(buffer, match, directive);
+                handle_eachdo(buffer, match, directive, engine->config);
 
             break;
         }

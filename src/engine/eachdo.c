@@ -159,6 +159,12 @@ handle_page_source(list_t *atoms,
                    list_t *directives,
                    config_t *config)
 {
+    if (config == NULL) {
+        printf("EACHDO with page variables as a source will not work without "
+               "a config at the top of the file\n");
+        return;
+    }
+
     list_t *nested_blocks
         = unwrap(list_find_corresponding_value_from_ptr_wrapper(
             config->keys, config->nested_config_values, trim(operands->key)));
@@ -186,7 +192,10 @@ handle_page_source(list_t *atoms,
  * directive: Pointer to the directive struct
  */
 void
-handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
+handle_eachdo(char **buffer,
+              key_match_t *match,
+              directive_t *directive,
+              config_t *config)
 {
     eachdo_operands_t *operands = directive->operands;
 
@@ -200,6 +209,8 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 
     if (!strcmp(operands->source, "resources"))
         handle_file_source(atoms, operands, directives);
+    else if (!strcmp(operands->source, "page"))
+        handle_page_source(atoms, operands, directives, config);
     else
         printf("Unknown source: %s\n", operands->source);
 
