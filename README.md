@@ -75,6 +75,13 @@ Usage: ./msg [-h] [-w] [-v] [-o <output>] <directory>
 ```html
 <!-- projects/xyz.html -->
 title = XYZ
+links = [
+    href = https://example.org
+    label = abc
+    ___
+    href = https://google.com
+    label = test
+]
 ---
 
 <h1>XYZ!</h1>
@@ -82,6 +89,11 @@ title = XYZ
 <!-- index.html -->
 {{ eachdo resources.projects }}
 <p>{{ put title }}</p>
+{{ endeachdo }}
+
+{{ eachdo page.links }}
+<p>{{ put href }}</p>
+<p>{{ put label }}</p>
 {{ endeachdo }}
 ```
 
