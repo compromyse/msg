@@ -173,7 +173,6 @@ template_write(engine_t *engine, FILE *f, void *doc, bool is_markdown)
 
         case BODY: {
             if (is_markdown) {
-
                 mkd_flag_t *flags = mkd_flags();
                 mkd_set_flag_num(flags, MKD_FENCEDCODE);
                 markdown(doc, f, flags);

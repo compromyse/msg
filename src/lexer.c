@@ -32,6 +32,7 @@ lex(char *buffer)
 {
     list_t *directives = list_create(sizeof(directive_t));
     size_t current_offset = 0;
+    directive_e skip_until_directive = _NONE;
 
     while (true) {
         key_match_t *match = find_next_key(buffer, 0);
@@ -45,21 +46,36 @@ lex(char *buffer)
 
         current_offset += match->length + match->offset;
 
-        if (current_offset != 0) {
-            char *raw_content = strndup(buffer, match->offset);
+        if (directive->type == skip_until_directive
+            || skip_until_directive == _NONE) {
 
-            directive_t *raw_directive = malloc(sizeof(directive_t));
+            /* don't add _RAW for the part before the skip_until directive */
+            if (skip_until_directive == _NONE) {
+                if (current_offset != 0) {
+                    char *raw_content = strndup(buffer, match->offset);
 
-            raw_directive->type = _RAW;
-            raw_directive->operands = raw_content;
-            list_add(directives, raw_directive);
+                    directive_t *raw_directive = malloc(sizeof(directive_t));
 
-            free(raw_directive);
+                    raw_directive->type = _RAW;
+                    raw_directive->operands = raw_content;
+                    list_add(directives, raw_directive);
+
+                    free(raw_directive);
+                }
+            }
+
+            list_add(directives, directive);
+
+            skip_until_directive = _NONE;
         }
 
         buffer += match->offset + match->length;
 
-        list_add(directives, directive);
+        if (directive->type == EACHDO)
+            skip_until_directive = ENDEACHDO;
+
+        if (directive->type == CONTENTFOR)
+            skip_until_directive = ENDCONTENT;
 
         free(directive);
         free(match);

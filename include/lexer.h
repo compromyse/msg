@@ -24,6 +24,7 @@
 #define DIRECTIVE_IS(key) strncmp(buffer + n, key, strlen(key)) == 0
 
 typedef enum {
+    _NONE,
     _RAW,
     INCLUDE,
     CONTENT,
