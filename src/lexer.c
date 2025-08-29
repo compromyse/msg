@@ -352,19 +352,19 @@ found_start:
     } else if (DIRECTIVE_IS("body")) {
         directive->type = BODY;
         directive->operands = NULL;
-    } else if (DIRECTIVE_IS("include")) {
+    } else if (DIRECTIVE_IS("include"))
         lexer_handle_include(directive, match, buffer, n);
-    } else if (DIRECTIVE_IS("contentfor")) {
+    else if (DIRECTIVE_IS("contentfor"))
         lexer_handle_contentfor(directive, match, buffer, content, n);
-    } else if (DIRECTIVE_IS("content")) {
+    else if (DIRECTIVE_IS("content"))
         lexer_handle_content(directive, match, buffer, n);
-    } else if (DIRECTIVE_IS("eachdo")) {
+    else if (DIRECTIVE_IS("eachdo"))
         lexer_handle_eachdo(directive, match, buffer, n);
-    } else if (DIRECTIVE_IS("putpage")) {
+    else if (DIRECTIVE_IS("putpage"))
         lexer_handle_putpage(directive, match, buffer, n);
-    } else if (DIRECTIVE_IS("put")) {
+    else if (DIRECTIVE_IS("put"))
         lexer_handle_put(directive, match, buffer, n);
-    } else {
+    else {
         directive_delete(directive);
         directive = NULL;
     }
