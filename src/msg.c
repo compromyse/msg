@@ -121,7 +121,7 @@ handle_file(const char *path)
         if (engine.config != NULL)
             config_delete(engine.config);
     } else if (strlen(buffer) != 0) {
-        engine_t *engine = engine_ingest(&buffer);
+        engine_t *engine = engine_ingest(&buffer, false);
         template_write(engine, out, buffer, false);
         engine_delete(engine);
     }

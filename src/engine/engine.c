@@ -43,7 +43,7 @@ extern msg_t *msg;
  * It's only there to define the end of the EACHDO content block.
  */
 engine_t *
-engine_ingest(char **buffer)
+engine_ingest(char **buffer, bool is_template)
 {
     engine_t *engine = malloc(sizeof(engine_t));
     engine->config = NULL;
@@ -103,14 +103,13 @@ engine_ingest(char **buffer)
             break;
         case EACHDO: {
             eachdo_operands_t *operands = directive->operands;
-            /* TODO: Don't handle page source only if a template is currently
-             * being parsed */
-            if (!strcmp(operands->source, "page")) {
+            /* Don't handle page source only if a template is currently being
+             * parsed */
+            if (is_template && !strcmp(operands->source, "page"))
                 skip++;
-                break;
-            }
+            else
+                handle_eachdo(buffer, match, directive);
 
-            handle_eachdo(buffer, match, directive);
             break;
         }
 

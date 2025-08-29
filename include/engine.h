@@ -22,6 +22,7 @@
 #include <config.h>
 #include <lexer.h>
 #include <list.h>
+#include <stdbool.h>
 
 /*
  * Simply just there to return content headers and config.
@@ -42,7 +43,7 @@ typedef struct {
     int priority;
 } atom_t;
 
-engine_t *engine_ingest(char **buffer);
+engine_t *engine_ingest(char **buffer, bool is_template);
 void engine_delete(engine_t *engine);
 
 void handle_include(char **buffer, key_match_t *match, directive_t *directive);

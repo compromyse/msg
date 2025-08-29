@@ -116,7 +116,7 @@ template_create(char *template_name)
     char *buffer = fcontent(base, size);
     fclose(base);
 
-    engine_t *engine = engine_ingest(&buffer);
+    engine_t *engine = engine_ingest(&buffer, true);
     engine_delete(engine);
     template->components = lex(buffer);
 
@@ -198,17 +198,18 @@ template_write(engine_t *engine, FILE *f, void *doc, bool is_markdown)
 
         case EACHDO: {
             eachdo_operands_t *operands = directive->operands;
-            if (!strcmp(operands->source, "page")) {
-                list_t *atoms = list_create(sizeof(ptr_wrapper_t));
-                list_t *directives = lex(operands->content);
+            /* must be a page loop, since resources are handled in
+             * engine_ingest() */
+            // if (!strcmp(operands->source, "page"))
 
-                handle_page_source(
-                    atoms, operands, directives, engine->config);
+            list_t *atoms = list_create(sizeof(ptr_wrapper_t));
+            list_t *directives = lex(operands->content);
 
-                for (size_t i = 0; i < atoms->size; i++) {
-                    atom_t *atom = list_get(atoms, i);
-                    fprintf(f, "%s", atom->content);
-                }
+            handle_page_source(atoms, operands, directives, engine->config);
+
+            for (size_t i = 0; i < atoms->size; i++) {
+                atom_t *atom = list_get(atoms, i);
+                fprintf(f, "%s", atom->content);
             }
         }
 

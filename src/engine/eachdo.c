@@ -190,7 +190,7 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 {
     eachdo_operands_t *operands = directive->operands;
 
-    engine_t *engine = engine_ingest(&operands->content);
+    engine_t *engine = engine_ingest(&operands->content, false);
     engine_delete(engine);
     list_t *directives = lex(operands->content);
 
