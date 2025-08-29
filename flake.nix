@@ -1,27 +1,27 @@
 {
-  inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    self.submodules = true;
-  };
+    inputs = {
+        nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+        self.submodules = true;
+    };
 
-  outputs = { self, nixpkgs, ... }:
-    let
-      pkgs = import nixpkgs { system = "x86_64-linux"; };
+    outputs = { self, nixpkgs, ... }:
+        let
+        pkgs = import nixpkgs { system = "x86_64-linux"; };
     in {
-      devShells.x86_64-linux.default = pkgs.mkShell {
-        buildInputs = with pkgs; [
-          clang-tools
-          clang
-          lldb
-          ccls
+        devShells.x86_64-linux.default = pkgs.mkShell {
+            buildInputs = with pkgs; [
+                clang-tools
+                    clang
+                    lldb
+                    ccls
 
-          cmake
-          ninja
+                    cmake
+                    ninja
 
-          valgrind
-        ];
-      };
+                    valgrind
+            ];
+        };
 
-      packages.x86_64-linux.default = pkgs.callPackage ./default.nix {};
+        packages.x86_64-linux.default = pkgs.callPackage ./default.nix {};
     };
 }
