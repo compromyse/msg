@@ -153,10 +153,33 @@ handle_file_source(list_t *atoms,
     list_delete(files);
 }
 
+void
+handle_page_source(list_t *atoms,
+                   eachdo_operands_t *operands,
+                   list_t *directives,
+                   config_t *config)
+{
+    list_t *nested_blocks
+        = unwrap(list_find_corresponding_value_from_ptr_wrapper(
+            config->keys, config->nested_config_values, trim(operands->key)));
+
+    if (nested_blocks == NULL) {
+        printf("Could not find nested block %s\n", trim(operands->key));
+        return;
+    }
+
+    for (size_t i = 0; i < nested_blocks->size; i++) {
+        config_t *config = unwrap(list_get(nested_blocks, i));
+
+        write_eachdo_iteration(
+            atoms, directives, config->keys, config->values, 0);
+    }
+}
+
 /*
- * Handles EACHDO calls. Given a pointer to the buffer, it replaces the EACHDO
- * call along with its content block and ENDEACHDO call with the fetched
- * content.
+ * Handles EACHDO calls. Given a pointer to the buffer, it replaces the
+ * EACHDO call along with its content block and ENDEACHDO call with the
+ * fetched content.
  *
  * buffer: Pointer to the buffer that is modified
  * match: Pointer to the key match
@@ -177,11 +200,8 @@ handle_eachdo(char **buffer, key_match_t *match, directive_t *directive)
 
     if (!strcmp(operands->source, "resources"))
         handle_file_source(atoms, operands, directives);
-    else {
+    else
         printf("Unknown source: %s\n", operands->source);
-        /* TODO: handle this gracefully */
-        return;
-    }
 
     /* Sort atoms by priority */
     qsort(atoms->elements, atoms->size, sizeof(atom_t), comp);

@@ -101,9 +101,18 @@ engine_ingest(char **buffer)
             handle_contentfor(
                 buffer, match, directive, engine->content_headers);
             break;
-        case EACHDO:
+        case EACHDO: {
+            eachdo_operands_t *operands = directive->operands;
+            /* TODO: Don't handle page source only if a template is currently
+             * being parsed */
+            if (!strcmp(operands->source, "page")) {
+                skip++;
+                break;
+            }
+
             handle_eachdo(buffer, match, directive);
             break;
+        }
 
         case PUTPAGE:
             /* TODO: handle */

@@ -124,6 +124,7 @@ config_parse(char *content)
     config->values = values;
     config->array_values = array_values;
     config->nested_config_values = nested_config_values;
+
     return config;
 }
 

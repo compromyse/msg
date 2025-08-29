@@ -197,6 +197,22 @@ template_write(engine_t *engine, FILE *f, void *doc, bool is_markdown)
             break;
         }
 
+        case EACHDO: {
+            eachdo_operands_t *operands = directive->operands;
+            if (!strcmp(operands->source, "page")) {
+                list_t *atoms = list_create(sizeof(ptr_wrapper_t));
+                list_t *directives = lex(operands->content);
+
+                handle_page_source(
+                    atoms, operands, directives, engine->config);
+
+                for (size_t i = 0; i < atoms->size; i++) {
+                    atom_t *atom = list_get(atoms, i);
+                    fprintf(f, "%s", atom->content);
+                }
+            }
+        }
+
         /* TODO: Handle this gracefully */
         default:
             break;

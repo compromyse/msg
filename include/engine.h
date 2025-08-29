@@ -50,6 +50,12 @@ void handle_contentfor(char **buffer,
                        key_match_t *match,
                        directive_t *directive,
                        list_t *content_headers);
+
+/* EACHDO */
 void handle_eachdo(char **buffer, key_match_t *match, directive_t *directive);
+void handle_page_source(list_t *atoms,
+                        eachdo_operands_t *operands,
+                        list_t *directives,
+                        config_t *config);
 
 #endif
