@@ -114,14 +114,8 @@ engine_ingest(char **buffer)
             break;
         }
 
-        case PUTPAGE:
-            /* TODO: handle */
-        case PUT:
-        case ENDEACHDO:
-        case BODY:
-        case CONTENT:
-        case ENDCONTENT:
-        case _RAW:
+        /* TODO: handle */
+        default:
             skip++;
             break;
         }

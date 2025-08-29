@@ -341,6 +341,8 @@ find_directive(char *content, key_match_t *match)
 found_start:
     directive = (directive_t *) calloc(1, sizeof(directive_t));
 
+#define DIRECTIVE_IS(key) strncmp(buffer + n, key, strlen(key)) == 0
+
     if (DIRECTIVE_IS("endcontent")) {
         directive->type = ENDCONTENT;
         directive->operands = NULL;
