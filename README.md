@@ -97,6 +97,22 @@ links = [
 {{ endeachdo }}
 ```
 
+```html
+<!-- config.cfg -->
+links = [
+    href = https://github.com/compromyse
+    label = GITHUB
+    ___
+    href = https://www.linkedin.com/in/compromyse
+    label = LINKEDIN
+]
+
+<!-- index.html -->
+{{ eachdo config.links }}
+<a href="{{ put href }}" class="button" target="_blank">{{ put label }}</a>
+{{ endeachdo }}
+```
+
 #### Template - specify template for page
 ```html
 <!-- projects/xyz.html -->
