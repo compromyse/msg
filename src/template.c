@@ -205,7 +205,7 @@ template_write(engine_t *engine, FILE *f, void *doc, bool is_markdown)
             list_t *atoms = list_create(sizeof(ptr_wrapper_t));
             list_t *directives = lex(operands->content);
 
-            handle_page_source(atoms, operands, directives, engine->config);
+            handle_config_source(atoms, operands, directives, engine->config);
 
             for (size_t i = 0; i < atoms->size; i++) {
                 atom_t *atom = list_get(atoms, i);

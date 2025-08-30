@@ -160,6 +160,8 @@ run(bool log)
     if (config == NULL)
         return EXIT_FAILURE;
 
+    msg->config = config;
+
     template_initialize();
 
     int err = mkdir(msg->output_directory, 0700);

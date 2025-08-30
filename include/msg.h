@@ -19,6 +19,7 @@
 #ifndef __MSG_H
 #define __MSG_H
 
+#include <config.h>
 #include <stdbool.h>
 
 #define PARTIALS "partials"
@@ -30,6 +31,7 @@ typedef struct {
     char *base_directory;
     char *output_directory;
     bool verbose;
+    config_t *config;
 } msg_t;
 
 int run(bool log);

@@ -154,10 +154,10 @@ handle_file_source(list_t *atoms,
 }
 
 void
-handle_page_source(list_t *atoms,
-                   eachdo_operands_t *operands,
-                   list_t *directives,
-                   config_t *config)
+handle_config_source(list_t *atoms,
+                     eachdo_operands_t *operands,
+                     list_t *directives,
+                     config_t *config)
 {
     if (config == NULL) {
         printf("EACHDO with page variables as a source will not work without "
@@ -210,7 +210,9 @@ handle_eachdo(char **buffer,
     if (!strcmp(operands->source, "resources"))
         handle_file_source(atoms, operands, directives);
     else if (!strcmp(operands->source, "page"))
-        handle_page_source(atoms, operands, directives, config);
+        handle_config_source(atoms, operands, directives, config);
+    else if (!strcmp(operands->source, "config"))
+        handle_config_source(atoms, operands, directives, msg->config);
     else
         printf("Unknown source: %s\n", operands->source);
 
