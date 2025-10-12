@@ -1,5 +1,15 @@
 cmake_minimum_required(VERSION 3.21)
-add_subdirectory(discount/cmake)
+
+include(FetchContent)
+FetchContent_Declare(
+  discount
+  GIT_REPOSITORY "https://github.com/Orc/discount"
+  GIT_TAG "main"
+  SOURCE_DIR "discount"
+)
+FetchContent_MakeAvailable(discount)
+
+add_subdirectory(${discount_SOURCE_DIR}/cmake)
 
 project(msg C)
 
